@@ -1,0 +1,14 @@
+{
+  "name": "quality-gate",
+  "owner": {
+    "name": "xgodev",
+    "url": "https://github.com/xgodev"
+  },
+  "plugins": [
+    {
+      "name": "quality-gate",
+      "source": "./",
+      "description": "Claude Code skill that runs the shared Quality Gate before opening a PR."
+    }
+  ]
+}

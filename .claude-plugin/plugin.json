@@ -1,0 +1,9 @@
+{
+  "name": "quality-gate",
+  "version": "0.1.0",
+  "description": "Claude Code skill that runs the shared Quality Gate before opening a PR: detects the project language(s), runs the matching gate, parses the JSON verdict, and renders an analyzed result.",
+  "author": {
+    "name": "xgodev"
+  },
+  "repository": "https://github.com/xgodev/quality-gate-plugin.git"
+}
