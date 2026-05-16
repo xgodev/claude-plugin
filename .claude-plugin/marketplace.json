@@ -1,12 +1,12 @@
 {
-  "name": "quality-gate",
+  "name": "claude-plugin",
   "owner": {
     "name": "xgodev",
     "url": "https://github.com/xgodev"
   },
   "plugins": [
     {
-      "name": "quality-gate",
+      "name": "claude-plugin",
       "source": "./",
       "description": "Claude Code skill that runs the shared Quality Gate before opening a PR."
     }

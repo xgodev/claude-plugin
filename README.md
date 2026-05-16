@@ -1,4 +1,4 @@
-# quality-gate-plugin
+# claude-plugin
 
 Claude Code plugin that bundles the **quality-gate** skill: it invokes the
 shared [Quality Gate](https://github.com/xgodev/quality-gate) dispatcher
@@ -14,8 +14,8 @@ chosen base ref.
 ## Install
 
 ```text
-/plugin marketplace add git@github.com:xgodev/quality-gate-plugin.git
-/plugin install quality-gate
+/plugin marketplace add git@github.com:xgodev/claude-plugin.git
+/plugin install claude-plugin
 ```
 
 ## Usage
