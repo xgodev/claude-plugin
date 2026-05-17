@@ -17,6 +17,21 @@ time.
 /plugin install claude-plugin
 ```
 
+## Dependencies
+
+Installing `claude-plugin` automatically pulls:
+
+- **`boost`** — same-marketplace plugin dependency, re-listed in
+  `marketplace.json` with an anonymous HTTPS clone of
+  [`xgodev/boost`](https://github.com/xgodev/boost). Declared in
+  `plugin.json` `dependencies`.
+
+It also wires up one MCP server:
+
+- **`playwright`** — the [`@playwright/mcp`](https://github.com/microsoft/playwright-mcp)
+  server (stdio, run on demand via `npx -y @playwright/mcp@latest`).
+  Declared in `plugin.json` `mcpServers`; no manual setup required.
+
 ## Update
 
 Inside Claude Code:
