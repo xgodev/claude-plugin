@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.2]
+
+- Synced `README.md` (it was not updated in the same change as 0.3.1 —
+  the docs-always-synced rule was added then immediately violated): intro
+  now matches the umbrella framing (bundles no skills; capabilities via
+  dependencies); removed a Portuguese trigger example (`rodar QG`) —
+  public OSS is English only.
+
 ## [0.3.1]
 
 - Added `CLAUDE.md` codifying the repo's hard rules (docs always synced,

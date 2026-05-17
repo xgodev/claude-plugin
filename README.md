@@ -1,9 +1,10 @@
 # claude-plugin
 
-A Claude Code plugin that wires up reusable skills via plugin dependencies.
-The **quality-gate** skill is provided through a dependency on the
-[`quality-gate`](https://github.com/xgodev/quality-gate) plugin, and the
-marketplace is designed to grow with additional skills over time.
+An umbrella Claude Code plugin. It **bundles no skills of its own** —
+capabilities are provided through plugin `dependencies` (currently
+[`quality-gate`](https://github.com/xgodev/quality-gate) and
+[`boost`](https://github.com/xgodev/boost)) plus one wired MCP server
+(`playwright`). It grows by adding dependencies, not by copying skills in.
 
 ## Skills
 
@@ -108,7 +109,7 @@ take effect.
 
 Once installed, the relevant skill triggers on natural phrases. For
 `quality-gate`: ask Claude to run the quality gate before opening a PR
-(e.g. "run quality gate", "rodar QG", "check quality before PR").
+(e.g. "run quality gate", "run QG", "check quality before PR").
 
 ## Documentation
 
