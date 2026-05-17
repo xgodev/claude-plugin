@@ -1,7 +1,7 @@
 {
   "name": "claude-plugin",
-  "version": "0.3.0",
-  "description": "Claude Code skill that runs the shared Quality Gate before opening a PR: detects the project language(s), runs the matching gate, parses the JSON verdict, and renders an analyzed result.",
+  "version": "0.3.1",
+  "description": "Umbrella Claude Code plugin. Bundles no skills of its own: provides the quality-gate skill via a dependency on the `quality-gate` plugin, pulls `boost`, and wires the `playwright` MCP server. Grows by adding dependencies.",
   "author": {
     "name": "xgodev"
   },
