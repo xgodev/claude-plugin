@@ -17,6 +17,14 @@
         "url": "https://github.com/xgodev/boost.git"
       },
       "description": "Re-listing of xgodev/boost so claude-plugin can declare it as a same-marketplace dependency. Anonymous HTTPS clone (public GitHub repo)."
+    },
+    {
+      "name": "quality-gate",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/xgodev/quality-gate.git"
+      },
+      "description": "Re-listing of xgodev/quality-gate so claude-plugin can declare it as a same-marketplace dependency. Anonymous HTTPS clone (public GitHub repo)."
     }
   ]
 }

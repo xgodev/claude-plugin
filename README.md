@@ -1,14 +1,15 @@
 # claude-plugin
 
-A Claude Code plugin bundling reusable skills. It currently ships the
-**quality-gate** skill, and is designed to grow with additional skills over
-time.
+A Claude Code plugin that wires up reusable skills via plugin dependencies.
+The **quality-gate** skill is provided through a dependency on the
+[`quality-gate`](https://github.com/xgodev/quality-gate) plugin, and the
+marketplace is designed to grow with additional skills over time.
 
 ## Skills
 
-| Skill | Purpose | Docs |
+| Skill | Purpose | Source |
 |---|---|---|
-| `quality-gate` | Invokes the shared [Quality Gate](https://github.com/xgodev/quality-gate) dispatcher locally before you open a PR, interprets the JSON verdict, and renders an analyzed result. The gate lives in a separate repo ([`xgodev/quality-gate`](https://github.com/xgodev/quality-gate)), cloned into `~/.quality-gate/` and pulled on every run. It fails **only** when a PR worsens a metric relative to a chosen base ref. | [`docs/quality-gate.md`](docs/quality-gate.md) |
+| `quality-gate` | Invokes the shared Quality Gate dispatcher locally before you open a PR, interprets the JSON verdict, and renders an analyzed result. It fails **only** when a PR worsens a metric relative to a chosen base ref. **Provided via a dependency** on the [`quality-gate@quality-gate`](https://github.com/xgodev/quality-gate) plugin — no longer bundled in this repo. | [`xgodev/quality-gate`](https://github.com/xgodev/quality-gate) |
 
 ## Install
 
@@ -25,6 +26,11 @@ Installing `claude-plugin` automatically pulls:
   `marketplace.json` with an anonymous HTTPS clone of
   [`xgodev/boost`](https://github.com/xgodev/boost). Declared in
   `plugin.json` `dependencies`.
+- **`quality-gate`** — same-marketplace plugin dependency, re-listed in
+  `marketplace.json` with an anonymous HTTPS clone of
+  [`xgodev/quality-gate`](https://github.com/xgodev/quality-gate). Declared
+  in `plugin.json` `dependencies`. This is where the `quality-gate` skill now
+  ships from (it is no longer bundled in this repo).
 
 It also wires up one MCP server:
 
@@ -94,24 +100,21 @@ take effect.
 > incremented. Commits without a version bump do not trigger an update —
 > even with auto-update on, Claude Code reports "already at latest".
 
-> The plugin and the gate are **separate**. `plugin update` only refreshes
-> the skills in this plugin. The gate (`xgodev/quality-gate`) is pulled via
-> `git` into `~/.quality-gate/` by the `quality-gate` skill on **every run**,
-> so gate fixes arrive automatically without a plugin update.
+> The `quality-gate` skill is provided by the `quality-gate` plugin
+> dependency, which packages the gate with it. Updating that dependency
+> (`plugin update`) refreshes both the skill and its bundled gate.
 
 ## Usage
 
 Once installed, the relevant skill triggers on natural phrases. For
 `quality-gate`: ask Claude to run the quality gate before opening a PR
-(e.g. "run quality gate", "rodar QG", "check quality before PR"). The skill
-ensures the gate is cloned/updated and runs it against your project.
-
-Override the gate location for local gate development with the `QG_PATH`
-environment variable.
+(e.g. "run quality gate", "rodar QG", "check quality before PR").
 
 ## Documentation
 
-Per-skill docs live under [`docs/`](docs/).
+The `quality-gate` skill and its docs live in the
+[`xgodev/quality-gate`](https://github.com/xgodev/quality-gate) plugin
+repository.
 
 ## License
 
