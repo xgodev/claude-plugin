@@ -6,12 +6,6 @@ capabilities are provided through plugin `dependencies` (currently
 [`boost`](https://github.com/xgodev/boost)) plus one wired MCP server
 (`playwright`). It grows by adding dependencies, not by copying skills in.
 
-## Skills
-
-| Skill | Purpose | Source |
-|---|---|---|
-| `quality-gate` | Invokes the shared Quality Gate dispatcher locally before you open a PR, interprets the JSON verdict, and renders an analyzed result. It fails **only** when a PR worsens a metric relative to a chosen base ref. **Provided via a dependency** on the [`quality-gate@quality-gate`](https://github.com/xgodev/quality-gate) plugin — no longer bundled in this repo. | [`xgodev/quality-gate`](https://github.com/xgodev/quality-gate) |
-
 ## Install
 
 ```text

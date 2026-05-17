@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.3]
+
+- Removed the `## Skills` section from `README.md`: this plugin ships no
+  skills of its own (umbrella). What capabilities you get is fully covered
+  by the `## Dependencies` section; a Skills table listing `quality-gate`
+  was misleading.
+
 ## [0.3.2]
 
 - Synced `README.md` (it was not updated in the same change as 0.3.1 —
