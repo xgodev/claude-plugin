@@ -9,6 +9,14 @@
       "name": "claude-plugin",
       "source": "./",
       "description": "Claude Code skill that runs the shared Quality Gate before opening a PR."
+    },
+    {
+      "name": "boost",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/xgodev/boost.git"
+      },
+      "description": "Re-listing of xgodev/boost so claude-plugin can declare it as a same-marketplace dependency. Anonymous HTTPS clone (public GitHub repo)."
     }
   ]
 }

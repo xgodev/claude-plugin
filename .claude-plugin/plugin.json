@@ -1,9 +1,18 @@
 {
   "name": "claude-plugin",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Claude Code skill that runs the shared Quality Gate before opening a PR: detects the project language(s), runs the matching gate, parses the JSON verdict, and renders an analyzed result.",
   "author": {
     "name": "xgodev"
   },
-  "repository": "https://github.com/xgodev/claude-plugin.git"
+  "repository": "https://github.com/xgodev/claude-plugin.git",
+  "dependencies": [
+    "boost"
+  ],
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"]
+    }
+  }
 }
