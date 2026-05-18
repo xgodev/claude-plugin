@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.4.0]
+
+- Added `dev-rules` as a plugin dependency: declared in `plugin.json`
+  `dependencies` and re-listed in `marketplace.json` (anonymous HTTPS clone
+  of [`xgodev/dev-rules`](https://github.com/xgodev/dev-rules)). The umbrella
+  now provides the macro language-agnostic engineering-discipline skill
+  alongside `quality-gate` and `boost`. README + the stale `marketplace.json`
+  self-description synced in the same change.
+
 ## [0.3.3]
 
 - Removed the `## Skills` section from `README.md`: this plugin ships no

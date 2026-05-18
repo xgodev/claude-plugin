@@ -2,7 +2,8 @@
 
 An umbrella Claude Code plugin. It **bundles no skills of its own** —
 capabilities are provided through plugin `dependencies` (currently
-[`quality-gate`](https://github.com/xgodev/quality-gate) and
+[`quality-gate`](https://github.com/xgodev/quality-gate),
+[`dev-rules`](https://github.com/xgodev/dev-rules) and
 [`boost`](https://github.com/xgodev/boost)) plus one wired MCP server
 (`playwright`). It grows by adding dependencies, not by copying skills in.
 
@@ -26,6 +27,11 @@ Installing `claude-plugin` automatically pulls:
   [`xgodev/quality-gate`](https://github.com/xgodev/quality-gate). Declared
   in `plugin.json` `dependencies`. This is where the `quality-gate` skill now
   ships from (it is no longer bundled in this repo).
+- **`dev-rules`** — same-marketplace plugin dependency, re-listed in
+  `marketplace.json` with an anonymous HTTPS clone of
+  [`xgodev/dev-rules`](https://github.com/xgodev/dev-rules). Declared in
+  `plugin.json` `dependencies`. Macro, language-agnostic engineering-
+  discipline skill applied before writing/editing/refactoring any code.
 
 It also wires up one MCP server:
 

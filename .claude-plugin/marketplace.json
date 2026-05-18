@@ -8,7 +8,7 @@
     {
       "name": "claude-plugin",
       "source": "./",
-      "description": "Claude Code skill that runs the shared Quality Gate before opening a PR."
+      "description": "Umbrella Claude Code plugin: bundles no skills of its own; provides them via dependencies (quality-gate, dev-rules, boost) and wires the playwright MCP."
     },
     {
       "name": "boost",
@@ -25,6 +25,14 @@
         "url": "https://github.com/xgodev/quality-gate.git"
       },
       "description": "Re-listing of xgodev/quality-gate so claude-plugin can declare it as a same-marketplace dependency. Anonymous HTTPS clone (public GitHub repo)."
+    },
+    {
+      "name": "dev-rules",
+      "source": {
+        "source": "url",
+        "url": "https://github.com/xgodev/dev-rules.git"
+      },
+      "description": "Re-listing of xgodev/dev-rules so claude-plugin can declare it as a same-marketplace dependency. Anonymous HTTPS clone (public GitHub repo)."
     }
   ]
 }
