@@ -1,21 +1,34 @@
 # Changelog
 
-## [0.5.0]
+## [0.6.0]
 
-BREAKING -- decoupling release.
+BREAKING -- marketplace rename + cross-marketplace dependencies.
+Requires Claude Code v2.1.110+ (cross-marketplace deps support).
+
+Note: 0.5.0 was pushed briefly with a decoupled shape (no dependencies)
+and is superseded by this entry. Use 0.6.0+.
 
 - Marketplace `name` renamed from `xgodev` to `xgodev-claude-plugin`
   (more specific identifier: a single owner can host multiple
   marketplaces; the generic `xgodev` ID collided with other `xgodev/*`
   marketplaces). Installed as `claude-plugin@xgodev-claude-plugin`.
-- Plugin no longer declares any dependencies. The previous `dependencies`
-  (`boost`, `quality-gate`, `dev-rules`) and their re-listings in
-  `marketplace.json` are removed. `xgodev` plugins are now independent
-  marketplaces and must be added separately (e.g.
-  `quality-gate@xgodev-quality-gate`). This removes the coupling that
-  made `quality-gate@xgodev` exist as a side-effect of the umbrella.
-- `claude-plugin` now only wires the `playwright` MCP server. README,
-  description and `marketplace.json` `plugins[].description` synced.
+- Dependencies migrated from the same-marketplace re-listing pattern
+  to the canonical **cross-marketplace** form. `plugin.json`
+  `dependencies` now uses the object shape
+  `{ "name": "<plugin>", "marketplace": "xgodev-<plugin>" }` for
+  `boost`, `quality-gate` and `dev-rules`, pointing at their standalone
+  marketplaces (`xgodev-boost`, `xgodev-quality-gate`,
+  `xgodev-dev-rules`). The previous re-listings of those three plugins
+  under `plugins` in `marketplace.json` were removed (they would
+  collide with the standalone marketplaces). Source of truth:
+  https://code.claude.com/docs/en/plugin-dependencies
+- `marketplace.json` declares
+  `allowCrossMarketplaceDependenciesOn: ["xgodev-boost",
+  "xgodev-quality-gate", "xgodev-dev-rules"]` so Claude Code is
+  allowed to resolve and auto-install those dependencies on
+  `claude-plugin` install.
+- `CLAUDE.md`, `README.md` and `plugin.json` `description` synced with
+  the umbrella + cross-marketplace shape in the same change.
 
 ## [0.4.0]
 

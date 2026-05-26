@@ -4,11 +4,16 @@
     "name": "xgodev",
     "url": "https://github.com/xgodev"
   },
+  "allowCrossMarketplaceDependenciesOn": [
+    "xgodev-boost",
+    "xgodev-quality-gate",
+    "xgodev-dev-rules"
+  ],
   "plugins": [
     {
       "name": "claude-plugin",
       "source": "./",
-      "description": "Standalone Claude Code plugin. Wires the playwright MCP server. No plugin dependencies."
+      "description": "Umbrella Claude Code plugin: bundles no skills of its own; pulls boost, quality-gate and dev-rules via cross-marketplace dependencies and wires the playwright MCP."
     }
   ]
 }

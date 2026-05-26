@@ -1,11 +1,16 @@
 {
   "name": "claude-plugin",
-  "version": "0.5.0",
-  "description": "Standalone Claude Code plugin by xgodev. Wires the `playwright` MCP server. No plugin dependencies -- other xgodev plugins are independent marketplaces (e.g. `quality-gate@xgodev-quality-gate`).",
+  "version": "0.6.0",
+  "description": "Umbrella Claude Code plugin by xgodev. Bundles no skills of its own; pulls `boost`, `quality-gate` and `dev-rules` via cross-marketplace dependencies and wires the `playwright` MCP server.",
   "author": {
     "name": "xgodev"
   },
   "repository": "https://github.com/xgodev/claude-plugin.git",
+  "dependencies": [
+    { "name": "boost", "marketplace": "xgodev-boost" },
+    { "name": "quality-gate", "marketplace": "xgodev-quality-gate" },
+    { "name": "dev-rules", "marketplace": "xgodev-dev-rules" }
+  ],
   "mcpServers": {
     "playwright": {
       "command": "npx",
