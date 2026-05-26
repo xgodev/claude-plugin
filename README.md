@@ -1,41 +1,22 @@
 # claude-plugin
 
-An umbrella Claude Code plugin. It **bundles no skills of its own** —
-capabilities are provided through plugin `dependencies` (currently
-[`quality-gate`](https://github.com/xgodev/quality-gate),
-[`dev-rules`](https://github.com/xgodev/dev-rules) and
-[`boost`](https://github.com/xgodev/boost)) plus one wired MCP server
-(`playwright`). It grows by adding dependencies, not by copying skills in.
+A standalone Claude Code plugin by `xgodev`. It bundles no skills of its
+own; it just wires one MCP server (`playwright`). No plugin dependencies.
+
+Other `xgodev` plugins live in their own marketplaces and are installed
+independently (e.g. `quality-gate@xgodev-quality-gate`,
+`dev-rules@xgodev-dev-rules`, `boost@xgodev-boost`).
 
 ## Install
 
 ```text
 /plugin marketplace add git@github.com:xgodev/claude-plugin.git
-/plugin install claude-plugin
+/plugin install claude-plugin@xgodev-claude-plugin
 ```
 
-## Dependencies
+## What it provides
 
-Installing `claude-plugin` automatically pulls:
-
-- **`boost`** — same-marketplace plugin dependency, re-listed in
-  `marketplace.json` with an anonymous HTTPS clone of
-  [`xgodev/boost`](https://github.com/xgodev/boost). Declared in
-  `plugin.json` `dependencies`.
-- **`quality-gate`** — same-marketplace plugin dependency, re-listed in
-  `marketplace.json` with an anonymous HTTPS clone of
-  [`xgodev/quality-gate`](https://github.com/xgodev/quality-gate). Declared
-  in `plugin.json` `dependencies`. This is where the `quality-gate` skill now
-  ships from (it is no longer bundled in this repo).
-- **`dev-rules`** — same-marketplace plugin dependency, re-listed in
-  `marketplace.json` with an anonymous HTTPS clone of
-  [`xgodev/dev-rules`](https://github.com/xgodev/dev-rules). Declared in
-  `plugin.json` `dependencies`. Macro, language-agnostic engineering-
-  discipline skill applied before writing/editing/refactoring any code.
-
-It also wires up one MCP server:
-
-- **`playwright`** — the [`@playwright/mcp`](https://github.com/microsoft/playwright-mcp)
+- **`playwright`** MCP server — the [`@playwright/mcp`](https://github.com/microsoft/playwright-mcp)
   server (stdio, run on demand via `npx -y @playwright/mcp@latest`).
   Declared in `plugin.json` `mcpServers`; no manual setup required.
 
@@ -50,13 +31,13 @@ Inside Claude Code:
 From the CLI:
 
 ```bash
-claude plugin update claude-plugin@claude-plugin
+claude plugin update claude-plugin@xgodev-claude-plugin
 ```
 
 If it reports `Plugin "..." not found`, specify the scope explicitly:
 
 ```bash
-claude plugin update claude-plugin@claude-plugin --scope user   # or: project | local | managed
+claude plugin update claude-plugin@xgodev-claude-plugin --scope user   # or: project | local | managed
 ```
 
 Use `claude plugin list` to find the scope where the plugin is installed.
@@ -82,7 +63,7 @@ Or declaratively, in `~/.claude/settings.json` (global) — add
 ```json
 {
   "extraKnownMarketplaces": {
-    "claude-plugin": {
+    "xgodev-claude-plugin": {
       "source": {
         "source": "git",
         "url": "git@github.com:xgodev/claude-plugin.git"
@@ -101,22 +82,11 @@ take effect.
 > incremented. Commits without a version bump do not trigger an update —
 > even with auto-update on, Claude Code reports "already at latest".
 
-> The `quality-gate` skill is provided by the `quality-gate` plugin
-> dependency, which packages the gate with it. Updating that dependency
-> (`plugin update`) refreshes both the skill and its bundled gate.
-
 ## Usage
 
-Once installed, the relevant skill triggers on natural phrases. For
-`quality-gate`: ask Claude to run the quality gate before opening a PR
-(e.g. "run quality gate", "run QG", "check quality before PR").
-
-## Documentation
-
-The `quality-gate` skill and its docs live in the
-[`xgodev/quality-gate`](https://github.com/xgodev/quality-gate) plugin
-repository.
+The `playwright` MCP server is available to Claude once installed. Tools
+appear under the `mcp__playwright__*` namespace.
 
 ## License
 
-See the gate repository for details.
+MIT (no source files; configuration only).

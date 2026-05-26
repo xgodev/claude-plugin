@@ -1,5 +1,5 @@
 {
-  "name": "xgodev",
+  "name": "xgodev-claude-plugin",
   "owner": {
     "name": "xgodev",
     "url": "https://github.com/xgodev"
@@ -8,31 +8,7 @@
     {
       "name": "claude-plugin",
       "source": "./",
-      "description": "Umbrella Claude Code plugin: bundles no skills of its own; provides them via dependencies (quality-gate, dev-rules, boost) and wires the playwright MCP."
-    },
-    {
-      "name": "boost",
-      "source": {
-        "source": "url",
-        "url": "https://github.com/xgodev/boost.git"
-      },
-      "description": "Re-listing of xgodev/boost so claude-plugin can declare it as a same-marketplace dependency. Anonymous HTTPS clone (public GitHub repo)."
-    },
-    {
-      "name": "quality-gate",
-      "source": {
-        "source": "url",
-        "url": "https://github.com/xgodev/quality-gate.git"
-      },
-      "description": "Re-listing of xgodev/quality-gate so claude-plugin can declare it as a same-marketplace dependency. Anonymous HTTPS clone (public GitHub repo)."
-    },
-    {
-      "name": "dev-rules",
-      "source": {
-        "source": "url",
-        "url": "https://github.com/xgodev/dev-rules.git"
-      },
-      "description": "Re-listing of xgodev/dev-rules so claude-plugin can declare it as a same-marketplace dependency. Anonymous HTTPS clone (public GitHub repo)."
+      "description": "Standalone Claude Code plugin. Wires the playwright MCP server. No plugin dependencies."
     }
   ]
 }

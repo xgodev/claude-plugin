@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.5.0]
+
+BREAKING -- decoupling release.
+
+- Marketplace `name` renamed from `xgodev` to `xgodev-claude-plugin`
+  (more specific identifier: a single owner can host multiple
+  marketplaces; the generic `xgodev` ID collided with other `xgodev/*`
+  marketplaces). Installed as `claude-plugin@xgodev-claude-plugin`.
+- Plugin no longer declares any dependencies. The previous `dependencies`
+  (`boost`, `quality-gate`, `dev-rules`) and their re-listings in
+  `marketplace.json` are removed. `xgodev` plugins are now independent
+  marketplaces and must be added separately (e.g.
+  `quality-gate@xgodev-quality-gate`). This removes the coupling that
+  made `quality-gate@xgodev` exist as a side-effect of the umbrella.
+- `claude-plugin` now only wires the `playwright` MCP server. README,
+  description and `marketplace.json` `plugins[].description` synced.
+
 ## [0.4.0]
 
 - Added `dev-rules` as a plugin dependency: declared in `plugin.json`
