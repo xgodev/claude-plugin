@@ -1,7 +1,7 @@
 {
   "name": "claude-plugin",
-  "version": "0.6.0",
-  "description": "Umbrella Claude Code plugin by xgodev. Bundles no skills of its own; pulls `boost`, `quality-gate` and `dev-rules` via cross-marketplace dependencies and wires the `playwright` MCP server.",
+  "version": "0.7.0",
+  "description": "Umbrella Claude Code plugin by xgodev. Bundles no skills of its own; pulls `boost`, `quality-gate`, `dev-rules` and `skill-rules` via cross-marketplace dependencies and wires the `playwright` MCP server.",
   "author": {
     "name": "xgodev"
   },
@@ -9,7 +9,8 @@
   "dependencies": [
     { "name": "boost", "marketplace": "xgodev-boost" },
     { "name": "quality-gate", "marketplace": "xgodev-quality-gate" },
-    { "name": "dev-rules", "marketplace": "xgodev-dev-rules" }
+    { "name": "dev-rules", "marketplace": "xgodev-dev-rules" },
+    { "name": "skill-rules", "marketplace": "xgodev-skill-rules" }
   ],
   "mcpServers": {
     "playwright": {

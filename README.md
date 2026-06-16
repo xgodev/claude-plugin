@@ -7,9 +7,10 @@ plugin dependencies**:
 - [`boost@xgodev-boost`](https://github.com/xgodev/boost)
 - [`quality-gate@xgodev-quality-gate`](https://github.com/xgodev/quality-gate)
 - [`dev-rules@xgodev-dev-rules`](https://github.com/xgodev/dev-rules)
+- [`skill-rules@xgodev-skill-rules`](https://github.com/xgodev/skill-rules)
 
 It also wires one MCP server (`playwright`). Installing `claude-plugin`
-auto-installs the three dependencies (each lives in its own marketplace
+auto-installs the four dependencies (each lives in its own marketplace
 and is allow-listed via this marketplace's
 `allowCrossMarketplaceDependenciesOn`).
 
@@ -23,9 +24,9 @@ and is allow-listed via this marketplace's
 ```
 
 Claude Code resolves each dependency by adding its standalone
-marketplace (`xgodev-boost`, `xgodev-quality-gate`, `xgodev-dev-rules`)
-on demand. The install output lists the auto-installed dependencies at
-the end.
+marketplace (`xgodev-boost`, `xgodev-quality-gate`, `xgodev-dev-rules`,
+`xgodev-skill-rules`) on demand. The install output lists the
+auto-installed dependencies at the end.
 
 ## What it provides
 
@@ -33,6 +34,8 @@ the end.
   - `boost` -- the `xgodev/boost` framework skills.
   - `quality-gate` -- the `quality-gate` skill + gate dispatcher.
   - `dev-rules` -- language-agnostic engineering-discipline skill.
+  - `skill-rules` -- skill-authoring discipline: every skill must be
+    portable across all developers and machines.
 - **`playwright`** MCP server -- the [`@playwright/mcp`](https://github.com/microsoft/playwright-mcp)
   server (stdio, run on demand via `npx -y @playwright/mcp@latest`).
   Declared in `plugin.json` `mcpServers`; no manual setup required.

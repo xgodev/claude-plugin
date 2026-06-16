@@ -3,9 +3,10 @@
 This repo is **`claude-plugin`**: an umbrella Claude Code plugin by
 `xgodev`. It **bundles no skills of its own** and provides capabilities
 through **cross-marketplace plugin dependencies**: `boost@xgodev-boost`,
-`quality-gate@xgodev-quality-gate`, `dev-rules@xgodev-dev-rules`. It also
-wires one MCP server (`playwright`). Installing `claude-plugin` should
-auto-install the three dependencies (subject to user trust of those
+`quality-gate@xgodev-quality-gate`, `dev-rules@xgodev-dev-rules`,
+`skill-rules@xgodev-skill-rules`. It also wires one MCP server
+(`playwright`). Installing `claude-plugin` should auto-install the four
+dependencies (subject to user trust of those
 marketplaces via this marketplace's `allowCrossMarketplaceDependenciesOn`
 allowlist).
 

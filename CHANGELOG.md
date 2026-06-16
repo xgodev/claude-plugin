@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.7.0]
+
+### Added
+
+- **`skill-rules` dependency.** Pulls `skill-rules@xgodev-skill-rules` via a
+  cross-marketplace dependency, alongside `boost`, `quality-gate` and
+  `dev-rules`. `skill-rules` is the skill-authoring companion to `dev-rules`:
+  it requires every Claude skill to be portable across all developers and
+  machines (no environment-tied hardcoding). `plugin.json` `dependencies`
+  gains `{ "name": "skill-rules", "marketplace": "xgodev-skill-rules" }`, and
+  `marketplace.json` `allowCrossMarketplaceDependenciesOn` gains
+  `xgodev-skill-rules` so the dependency auto-installs.
+
 ## [0.6.0]
 
 BREAKING -- marketplace rename + cross-marketplace dependencies.

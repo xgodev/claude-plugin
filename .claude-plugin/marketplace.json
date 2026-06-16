@@ -7,13 +7,14 @@
   "allowCrossMarketplaceDependenciesOn": [
     "xgodev-boost",
     "xgodev-quality-gate",
-    "xgodev-dev-rules"
+    "xgodev-dev-rules",
+    "xgodev-skill-rules"
   ],
   "plugins": [
     {
       "name": "claude-plugin",
       "source": "./",
-      "description": "Umbrella Claude Code plugin: bundles no skills of its own; pulls boost, quality-gate and dev-rules via cross-marketplace dependencies and wires the playwright MCP."
+      "description": "Umbrella Claude Code plugin: bundles no skills of its own; pulls boost, quality-gate, dev-rules and skill-rules via cross-marketplace dependencies and wires the playwright MCP."
     }
   ]
 }
