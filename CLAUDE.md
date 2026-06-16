@@ -35,7 +35,7 @@ session does not repeat past mistakes.
 - **This plugin bundles NO skill.** Skills (if ever added) live in
   `skills/<name>/SKILL.md` at the plugin root (NOT `.claude/skills/`,
   which is project-local, not plugin-distributed). The
-  `quality-gate` / `dev-rules` / `boost` skills come from their
+  `quality-gate` / `dev-rules` / `golang-boost` skills come from their
   respective dependency plugins -- never copy them back in here.
 - **Cross-marketplace dependency pattern (canonical, per official
   docs).** Each dependency on a non-bundled `xgodev` plugin uses the

@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.7.1]
+
+### Fixed
+
+- **`boost` dependency name corrected to `golang-boost`.** The `boost`
+  dependency pointed at plugin name `boost`, but the plugin published in the
+  `xgodev-boost` marketplace (repo `xgodev/boost`) is named `golang-boost`.
+  Installing the umbrella therefore failed with
+  `Dependency "boost@xgodev-boost" is not installed`. `plugin.json`
+  `dependencies` now uses `{ "name": "golang-boost", "marketplace": "xgodev-boost" }`;
+  README, `marketplace.json` description, and `CLAUDE.md` updated to match.
+
 ## [0.7.0]
 
 ### Added

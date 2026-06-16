@@ -14,7 +14,7 @@
     {
       "name": "claude-plugin",
       "source": "./",
-      "description": "Umbrella Claude Code plugin: bundles no skills of its own; pulls boost, quality-gate, dev-rules and skill-rules via cross-marketplace dependencies and wires the playwright MCP."
+      "description": "Umbrella Claude Code plugin: bundles no skills of its own; pulls golang-boost, quality-gate, dev-rules and skill-rules via cross-marketplace dependencies and wires the playwright MCP."
     }
   ]
 }
