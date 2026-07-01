@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.7.2]
+
+### Changed
+
+- **`golang-boost` moved to its own repo `xgodev/boost-claude`.** The
+  `xgodev-boost` marketplace is now published from `xgodev/boost-claude`
+  instead of `xgodev/boost` (the plugin was extracted so installing it no
+  longer clones the whole framework). No JSON change was needed here: the
+  cross-marketplace dependency resolves by marketplace name (`xgodev-boost`),
+  which is unchanged. README links repointed to `xgodev/boost-claude`.
+
 ## [0.7.1]
 
 ### Fixed

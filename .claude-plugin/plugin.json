@@ -1,6 +1,6 @@
 {
   "name": "claude-plugin",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "Umbrella Claude Code plugin by xgodev. Bundles no skills of its own; pulls `golang-boost`, `quality-gate`, `dev-rules` and `skill-rules` via cross-marketplace dependencies and wires the `playwright` MCP server.",
   "author": {
     "name": "xgodev"
