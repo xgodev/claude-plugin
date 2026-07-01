@@ -4,7 +4,7 @@ An umbrella Claude Code plugin by `xgodev`. It **bundles no skills of
 its own** -- capabilities are provided through **cross-marketplace
 plugin dependencies**:
 
-- [`golang-boost@xgodev-boost`](https://github.com/xgodev/boost)
+- [`golang-boost@xgodev-boost`](https://github.com/xgodev/boost-claude)
 - [`quality-gate@xgodev-quality-gate`](https://github.com/xgodev/quality-gate)
 - [`dev-rules@xgodev-dev-rules`](https://github.com/xgodev/dev-rules)
 - [`skill-rules@xgodev-skill-rules`](https://github.com/xgodev/skill-rules)
@@ -31,7 +31,8 @@ auto-installed dependencies at the end.
 ## What it provides
 
 - **Dependency plugins** (auto-installed):
-  - `golang-boost` -- the `xgodev/boost` framework skills.
+  - `golang-boost` -- skills for the `xgodev/boost` framework, shipped from
+    [`xgodev/boost-claude`](https://github.com/xgodev/boost-claude).
   - `quality-gate` -- the `quality-gate` skill + gate dispatcher.
   - `dev-rules` -- language-agnostic engineering-discipline skill.
   - `skill-rules` -- skill-authoring discipline: every skill must be
