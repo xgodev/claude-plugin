@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.2]
+
+### Changed
+
+- README describes current state only -- dropped a leftover historical
+  aside in the context-overhead table. History lives here in the
+  CHANGELOG, not in the README.
+
 ## [1.1.1]
 
 ### Added

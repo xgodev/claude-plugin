@@ -142,6 +142,9 @@ repos. Read them before changing anything.
   The inverse also holds: maintainer-only skills (`add-quality-gate`)
   stay in `.claude/skills/` and must NOT be shipped.
 - Any Portuguese string (run a language sweep before push).
+- Historical asides in the README ("X removed in N.N.N", "formerly Y",
+  migration walkthroughs for layouts nobody used). The README describes
+  the CURRENT state only; history belongs in the CHANGELOG.
 - Touching `docs/quality-gate.md` links without re-checking relative paths
   (that file lives in `docs/`, so gate dirs are
   `../tools/quality-gate/<lang>/`).

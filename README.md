@@ -110,7 +110,7 @@ is pay-per-use:
 | `dev-rules` SKILL.md (~4.3k words) | 0 | only when the skill fires |
 | `boost` SKILL.md index + per-component references | 0 | only when the skill fires |
 | Hooks (pre-push gate, RED-first) | 0 | never (run as processes) |
-| MCP servers | 0 | none bundled (playwright removed in 1.1.0) |
+| MCP servers | 0 | none bundled |
 
 ## Repository layout
 
@@ -144,4 +144,4 @@ See [`docs/quality-gate.md`](docs/quality-gate.md) and
 
 MIT -- see [LICENSE](LICENSE).
 
-- Version: 1.1.1
+- Version: 1.1.2
