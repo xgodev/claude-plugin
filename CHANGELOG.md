@@ -1,5 +1,30 @@
 # Changelog
 
+## [1.1.1]
+
+### Added
+
+- **Dependency on `superpowers`** (Jesse Vincent, `obra/superpowers`):
+  core skills library (TDD, debugging, collaboration patterns). Listed in
+  the `xgodev` marketplace with a GitHub source and declared in
+  `plugin.json` `dependencies`, so it resolves same-marketplace and
+  auto-installs with `claude-plugin` -- no extra
+  `/plugin marketplace add`. Verified end-to-end with a local install.
+
+### Removed
+
+- **`ux-ui-mastery` dependency (added in 1.1.0) dropped for now.** Its
+  upstream `plugin.json` (v3.0.0) is rejected by current Claude Code
+  manifest validation (`commands` / `skills` fields), which made the
+  whole `claude-plugin` install fail. Re-add once
+  `phazurlabs/ux-ui-mastery` ships a valid manifest.
+
+- **"Migrating from earlier layouts" README section.** The pre-1.0
+  layouts (per-repo marketplaces, multi-plugin marketplace) had no real
+  adoption, so the migration walkthrough was dead weight. The
+  `renames` map in `marketplace.json` stays -- it still auto-migrates any
+  old install transparently.
+
 ## [1.1.0]
 
 ### Changed

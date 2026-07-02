@@ -19,10 +19,10 @@ capability:
 - **`skill-rules`** -- skill-authoring discipline: every skill must be
   portable across all developers and machines. See
   [`docs/skill-rules.md`](docs/skill-rules.md).
-- **Dependency: [`ux-ui-mastery`](https://github.com/phazurlabs/ux-ui-mastery)**
-  -- UX/UI design mastery plugin by Design Tribe Republic, auto-installed
-  as a cross-marketplace dependency (its marketplace must be added -- see
-  Install).
+- **Dependency: [`superpowers`](https://github.com/obra/superpowers)** --
+  core skills library by Jesse Vincent (TDD, debugging, collaboration
+  patterns), listed in the `xgodev` marketplace and auto-installed with
+  `claude-plugin`.
 
 Skills are namespaced by the plugin name: `claude-plugin:boost`,
 `claude-plugin:quality-gate`, `claude-plugin:dev-rules`,
@@ -34,39 +34,13 @@ not shipped with the plugin.)
 ## Install
 
 ```text
-/plugin marketplace add phazurlabs/ux-ui-mastery
 /plugin marketplace add git@github.com:xgodev/claude-plugin.git
 /plugin install claude-plugin@xgodev
 ```
 
-The first line adds the marketplace of the `ux-ui-mastery` dependency;
-Claude Code then auto-installs it together with `claude-plugin` (a
-cross-marketplace dependency only resolves when its marketplace is
-already configured).
-
-## Migrating from earlier layouts
-
-The four former plugins (`golang-boost`, `quality-gate`, `dev-rules`,
-`skill-rules`) were merged into `claude-plugin` 1.0.0; the marketplace's
-`renames` map migrates existing installs automatically on marketplace update
-(Claude Code v2.1.193+).
-
-**From the retired per-repo marketplaces** (`xgodev-claude-plugin`,
-`xgodev-boost`, `xgodev-quality-gate`, `xgodev-dev-rules`,
-`xgodev-skill-rules`): remove them all, then add the single marketplace and
-install as above:
-
-```text
-/plugin marketplace remove xgodev-claude-plugin
-/plugin marketplace remove xgodev-boost
-/plugin marketplace remove xgodev-quality-gate
-/plugin marketplace remove xgodev-dev-rules
-/plugin marketplace remove xgodev-skill-rules
-/plugin marketplace add git@github.com:xgodev/claude-plugin.git
-/plugin install claude-plugin@xgodev
-```
-
-(Skip any `marketplace remove` for a marketplace you never added.)
+The `superpowers` dependency is listed in the `xgodev` marketplace
+(GitHub source), so it auto-installs with `claude-plugin` -- no extra
+step.
 
 ## Update
 
@@ -170,4 +144,4 @@ See [`docs/quality-gate.md`](docs/quality-gate.md) and
 
 MIT -- see [LICENSE](LICENSE).
 
-- Version: 1.1.0
+- Version: 1.1.1

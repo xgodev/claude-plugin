@@ -45,11 +45,16 @@ repos. Read them before changing anything.
 - **Single plugin, single manifest.** Do NOT reintroduce per-area
   `plugin.json`s, per-area marketplaces, or `dependencies` between the
   bundled areas. Everything ships together. EXTERNAL dependencies are
-  allowed and declared in `plugin.json` `dependencies` (today:
-  `ux-ui-mastery@ux-ui-mastery-marketplace`, allowlisted in
-  `marketplace.json` `allowCrossMarketplaceDependenciesOn`; the README
-  install section must always tell users to add the dependency's
-  marketplace first, or resolution fails).
+  allowed and must be SELF-CONTAINED: declare the bare name in
+  `plugin.json` `dependencies` AND list the plugin in
+  `marketplace.json` `plugins` with a GitHub source (today:
+  `superpowers` from `obra/superpowers`). Never use the
+  cross-marketplace form -- it forces users to add a third-party
+  marketplace by hand. ALWAYS smoke-test an install from a temp project
+  before pushing a dependency change: a dependency with an invalid
+  upstream manifest fails the WHOLE claude-plugin install
+  (`ux-ui-mastery` 3.0.0 is blocked on exactly that -- re-add when
+  upstream fixes its manifest).
 - **Hooks live in `hooks/hooks.json` ONLY (auto-discovered).** Never also
   declare `"hooks"` in `plugin.json` -- the manifest key is only for
   ADDITIONAL non-standard files, and double registration breaks the whole
