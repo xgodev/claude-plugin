@@ -101,17 +101,17 @@ tokens of the first request; 2 runs each, +/-11 tokens run-to-run noise):
 | Configuration | Total context (first request) |
 |---|---|
 | Claude Code baseline, no plugin | ~26,600 tokens |
-| With `claude-plugin` installed | ~27,117 tokens |
-| **Plugin overhead, per session** | **~510 tokens (+1.9%)** |
+| With `claude-plugin` installed | ~26,970 tokens |
+| **Plugin overhead, per session** | **~370 tokens (+1.4%)** |
 
-That ~510 tokens is the WHOLE always-on cost: the name + description lines
+That ~370 tokens is the WHOLE always-on cost: the name + description lines
 of the 4 bundled skills plus plugin registration metadata. Everything else
 is pay-per-use:
 
 | Component | Always-on | Loaded when |
 |---|---|---|
-| `boost` description | ~140 tokens | every session |
-| `quality-gate` description | ~120 tokens | every session |
+| `boost` description | ~55 tokens | every session |
+| `quality-gate` description | ~55 tokens | every session |
 | `skill-rules` description | ~40 tokens | every session |
 | `dev-rules` description | ~25 tokens | every session |
 | `quality-gate` SKILL.md (~2.5k words) | 0 | only when the skill fires |
@@ -152,4 +152,4 @@ See [`docs/quality-gate.md`](docs/quality-gate.md) and
 
 MIT -- see [LICENSE](LICENSE).
 
-- Version: 1.1.5
+- Version: 1.1.6

@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.1.6]
+
+### Changed
+
+- README context-overhead numbers refreshed for the trimmed
+  descriptions: plugin overhead is now ~370 tokens/session (+1.4%).
+  Measured end-to-end, the 1.1.5 + ux-ui-mastery 3.0.1 trims cut 752
+  tokens/session off a fully loaded setup (29,227 -> 28,475).
+
 ## [1.1.5]
 
 ### Changed
