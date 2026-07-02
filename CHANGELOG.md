@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.8.0]
+
+### Changed
+
+- **BREAKING (install path): single marketplace `xgodev-plugins`.** This
+  repo's marketplace was renamed from `xgodev-claude-plugin` to
+  `xgodev-plugins` and now lists every `xgodev` plugin directly:
+  `golang-boost`, `quality-gate`, `dev-rules` and `skill-rules` via GitHub
+  sources (`{ "source": "github", "repo": "xgodev/<repo>" }`, each shipped
+  from its own repo), plus the umbrella `claude-plugin` (source `./`). The
+  per-repo marketplaces (`xgodev-boost`, `xgodev-quality-gate`,
+  `xgodev-dev-rules`, `xgodev-skill-rules`) are retired. `plugin.json`
+  `dependencies` switched from the cross-marketplace object form to bare
+  names (same-marketplace resolution), and
+  `allowCrossMarketplaceDependenciesOn` was removed. Existing users must
+  remove the old marketplaces and re-add this one -- see "Migrating from
+  the per-repo marketplaces" in the README. README and CLAUDE.md rewritten
+  for the new shape.
+
 ## [0.7.2]
 
 ### Changed

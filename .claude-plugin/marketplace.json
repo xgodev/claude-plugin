@@ -1,20 +1,51 @@
 {
-  "name": "xgodev-claude-plugin",
+  "name": "xgodev-plugins",
   "owner": {
     "name": "xgodev",
     "url": "https://github.com/xgodev"
   },
-  "allowCrossMarketplaceDependenciesOn": [
-    "xgodev-boost",
-    "xgodev-quality-gate",
-    "xgodev-dev-rules",
-    "xgodev-skill-rules"
-  ],
+  "metadata": {
+    "description": "The single xgodev Claude Code marketplace: every xgodev plugin, each shipped from its own repository."
+  },
   "plugins": [
     {
       "name": "claude-plugin",
       "source": "./",
-      "description": "Umbrella Claude Code plugin: bundles no skills of its own; pulls golang-boost, quality-gate, dev-rules and skill-rules via cross-marketplace dependencies and wires the playwright MCP."
+      "description": "Umbrella Claude Code plugin: bundles no skills of its own; pulls golang-boost, quality-gate, dev-rules and skill-rules as same-marketplace dependencies and wires the playwright MCP."
+    },
+    {
+      "name": "golang-boost",
+      "source": {
+        "source": "github",
+        "repo": "xgodev/boost-claude"
+      },
+      "description": "Single-entry, grouped-index skill for github.com/xgodev/boost -- skills/boost/SKILL.md lists 8 top-level contexts, each expanding into a group/domain file before reaching a per-component leaf, so only the small top-level index loads on every trigger. Pulls in quality-gate for the pre-push comparative gate as a dependency.",
+      "category": "language-go",
+      "tags": ["go", "golang", "boost", "echo", "resty", "pubsub", "cloudevents", "nats", "kafka", "mongo", "cassandra", "redis", "elasticsearch", "aws", "grpc", "fx", "otel", "datadog", "prometheus", "k8s"]
+    },
+    {
+      "name": "quality-gate",
+      "source": {
+        "source": "github",
+        "repo": "xgodev/quality-gate"
+      },
+      "description": "Quality Gate dispatcher + per-language gates + the quality-gate skill."
+    },
+    {
+      "name": "dev-rules",
+      "source": {
+        "source": "github",
+        "repo": "xgodev/dev-rules"
+      },
+      "description": "A macro, language-agnostic engineering-discipline skill that governs how code is written, edited, and refactored: data ownership, zero coupling, single source of truth, RED-first TDD, docs-synced commits, verify-before-done, and concurrency-first design. Ships language-agnostic RED-first enforcement hooks."
+    },
+    {
+      "name": "skill-rules",
+      "source": {
+        "source": "github",
+        "repo": "xgodev/skill-rules"
+      },
+      "description": "Discipline skill: every Claude skill must be portable across all developers and machines -- no environment-tied hardcoding (home/user paths, absolute paths to other repos, pinned plugin versions)."
     }
   ]
 }

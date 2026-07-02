@@ -1,14 +1,18 @@
 # CLAUDE.md -- claude-plugin
 
-This repo is **`claude-plugin`**: an umbrella Claude Code plugin by
-`xgodev`. It **bundles no skills of its own** and provides capabilities
-through **cross-marketplace plugin dependencies**: `golang-boost@xgodev-boost`,
-`quality-gate@xgodev-quality-gate`, `dev-rules@xgodev-dev-rules`,
-`skill-rules@xgodev-skill-rules`. It also wires one MCP server
-(`playwright`). Installing `claude-plugin` should auto-install the four
-dependencies (subject to user trust of those
-marketplaces via this marketplace's `allowCrossMarketplaceDependenciesOn`
-allowlist).
+This repo is two things at once:
+
+1. **The single `xgodev` marketplace, `xgodev-plugins`**
+   (`.claude-plugin/marketplace.json`): it lists every `xgodev` plugin
+   -- `golang-boost`, `quality-gate`, `dev-rules`, `skill-rules` -- each
+   with a GitHub source pointing at its own repository, plus the
+   umbrella plugin below (source `./`). The plugin repos themselves are
+   NOT marketplaces.
+2. **The umbrella plugin `claude-plugin`**
+   (`.claude-plugin/plugin.json`): it **bundles no skills of its own**;
+   it declares the four plugins above as same-marketplace dependencies
+   (bare names) and wires one MCP server (`playwright`). Installing
+   `claude-plugin` auto-installs the four dependencies.
 
 These are hard rules. Read them before changing anything so a future
 session does not repeat past mistakes.
@@ -35,42 +39,51 @@ session does not repeat past mistakes.
 - **This plugin bundles NO skill.** Skills (if ever added) live in
   `skills/<name>/SKILL.md` at the plugin root (NOT `.claude/skills/`,
   which is project-local, not plugin-distributed). The
-  `quality-gate` / `dev-rules` / `golang-boost` skills come from their
-  respective dependency plugins -- never copy them back in here.
-- **Cross-marketplace dependency pattern (canonical, per official
-  docs).** Each dependency on a non-bundled `xgodev` plugin uses the
-  object form in `plugin.json`:
-  `{ "name": "<plugin>", "marketplace": "xgodev-<plugin>" }`. Do NOT use
-  bare strings (those would resolve in this marketplace and force a
-  re-listing). Do NOT re-list those plugins under `plugins` in
-  `marketplace.json` -- the standalone `xgodev-<plugin>` marketplaces
-  are canonical. The umbrella's `marketplace.json` must declare each
-  target marketplace in `allowCrossMarketplaceDependenciesOn`,
-  otherwise auto-install of the dep is blocked with a
-  `cross-marketplace` error. Source of truth:
+  `quality-gate` / `dev-rules` / `golang-boost` / `skill-rules` skills
+  come from their respective dependency plugins -- never copy them back
+  in here.
+- **Single-marketplace pattern (canonical, per official docs).** The
+  marketplace name is `xgodev-plugins` and it is the ONLY `xgodev`
+  marketplace. Every `xgodev` plugin is listed under `plugins` in this
+  repo's `marketplace.json`: external plugins use the GitHub source
+  object `{ "source": "github", "repo": "xgodev/<repo>" }`; the umbrella
+  uses `"./"`. Dependencies in `plugin.json` use bare names (they
+  resolve within this same marketplace). Do NOT reintroduce
+  cross-marketplace object deps (`{ "name", "marketplace" }`) or
+  `allowCrossMarketplaceDependenciesOn` -- the per-repo marketplaces
+  (`xgodev-boost`, `xgodev-quality-gate`, `xgodev-dev-rules`,
+  `xgodev-skill-rules`, and this repo's former `xgodev-claude-plugin`)
+  were retired in 0.8.0. Adding a new `xgodev` plugin = one new entry in
+  `marketplace.json` (GitHub source) + one bare name in `plugin.json`
+  `dependencies` if the umbrella should pull it. Source of truth:
+  https://code.claude.com/docs/en/plugin-marketplaces and
   https://code.claude.com/docs/en/plugin-dependencies
+- **A plugin's version lives in its own repo.** Each listed plugin's
+  update cadence is driven by the `version` in that repo's
+  `plugin.json`. Do not pin `version` on the external entries in this
+  `marketplace.json` -- pinning here would freeze users until this repo
+  is edited.
 - **MCP servers** are declared in `.claude-plugin/plugin.json`
   `mcpServers` (e.g. `playwright` = stdio `npx -y @playwright/mcp@latest`).
 - **ASCII** identifiers/commands; no accents, no em-dash (use `--`).
   Templates (if any) use `{{UPPER_SNAKE}}` placeholders only.
 - **Never guess Claude Code plugin specifics.** Verify against
-  https://code.claude.com/docs (plugins/skills/plugin-dependencies)
-  before asserting.
-- **Minimum Claude Code version.** Cross-marketplace dependencies
-  require Claude Code v2.1.110+. If support for older versions is ever
-  needed, switch to the legacy "same-marketplace re-listing" pattern
-  (bare names in `dependencies` + re-listings in `marketplace.json`)
-  and accept the ID collisions that come with it.
+  https://code.claude.com/docs (plugins/skills/plugin-marketplaces/
+  plugin-dependencies) before asserting.
+- **Marketplace name is contract.** `xgodev-plugins` (and the plugin
+  name `claude-plugin`) do not change without a documented migration in
+  README + CHANGELOG -- a rename silently breaks every existing install
+  (`/plugin install <name>@xgodev-plugins` and
+  `extraKnownMarketplaces` entries).
 
 ## Common mistakes
 
-- Using bare strings in `dependencies` (e.g. `"boost"`) combined with
-  re-listings in `marketplace.json` -- that was the 0.4.0 pattern; it
-  collides with the standalone `xgodev-<plugin>` marketplaces. Use the
-  cross-marketplace object form.
-- Forgetting to add a target marketplace to
-  `allowCrossMarketplaceDependenciesOn` -- the dependency stops
-  auto-installing and surfaces a `cross-marketplace` error.
+- Reintroducing the cross-marketplace pattern (object deps +
+  `allowCrossMarketplaceDependenciesOn`) -- that was the pre-0.8.0
+  shape; it required every user to trust five marketplaces. The single
+  `xgodev-plugins` marketplace replaced it.
+- Pinning `version` on a GitHub-sourced plugin entry in
+  `marketplace.json` -- users stop receiving that plugin's updates.
 - Bumping `plugin.json` and forgetting README/CHANGELOG (or leaving the
   `description` describing an old shape).
 - Putting skills in `.claude/skills/` for a distributed plugin (wrong;
