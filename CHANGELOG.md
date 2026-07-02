@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.1.5]
+
+### Changed
+
+- **Skill descriptions trimmed to trigger-only lines** (`boost`,
+  `quality-gate`) -- descriptions load into every session's context;
+  workflow and prohibition text lives in the SKILL.md bodies (where it
+  already was). Same routing triggers, fewer always-on tokens. The
+  `ux-ui-mastery` fork got the same treatment for its 19 skills (3.0.1).
+
 ## [1.1.4]
 
 ### Added

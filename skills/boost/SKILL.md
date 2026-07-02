@@ -1,6 +1,6 @@
 ---
 name: boost
-description: "Use for any work with github.com/xgodev/boost — the modular Go service framework: boot sequence, wrapper (log/config/cache/publisher), bootstrap (function/middleware/adapters), extra (health/middleware/multiserver), fx modules, typed errors, and every factory/contrib integration (databases, messaging, HTTP/RPC, observability, cloud/infra). Triggers on any import under github.com/xgodev/boost, on boost initialization or wiring questions, on writing or reviewing Go service code that uses boost, and on contributing a new component to the boost repo."
+description: "Use for any work with github.com/xgodev/boost, the modular Go service framework: any import under github.com/xgodev/boost, boot/wiring questions, writing or reviewing Go services on boost, or contributing a boost component."
 license: MIT
 metadata:
   author: jpfaria

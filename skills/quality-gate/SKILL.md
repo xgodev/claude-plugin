@@ -1,6 +1,6 @@
 ---
 name: quality-gate
-description: Use when checking code quality before opening a PR. Triggers -- "run quality gate", "run QG", "check quality", "check quality before PR", "validate before PR", "is it ready for PR", "qa before push", "run gate", "run the gate". Invokes the gate dispatcher bundled in this plugin, interprets the JSON and renders an analysis. NEVER sets `QG_BYPASS_REASON` on its own. NEVER edits code to "make the gate pass". NEVER runs `gh pr create` or `git push` automatically.
+description: Use when checking code quality before opening a PR. Triggers -- "run quality gate", "run QG", "check quality", "check quality before PR", "validate before PR", "is it ready for PR", "qa before push", "run gate", "run the gate".
 ---
 
 # Quality Gate
