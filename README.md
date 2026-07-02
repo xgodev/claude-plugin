@@ -21,8 +21,10 @@ capability:
   [`docs/skill-rules.md`](docs/skill-rules.md).
 - **Dependency: [`superpowers`](https://github.com/obra/superpowers)** --
   core skills library by Jesse Vincent (TDD, debugging, collaboration
-  patterns), listed in the `xgodev` marketplace and auto-installed with
-  `claude-plugin`.
+  patterns), resolved from the official `claude-plugins-official`
+  marketplace and auto-installed with `claude-plugin`. An existing
+  `superpowers@claude-plugins-official` install satisfies it -- no
+  duplicate copy.
 
 Skills are namespaced by the plugin name: `claude-plugin:boost`,
 `claude-plugin:quality-gate`, `claude-plugin:dev-rules`,
@@ -38,9 +40,9 @@ not shipped with the plugin.)
 /plugin install claude-plugin@xgodev
 ```
 
-The `superpowers` dependency is listed in the `xgodev` marketplace
-(GitHub source), so it auto-installs with `claude-plugin` -- no extra
-step.
+The `superpowers` dependency resolves from `claude-plugins-official`
+(preconfigured in Claude Code), so it auto-installs with
+`claude-plugin` -- no extra step, and an existing install satisfies it.
 
 ## Update
 
@@ -144,4 +146,4 @@ See [`docs/quality-gate.md`](docs/quality-gate.md) and
 
 MIT -- see [LICENSE](LICENSE).
 
-- Version: 1.1.2
+- Version: 1.1.3

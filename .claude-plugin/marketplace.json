@@ -7,6 +7,7 @@
   "metadata": {
     "description": "The xgodev Claude Code marketplace: a single all-in-one plugin bundling every xgodev skill, hook, and tool."
   },
+  "allowCrossMarketplaceDependenciesOn": ["claude-plugins-official"],
   "renames": {
     "golang-boost": "claude-plugin",
     "quality-gate": "claude-plugin",
@@ -20,16 +21,6 @@
       "description": "All-in-one xgodev plugin: the boost skill set (github.com/xgodev/boost), the Quality Gate (dispatcher + per-language gates + the quality-gate skill + opt-in pre-push hook), the dev-rules engineering-discipline skill with RED-first enforcement hooks, and the skill-rules skill-authoring discipline.",
       "category": "bundle",
       "tags": ["go", "golang", "boost", "quality-gate", "tdd", "discipline", "skills", "hooks"]
-    },
-    {
-      "name": "superpowers",
-      "source": {
-        "source": "github",
-        "repo": "obra/superpowers"
-      },
-      "description": "Core skills library for Claude Code by Jesse Vincent: TDD, debugging, collaboration patterns. Listed here so it auto-installs as a dependency of claude-plugin.",
-      "category": "skills",
-      "tags": ["tdd", "debugging", "skills"]
     }
   ]
 }

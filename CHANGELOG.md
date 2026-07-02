@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.1.3]
+
+### Fixed
+
+- **`superpowers` dependency resolves from `claude-plugins-official`.**
+  Serving it from the `xgodev` marketplace (1.1.1) created a DUPLICATE
+  plugin for everyone who already had
+  `superpowers@claude-plugins-official` installed -- Claude Code treats
+  the same plugin from two marketplaces as two plugins. The dependency
+  is now the cross-marketplace form
+  (`{"name": "superpowers", "marketplace": "claude-plugins-official"}`,
+  allowlisted via `allowCrossMarketplaceDependenciesOn`); the official
+  marketplace is preconfigured in Claude Code, so it still auto-installs
+  with no extra step, and an existing install satisfies it.
+
 ## [1.1.2]
 
 ### Changed

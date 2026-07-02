@@ -1,11 +1,13 @@
 {
   "name": "claude-plugin",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "All-in-one Claude Code plugin by xgodev. Bundles the `boost` skill set for github.com/xgodev/boost (Go service framework), the Quality Gate (dispatcher `qg` + per-language gates + `quality-gate` skill + opt-in pre-push hook), the `dev-rules` engineering-discipline skill with RED-first enforcement hooks, and the `skill-rules` skill-authoring discipline.",
   "author": {
     "name": "xgodev"
   },
   "repository": "https://github.com/xgodev/claude-plugin.git",
   "license": "MIT",
-  "dependencies": ["superpowers"]
+  "dependencies": [
+    { "name": "superpowers", "marketplace": "claude-plugins-official" }
+  ]
 }
