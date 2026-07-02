@@ -1,0 +1,44 @@
+**REQUIRED BACKGROUND:**
+- `references/bootstrap/function.md` — handler typing rule.
+- `references/bootstrap/middleware.md` — recovery/logger/publisher chain.
+- `references/extra/middleware.md` — `NewAnyErrorWrapper` for the workaround.
+- `references/bootstrap/adapter-pubsub.md` — same shape, full workaround pattern documented there.
+
+## Canonical (prototype / dev)
+
+```go
+import (
+    akafka "github.com/xgodev/boost/bootstrap/function/adapter/contrib/confluentinc/confluent-kafka-go/v2"
+    "github.com/xgodev/boost/bootstrap/function"
+)
+
+fn, _ := function.New[*cloudevents.Event](rec, lmi, pmi)
+fn.Run(ctx, handle, akafka.New[*cloudevents.Event](consumer))
+```
+
+Topics, consumer group, broker list, and offset reset behavior are configured via `boost.bootstrap.function.adapter.kafka.*` (override via `BOOST_BOOTSTRAP_FUNCTION_ADAPTER_KAFKA_*`).
+
+## Production caveat — same ctx-loss as Pub/Sub
+
+`bootstrap/function/adapter/contrib/confluentinc/confluent-kafka-go/v2/helper.go:41` hard-codes:
+
+```go
+err := subscriber.Subscribe(context.Background())
+```
+
+SIGTERM does not gracefully drain in-flight messages. Apply the **same workaround pattern** documented in `references/bootstrap/adapter-pubsub.md`: bypass `fn.Run`, build the chain via `extra/middleware.NewAnyErrorWrapper`, drive `akafka.NewSubscriber` with a signal-aware ctx, and add the `// TODO(boost-upstream):` annotation naming the offending file.
+
+## Consumer group semantics
+
+Kafka delivers each message to exactly one member of a consumer group. The boost adapter respects the group config — set `boost.bootstrap.function.adapter.kafka.groupID` so multiple replicas of your service share the partition load.
+
+Offsets commit on successful handler return (post-publisher middleware). A handler error propagates as a nack — the message replays per Kafka's redelivery semantics. Wrap errors via `bootsterrors.Wrap` (see `references/model-errors.md`) so the deadletter middleware can route by type.
+
+## Red flags
+
+| Red flag | Fix |
+|---|---|
+| `kafka.Consumer.Poll(...)` / `ReadMessage(...)` loops directly | Use `akafka.NewSubscriber(...).Subscribe(ctx)` or `function.New + fn.Run` |
+| Bypass of `fn.Run` without `// TODO(boost-upstream):` naming `helper.go:41` | Add the comment, OR accept ungraceful shutdown |
+| Reading `KAFKA_BROKERS` / `KAFKA_GROUP_ID` via `os.Getenv` | Use `BOOST_BOOTSTRAP_FUNCTION_ADAPTER_KAFKA_*` overrides |
+| Manual offset commit inside the handler | Let the publisher middleware drive commit on success (default) |

@@ -1,17 +1,12 @@
 {
   "name": "claude-plugin",
-  "version": "0.8.0",
-  "description": "Umbrella Claude Code plugin by xgodev. Bundles no skills of its own; pulls `golang-boost`, `quality-gate`, `dev-rules` and `skill-rules` as dependencies from the same `xgodev-plugins` marketplace and wires the `playwright` MCP server.",
+  "version": "1.0.0",
+  "description": "All-in-one Claude Code plugin by xgodev. Bundles the `boost` skill set for github.com/xgodev/boost (Go service framework), the Quality Gate (dispatcher `qg` + per-language gates + `quality-gate`/`add-quality-gate` skills + opt-in pre-push hook), the `dev-rules` engineering-discipline skill with RED-first enforcement hooks, the `skill-rules` skill-authoring discipline, and the `playwright` MCP server.",
   "author": {
     "name": "xgodev"
   },
   "repository": "https://github.com/xgodev/claude-plugin.git",
-  "dependencies": [
-    "golang-boost",
-    "quality-gate",
-    "dev-rules",
-    "skill-rules"
-  ],
+  "license": "MIT",
   "mcpServers": {
     "playwright": {
       "command": "npx",

@@ -1,25 +1,31 @@
 # claude-plugin
 
-Home of **`xgodev-plugins`** -- the single `xgodev` Claude Code
-marketplace -- and of the umbrella plugin **`claude-plugin`**.
+The **all-in-one Claude Code plugin** by `xgodev`, and home of the
+**`xgodev-plugins`** marketplace. One install brings every `xgodev`
+capability:
 
-The marketplace lists every `xgodev` plugin; each plugin ships from its
-own repository via a GitHub source:
+- **`boost` skill set** -- grouped-index documentation skill for
+  [`xgodev/boost`](https://github.com/xgodev/boost), the modular Go service
+  framework. See [`docs/golang-boost.md`](docs/golang-boost.md).
+- **Quality Gate** -- the `qg` dispatcher + per-language gates (Rust, Go,
+  Python, Node.js, Java, Swift, Kotlin, Web), the `quality-gate` and
+  `add-quality-gate` skills, and an opt-in pre-push enforcement hook. Fails
+  only when a PR worsens a metric vs a base ref. Also usable as a plain CLI
+  in CI. See [`docs/quality-gate.md`](docs/quality-gate.md).
+- **`dev-rules`** -- macro, language-agnostic engineering-discipline skill
+  (data ownership, zero coupling, RED-first TDD, docs-synced commits,
+  verify-before-done), with RED-first enforcement hooks. See
+  [`docs/dev-rules.md`](docs/dev-rules.md).
+- **`skill-rules`** -- skill-authoring discipline: every skill must be
+  portable across all developers and machines. See
+  [`docs/skill-rules.md`](docs/skill-rules.md).
+- **`playwright` MCP server** -- [`@playwright/mcp`](https://github.com/microsoft/playwright-mcp)
+  (stdio, run on demand via `npx -y @playwright/mcp@latest`).
 
-- [`golang-boost`](https://github.com/xgodev/boost-claude) -- skills for
-  the [`xgodev/boost`](https://github.com/xgodev/boost) framework.
-- [`quality-gate`](https://github.com/xgodev/quality-gate) -- the
-  `quality-gate` skill + gate dispatcher.
-- [`dev-rules`](https://github.com/xgodev/dev-rules) --
-  language-agnostic engineering-discipline skill.
-- [`skill-rules`](https://github.com/xgodev/skill-rules) --
-  skill-authoring discipline: every skill must be portable across all
-  developers and machines.
-
-The umbrella plugin **bundles no skills of its own** -- it declares the
-four plugins above as dependencies (resolved within this same
-marketplace, so installing it auto-installs all four) and wires one MCP
-server (`playwright`).
+Skills are namespaced by the plugin name: `claude-plugin:boost`,
+`claude-plugin:quality-gate`, `claude-plugin:add-quality-gate`,
+`claude-plugin:dev-rules`, `claude-plugin:skill-rules`. They trigger on
+natural phrases (e.g. "run quality gate" / "run QG") without the prefix.
 
 ## Install
 
@@ -28,28 +34,28 @@ server (`playwright`).
 /plugin install claude-plugin@xgodev-plugins
 ```
 
-The install output lists the auto-installed dependencies at the end.
+## Migrating from earlier layouts
 
-Plugins can also be installed individually from the same marketplace:
+**From the multi-plugin `xgodev-plugins` (claude-plugin 0.8.0):** the four
+plugins (`golang-boost`, `quality-gate`, `dev-rules`, `skill-rules`) were
+merged into `claude-plugin` 1.0.0. On Claude Code v2.1.193+ the marketplace's
+`renames` map migrates existing installs automatically on marketplace update.
+On older versions, uninstall the four plugins and install `claude-plugin`:
 
 ```text
-/plugin install dev-rules@xgodev-plugins
-/plugin install quality-gate@xgodev-plugins
-/plugin install skill-rules@xgodev-plugins
-/plugin install golang-boost@xgodev-plugins
+/plugin uninstall golang-boost@xgodev-plugins
+/plugin uninstall quality-gate@xgodev-plugins
+/plugin uninstall dev-rules@xgodev-plugins
+/plugin uninstall skill-rules@xgodev-plugins
+/plugin install claude-plugin@xgodev-plugins
 ```
 
-## Migrating from the per-repo marketplaces
-
-Before `claude-plugin` 0.8.0, each plugin was its own marketplace
-(`xgodev-claude-plugin`, `xgodev-boost`, `xgodev-quality-gate`,
-`xgodev-dev-rules`, `xgodev-skill-rules`) and the umbrella pulled the
-others via cross-marketplace dependencies. Those marketplaces are
-retired. If you installed the old way, remove them and re-add the single
-marketplace:
+**From the retired per-repo marketplaces** (`xgodev-claude-plugin`,
+`xgodev-boost`, `xgodev-quality-gate`, `xgodev-dev-rules`,
+`xgodev-skill-rules`): remove them all, then add the single marketplace and
+install as above:
 
 ```text
-/plugin uninstall claude-plugin@xgodev-claude-plugin
 /plugin marketplace remove xgodev-claude-plugin
 /plugin marketplace remove xgodev-boost
 /plugin marketplace remove xgodev-quality-gate
@@ -60,19 +66,6 @@ marketplace:
 ```
 
 (Skip any `marketplace remove` for a marketplace you never added.)
-
-## What it provides
-
-- **Dependency plugins** (auto-installed with the umbrella):
-  - `golang-boost` -- skills for the `xgodev/boost` framework, shipped
-    from [`xgodev/boost-claude`](https://github.com/xgodev/boost-claude).
-  - `quality-gate` -- the `quality-gate` skill + gate dispatcher.
-  - `dev-rules` -- language-agnostic engineering-discipline skill.
-  - `skill-rules` -- skill-authoring discipline: every skill must be
-    portable across all developers and machines.
-- **`playwright`** MCP server -- the [`@playwright/mcp`](https://github.com/microsoft/playwright-mcp)
-  server (stdio, run on demand via `npx -y @playwright/mcp@latest`).
-  Declared in `plugin.json` `mcpServers`; no manual setup required.
 
 ## Update
 
@@ -88,31 +81,15 @@ From the CLI:
 claude plugin update claude-plugin@xgodev-plugins
 ```
 
-If it reports `Plugin "..." not found`, specify the scope explicitly:
-
-```bash
-claude plugin update claude-plugin@xgodev-plugins --scope user   # or: project | local | managed
-```
-
-Use `claude plugin list` to find the scope where the plugin is installed.
+If it reports `Plugin "..." not found`, specify the scope explicitly
+(`--scope user`, `project`, `local`, or `managed`); `claude plugin list`
+shows where it is installed.
 
 ### Auto-update
 
-Claude Code checks for plugin updates at startup, but **third-party
-marketplaces have auto-update disabled by default** -- only Anthropic's
-official marketplaces update on their own. To enable it:
-
-Interactive, inside Claude Code:
-
-```text
-/plugin
-```
-
--> **Marketplaces** -> select `xgodev-plugins` -> **Enable auto-update**.
-
-Or declaratively, in `~/.claude/settings.json` (global) -- add
-`"autoUpdate": true` to the marketplace entry under
-`extraKnownMarketplaces`:
+Third-party marketplaces have auto-update disabled by default. Enable it via
+`/plugin` -> **Marketplaces** -> `xgodev-plugins` -> **Enable auto-update**,
+or declaratively in `~/.claude/settings.json`:
 
 ```json
 {
@@ -128,23 +105,38 @@ Or declaratively, in `~/.claude/settings.json` (global) -- add
 }
 ```
 
-The same works in a project's `.claude/settings.json` if you want to pin
-auto-update for the team via the repo. Restart Claude Code for the
-change to take effect.
+> An update is only recognized when the `version` in `plugin.json` is
+> incremented. Commits without a version bump do not trigger an update.
 
-> An update is only recognized when the `version` in a plugin's
-> `plugin.json` is incremented. Commits without a version bump do not
-> trigger an update -- even with auto-update on, Claude Code reports
-> "already at latest".
+## Repository layout
 
-## Usage
+```
+.claude-plugin/        plugin.json (the single plugin) + marketplace.json (xgodev-plugins)
+skills/                boost/  quality-gate/  add-quality-gate/  dev-rules/  skill-rules/
+hooks/                 hooks.json (merged) + pre-push-gate.sh (QG) + red-first-guard.sh,
+                       clear-after-commit.sh, lib/, test/ (dev-rules)
+qg                     Quality Gate dispatcher (also a plain CLI: clone and run ./qg)
+go/ java/ kotlin/      per-language gates (<lang>/qg.sh + lib/ + rules/ + test-fixtures/)
+nodejs/ python/ rust/
+swift/ web/
+tests/                 Quality Gate bats suite
+scripts/               verify_references.py (boost skill link checker)
+docs/                  per-area docs + Quality Gate contract, languages, hooks
+```
 
-Once installed, the dependency plugins' skills trigger on natural
-phrases. For `quality-gate`: ask Claude to run the quality gate before
-opening a PR (e.g. "run quality gate", "run QG"). The `playwright` MCP
-server is available to Claude under the `mcp__playwright__*` tool
-namespace.
+## Quality Gate as a CLI (no Claude Code)
+
+```bash
+git clone git@github.com:xgodev/claude-plugin.git ~/.claude-plugin
+cd /path/to/your/project
+~/.claude-plugin/qg --base origin/main
+```
+
+See [`docs/quality-gate.md`](docs/quality-gate.md) and
+[`docs/contract.md`](docs/contract.md).
 
 ## License
 
-MIT (no source files; configuration only).
+MIT -- see [LICENSE](LICENSE).
+
+- Version: 1.0.0

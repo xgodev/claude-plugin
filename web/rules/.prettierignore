@@ -1,0 +1,31 @@
+# Canonical Quality Gate ignore -- web (prettier HTML/CSS/SCSS).
+# Enforced by QG via prettier --ignore-path <this>. NEVER the target project's
+# .prettierignore (tamper-proof: the dev cannot loosen the scan).
+# LAW (docs/contract.md): the fmt/lint/complexity metrics measure SOURCE CODE;
+# generated/vendored directories are excluded by this canonical ignore.
+node_modules/
+dist/
+build/
+out/
+.next/
+.nuxt/
+.expo/
+coverage/
+.turbo/
+.cache/
+**/node_modules/
+**/dist/
+**/build/
+**/out/
+**/.next/
+**/.nuxt/
+**/.expo/
+**/coverage/
+**/.turbo/
+**/.cache/
+*.min.js
+*.min.css
+*.bundle.js
+*.chunk.js
+*-lock.json
+*.map

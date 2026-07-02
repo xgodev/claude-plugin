@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.0.0]
+
+### Changed
+
+- **BREAKING: all-in-one plugin.** The four separate plugins were merged
+  INTO `claude-plugin` itself: the `boost` skill set (from
+  `xgodev/boost-claude`), the Quality Gate -- dispatcher `qg`, per-language
+  gates, `quality-gate`/`add-quality-gate` skills, bats suite, opt-in
+  pre-push hook (from `xgodev/quality-gate`) -- the `dev-rules` skill +
+  RED-first enforcement hooks (from `xgodev/dev-rules`), and the
+  `skill-rules` skill (from `xgodev/skill-rules`). One plugin, one version,
+  one install; `dependencies` removed; `hooks/hooks.json` is the merge of
+  the QG pre-push hook and the dev-rules hooks. Skills are now namespaced
+  `claude-plugin:<skill>` (was `<plugin>:<skill>`). The marketplace lists
+  only `claude-plugin` and maps the former plugin names to it via
+  `renames` (auto-migration on Claude Code v2.1.193+; older versions:
+  uninstall the four, install `claude-plugin`). Per-area user docs moved
+  to `docs/golang-boost.md`, `docs/quality-gate.md`, `docs/dev-rules.md`,
+  `docs/skill-rules.md`; the Quality Gate contract docs keep their
+  `docs/` paths (`contract.md`, `languages/*`, `hooks.md`, ...). The
+  source repos are retired (their pre-merge history stays there). Also
+  ships the repo-level `LICENSE` (MIT) and a consolidated `CLAUDE.md`.
+
 ## [0.8.0]
 
 ### Changed

@@ -1,0 +1,35 @@
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.iml
+
+# Local Claude Code config (untracked)
+.claude/*
+!.claude/skills/
+
+# Logs
+*.log
+
+# Quality Gate runtime artifacts
+target/qg-logs/
+/tmp/qg-baseline-*/
+.qg.yaml.local
+
+# Build artifacts in test-fixtures (never commit)
+.gradle/
+build/
+.build/
+target/
+dist/
+node_modules/
+.qg-venv/
+__pycache__/
+*.py[cod]
+.coverage
+*.class
+*.jar
+*.war
+TEST*.xml
+*/test-fixtures/*/package-lock.json

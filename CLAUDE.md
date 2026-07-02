@@ -1,91 +1,119 @@
 # CLAUDE.md -- claude-plugin
 
-This repo is two things at once:
+This repo is the **all-in-one `claude-plugin`** by `xgodev` AND the single
+`xgodev-plugins` marketplace (`.claude-plugin/marketplace.json`, one plugin
+entry, source `./`). Everything that used to live in the retired repos'
+plugin form -- `boost-claude` (`boost` skill), `quality-gate` (dispatcher +
+gates + skills + pre-push hook), `dev-rules` (skill + RED-first hooks),
+`skill-rules` (skill) -- now lives HERE, as one plugin, one version, one
+install. It also wires the `playwright` MCP server.
 
-1. **The single `xgodev` marketplace, `xgodev-plugins`**
-   (`.claude-plugin/marketplace.json`): it lists every `xgodev` plugin
-   -- `golang-boost`, `quality-gate`, `dev-rules`, `skill-rules` -- each
-   with a GitHub source pointing at its own repository, plus the
-   umbrella plugin below (source `./`). The plugin repos themselves are
-   NOT marketplaces.
-2. **The umbrella plugin `claude-plugin`**
-   (`.claude-plugin/plugin.json`): it **bundles no skills of its own**;
-   it declares the four plugins above as same-marketplace dependencies
-   (bare names) and wires one MCP server (`playwright`). Installing
-   `claude-plugin` auto-installs the four dependencies.
+These are hard rules, most of them learned the expensive way in the source
+repos. Read them before changing anything.
 
-These are hard rules. Read them before changing anything so a future
-session does not repeat past mistakes.
+## Hard rules (repo-wide)
 
-## Hard rules
-
-- **Docs are ALWAYS updated in the same change. No exceptions.** Any
-  change to structure, dependencies, MCP, or version updates -- in the
-  **same commit** -- `README.md`, `CHANGELOG.md`, this `CLAUDE.md`, and
-  the `.claude-plugin/plugin.json` `description` if it no longer matches
-  reality. A manifest or doc that lies about the project is a defect,
-  not a follow-up. Before committing: "what doc does this change make
-  false?" -- fix it now.
+- **Docs are ALWAYS updated in the same change. No exceptions.** Any change
+  to code, structure, behavior, or version updates -- in the **same
+  commit** -- every doc it affects: `README.md`, `CHANGELOG.md`, this
+  `CLAUDE.md`, `docs/**`, per-language `<lang>/README.md`, the skills'
+  `SKILL.md`s, and the `plugin.json` `description` if it no longer matches
+  reality. A doc that lies is a defect, not a follow-up.
 - **3-file version discipline.** A version change moves together, same
   commit: `.claude-plugin/plugin.json` `version`, the README `- Version:`
-  line (if present), and a `CHANGELOG.md` entry. Verify they match
-  before committing.
-- **English only. Everywhere.** README, CHANGELOG, CLAUDE.md, manifests,
-  descriptions. Public OSS -- no Portuguese anywhere.
-- **Zero proprietary / internal references.** No `carrefour`,
-  `bitbucket`, internal names/URLs. Before push:
-  `grep -ri -E 'carrefour|bitbucket' . --include='*' | grep -v '\.git/'`
+  line, and a `CHANGELOG.md` entry. ONE version for the whole bundle: any
+  content change anywhere (a skill, a gate, a hook) bumps the single
+  plugin version, or auto-update will not pick it up.
+- **English only. Everywhere.** Docs, manifests, skills, code comments, and
+  all runtime output. Public OSS -- no Portuguese anywhere.
+- **Zero proprietary / internal references.** No internal company/product
+  names, hosts, or repo URLs -- in code, docs, keywords, or examples.
+  Before push: `grep -ri -E 'carrefour|bitbucket' . | grep -v '\.git/'`
   must be empty.
-- **This plugin bundles NO skill.** Skills (if ever added) live in
-  `skills/<name>/SKILL.md` at the plugin root (NOT `.claude/skills/`,
-  which is project-local, not plugin-distributed). The
-  `quality-gate` / `dev-rules` / `golang-boost` / `skill-rules` skills
-  come from their respective dependency plugins -- never copy them back
-  in here.
-- **Single-marketplace pattern (canonical, per official docs).** The
-  marketplace name is `xgodev-plugins` and it is the ONLY `xgodev`
-  marketplace. Every `xgodev` plugin is listed under `plugins` in this
-  repo's `marketplace.json`: external plugins use the GitHub source
-  object `{ "source": "github", "repo": "xgodev/<repo>" }`; the umbrella
-  uses `"./"`. Dependencies in `plugin.json` use bare names (they
-  resolve within this same marketplace). Do NOT reintroduce
-  cross-marketplace object deps (`{ "name", "marketplace" }`) or
-  `allowCrossMarketplaceDependenciesOn` -- the per-repo marketplaces
-  (`xgodev-boost`, `xgodev-quality-gate`, `xgodev-dev-rules`,
-  `xgodev-skill-rules`, and this repo's former `xgodev-claude-plugin`)
-  were retired in 0.8.0. Adding a new `xgodev` plugin = one new entry in
-  `marketplace.json` (GitHub source) + one bare name in `plugin.json`
-  `dependencies` if the umbrella should pull it. Source of truth:
-  https://code.claude.com/docs/en/plugin-marketplaces and
-  https://code.claude.com/docs/en/plugin-dependencies
-- **A plugin's version lives in its own repo.** Each listed plugin's
-  update cadence is driven by the `version` in that repo's
-  `plugin.json`. Do not pin `version` on the external entries in this
-  `marketplace.json` -- pinning here would freeze users until this repo
-  is edited.
-- **MCP servers** are declared in `.claude-plugin/plugin.json`
-  `mcpServers` (e.g. `playwright` = stdio `npx -y @playwright/mcp@latest`).
-- **ASCII** identifiers/commands; no accents, no em-dash (use `--`).
-  Templates (if any) use `{{UPPER_SNAKE}}` placeholders only.
+- **ASCII identifiers/commands; `--` not em-dash** in anything new.
 - **Never guess Claude Code plugin specifics.** Verify against
-  https://code.claude.com/docs (plugins/skills/plugin-marketplaces/
-  plugin-dependencies) before asserting.
-- **Marketplace name is contract.** `xgodev-plugins` (and the plugin
-  name `claude-plugin`) do not change without a documented migration in
-  README + CHANGELOG -- a rename silently breaks every existing install
-  (`/plugin install <name>@xgodev-plugins` and
-  `extraKnownMarketplaces` entries).
+  https://code.claude.com/docs (plugins / plugin-marketplaces /
+  plugin-dependencies / hooks) before asserting.
+- **Names are contract.** The plugin name `claude-plugin` and the
+  marketplace name `xgodev-plugins` do not change without a documented
+  migration (README + CHANGELOG + `renames` map in `marketplace.json`).
+  The former plugin names (`golang-boost`, `quality-gate`, `dev-rules`,
+  `skill-rules`) are mapped to `claude-plugin` in `renames` -- do not
+  remove those entries; they migrate old installs.
+- **Single plugin, single manifest.** Do NOT reintroduce per-area
+  `plugin.json`s, per-area marketplaces, or `dependencies` between the
+  bundled areas. Everything ships together.
+- **Hooks live in `hooks/hooks.json` ONLY (auto-discovered).** Never also
+  declare `"hooks"` in `plugin.json` -- the manifest key is only for
+  ADDITIONAL non-standard files, and double registration breaks the whole
+  plugin ("Duplicate hooks file detected", quality-gate 0.3.1 incident).
+  `hooks/hooks.json` is the MERGE of the QG pre-push hook and the
+  dev-rules hooks; when editing, keep all entries and run
+  `hooks/test/hooks_json_test.sh`.
+- **Editing/authoring any `SKILL.md` is gated** on the writing-skills
+  workflow (subagent baseline BEFORE writing). The `skill-rules` skill in
+  this very repo defines the portability law every skill here must obey
+  (no `/Users/<name>`, no absolute paths to other repos, no pinned
+  versions) -- run its pre-publish grep against `skills/` before commit.
+
+## Area rules
+
+### boost skill (`skills/boost/`)
+
+- Skills cite boost as a Go import path (`github.com/xgodev/boost/...`),
+  never as a file path of this repo.
+- Sync with `xgodev/boost` is manual and mandatory: a component change
+  there requires updating the matching
+  `skills/boost/references/<group>/<name>.md` here (+ index line in
+  `skills/boost/SKILL.md` for a new component), with a version bump.
+- Run `python3 scripts/verify_references.py` after editing any reference
+  file -- every `references/*.md` pointer must resolve.
+
+### Quality Gate (`qg`, `<lang>/`, `tests/`, `hooks/pre-push-gate.sh`)
+
+- **Self-contained -- no runtime clone/pull/cache.** The skill invokes the
+  dispatcher at `${CLAUDE_PLUGIN_ROOT}/qg` (override only via `QG_PATH`
+  for local development). Never reintroduce a `~/.<x>` clone + `git pull`
+  cache.
+- **Tamper-resistance is law.** The gate ships and enforces its own
+  rulesets (`<lang>/rules/`); project quality configs are ignored by
+  default. The only override is the `QG_RULESET_DIR` env var supplied by
+  whoever RUNS the gate -- never read from a project file.
+- **fmt/lint/complexity measure SOURCE, not generated output** (canonical
+  QG-owned ignore list, never the project's ignore files).
+- **The project's declared toolchain/build-system is authoritative.** If it
+  cannot be honored exactly, that is tool-error exit 2 -- never silently
+  substitute (no npm for a `yarn.lock`, no mvn for Gradle).
+- **Every "tool missing" error teaches how to install it** (Linux + macOS
+  commands + consequence).
+- The full contract lives in `docs/contract.md`; adding a language follows
+  the `add-quality-gate` skill and updates `docs/languages/<lang>.md` +
+  `<lang>/README.md` in the same change. Test suite: `tests/*.bats`.
+
+### dev-rules (`skills/dev-rules/`, `hooks/red-first-guard.sh` et al.)
+
+- The hooks make RED-first deterministic: production edits blocked until a
+  failing test exists (sentinels under `<project>/.dev-rules/`). Behavior
+  and per-repo opt-out are documented in `docs/dev-rules.md` -- keep code
+  and doc in lockstep.
+- Hook changes require running `hooks/test/*.sh` (all green) before commit.
+
+### skill-rules (`skills/skill-rules/`)
+
+- The discipline skill itself: keep the rationalizations table and red
+  flags populated from real failures; description stays verbatim English
+  (it is the routing signal -- never paraphrase or summarize workflow in
+  it).
 
 ## Common mistakes
 
-- Reintroducing the cross-marketplace pattern (object deps +
-  `allowCrossMarketplaceDependenciesOn`) -- that was the pre-0.8.0
-  shape; it required every user to trust five marketplaces. The single
-  `xgodev-plugins` marketplace replaced it.
-- Pinning `version` on a GitHub-sourced plugin entry in
-  `marketplace.json` -- users stop receiving that plugin's updates.
-- Bumping `plugin.json` and forgetting README/CHANGELOG (or leaving the
-  `description` describing an old shape).
-- Putting skills in `.claude/skills/` for a distributed plugin (wrong;
-  use `skills/` at the plugin root).
+- Bumping content without bumping the single plugin version (auto-update
+  silently stops).
+- Declaring `hooks` in `plugin.json` (breaks the whole plugin).
+- Reintroducing per-area plugins/marketplaces or cross-marketplace
+  dependencies -- retired in 1.0.0; the `renames` map replaced them.
+- Putting skills in `.claude/skills/` (project-local, not distributed);
+  plugin skills live in `skills/<name>/SKILL.md`.
 - Any Portuguese string (run a language sweep before push).
+- Touching `docs/quality-gate.md` links without re-checking relative paths
+  (that file lives in `docs/`, so gate dirs are `../<lang>/`).

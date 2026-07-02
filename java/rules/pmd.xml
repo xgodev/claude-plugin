@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!--
+  Canonical Quality Gate ruleset (Java, PMD).
+  Enforced by QG via pmd -R this file. The target project's ruleset is IGNORED.
+  Community defaults (errorprone + design); fine calibration in V2.
+-->
+<ruleset name="qg-java"
+         xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+  <description>QG canonical Java ruleset</description>
+  <rule ref="category/java/errorprone.xml"/>
+  <rule ref="category/java/design.xml/CyclomaticComplexity">
+    <properties>
+      <property name="methodReportLevel" value="10"/>
+    </properties>
+  </rule>
+</ruleset>

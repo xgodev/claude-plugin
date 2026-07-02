@@ -5,47 +5,21 @@
     "url": "https://github.com/xgodev"
   },
   "metadata": {
-    "description": "The single xgodev Claude Code marketplace: every xgodev plugin, each shipped from its own repository."
+    "description": "The xgodev Claude Code marketplace: a single all-in-one plugin bundling every xgodev skill, hook, and tool."
+  },
+  "renames": {
+    "golang-boost": "claude-plugin",
+    "quality-gate": "claude-plugin",
+    "dev-rules": "claude-plugin",
+    "skill-rules": "claude-plugin"
   },
   "plugins": [
     {
       "name": "claude-plugin",
       "source": "./",
-      "description": "Umbrella Claude Code plugin: bundles no skills of its own; pulls golang-boost, quality-gate, dev-rules and skill-rules as same-marketplace dependencies and wires the playwright MCP."
-    },
-    {
-      "name": "golang-boost",
-      "source": {
-        "source": "github",
-        "repo": "xgodev/boost-claude"
-      },
-      "description": "Single-entry, grouped-index skill for github.com/xgodev/boost -- skills/boost/SKILL.md lists 8 top-level contexts, each expanding into a group/domain file before reaching a per-component leaf, so only the small top-level index loads on every trigger. Pulls in quality-gate for the pre-push comparative gate as a dependency.",
-      "category": "language-go",
-      "tags": ["go", "golang", "boost", "echo", "resty", "pubsub", "cloudevents", "nats", "kafka", "mongo", "cassandra", "redis", "elasticsearch", "aws", "grpc", "fx", "otel", "datadog", "prometheus", "k8s"]
-    },
-    {
-      "name": "quality-gate",
-      "source": {
-        "source": "github",
-        "repo": "xgodev/quality-gate"
-      },
-      "description": "Quality Gate dispatcher + per-language gates + the quality-gate skill."
-    },
-    {
-      "name": "dev-rules",
-      "source": {
-        "source": "github",
-        "repo": "xgodev/dev-rules"
-      },
-      "description": "A macro, language-agnostic engineering-discipline skill that governs how code is written, edited, and refactored: data ownership, zero coupling, single source of truth, RED-first TDD, docs-synced commits, verify-before-done, and concurrency-first design. Ships language-agnostic RED-first enforcement hooks."
-    },
-    {
-      "name": "skill-rules",
-      "source": {
-        "source": "github",
-        "repo": "xgodev/skill-rules"
-      },
-      "description": "Discipline skill: every Claude skill must be portable across all developers and machines -- no environment-tied hardcoding (home/user paths, absolute paths to other repos, pinned plugin versions)."
+      "description": "All-in-one xgodev plugin: the boost skill set (github.com/xgodev/boost), the Quality Gate (dispatcher + per-language gates + skills + opt-in pre-push hook), the dev-rules engineering-discipline skill with RED-first enforcement hooks, the skill-rules skill-authoring discipline, and the playwright MCP server.",
+      "category": "bundle",
+      "tags": ["go", "golang", "boost", "quality-gate", "tdd", "discipline", "skills", "hooks"]
     }
   ]
 }
