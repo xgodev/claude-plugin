@@ -253,7 +253,7 @@ $ echo $?
 
 ## Dispatcher `qg` (monorepo / multi-language)
 
-The root `qg` dispatcher runs 1..N gates. With **1 language** detected, the
+The `qg` dispatcher runs 1..N gates. With **1 language** detected, the
 output is exactly that of `<lang>/qg.sh` (single object -- no wrapper). With **N
 languages** (or `.qg.yaml projects:` with multiple paths), `--format json`
 emits an enveloped array:

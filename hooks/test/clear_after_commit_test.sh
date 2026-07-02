@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -eu
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-HOOK="$HERE/../clear-after-commit.sh"
+HOOK="$HERE/../dev-rules/clear-after-commit.sh"
 SBX="$(mktemp -d)"; export CLAUDE_PROJECT_DIR="$SBX"
 trap 'rm -rf "$SBX"' EXIT
 fail=0

@@ -1,12 +1,14 @@
 # CLAUDE.md -- claude-plugin
 
 This repo is the **all-in-one `claude-plugin`** by `xgodev` AND the single
-`xgodev-plugins` marketplace (`.claude-plugin/marketplace.json`, one plugin
+`xgodev` marketplace (`.claude-plugin/marketplace.json`, one plugin
 entry, source `./`). Everything that used to live in the retired repos'
 plugin form -- `boost-claude` (`boost` skill), `quality-gate` (dispatcher +
 gates + skills + pre-push hook), `dev-rules` (skill + RED-first hooks),
 `skill-rules` (skill) -- now lives HERE, as one plugin, one version, one
-install. It also wires the `playwright` MCP server.
+install. The plugin ships ONLY what is its own: no third-party MCP
+servers (the `playwright` MCP wiring was removed in 1.1.0 -- users who
+want it add it to their own config).
 
 These are hard rules, most of them learned the expensive way in the source
 repos. Read them before changing anything.
@@ -35,21 +37,29 @@ repos. Read them before changing anything.
   https://code.claude.com/docs (plugins / plugin-marketplaces /
   plugin-dependencies / hooks) before asserting.
 - **Names are contract.** The plugin name `claude-plugin` and the
-  marketplace name `xgodev-plugins` do not change without a documented
+  marketplace name `xgodev` do not change without a documented
   migration (README + CHANGELOG + `renames` map in `marketplace.json`).
   The former plugin names (`golang-boost`, `quality-gate`, `dev-rules`,
   `skill-rules`) are mapped to `claude-plugin` in `renames` -- do not
   remove those entries; they migrate old installs.
 - **Single plugin, single manifest.** Do NOT reintroduce per-area
   `plugin.json`s, per-area marketplaces, or `dependencies` between the
-  bundled areas. Everything ships together.
+  bundled areas. Everything ships together. EXTERNAL dependencies are
+  allowed and declared in `plugin.json` `dependencies` (today:
+  `ux-ui-mastery@ux-ui-mastery-marketplace`, allowlisted in
+  `marketplace.json` `allowCrossMarketplaceDependenciesOn`; the README
+  install section must always tell users to add the dependency's
+  marketplace first, or resolution fails).
 - **Hooks live in `hooks/hooks.json` ONLY (auto-discovered).** Never also
   declare `"hooks"` in `plugin.json` -- the manifest key is only for
   ADDITIONAL non-standard files, and double registration breaks the whole
   plugin ("Duplicate hooks file detected", quality-gate 0.3.1 incident).
   `hooks/hooks.json` is the MERGE of the QG pre-push hook and the
   dev-rules hooks; when editing, keep all entries and run
-  `hooks/test/hooks_json_test.sh`.
+  `hooks/test/hooks_json_test.sh`. The registry stays at
+  `hooks/hooks.json`; the SCRIPTS are grouped by area
+  (`hooks/quality-gate/`, `hooks/dev-rules/` with its `lib/`), and
+  `hooks/test/` covers all of them.
 - **Editing/authoring any `SKILL.md` is gated** on the writing-skills
   workflow (subagent baseline BEFORE writing). The `skill-rules` skill in
   this very repo defines the portability law every skill here must obey
@@ -69,11 +79,16 @@ repos. Read them before changing anything.
 - Run `python3 scripts/verify_references.py` after editing any reference
   file -- every `references/*.md` pointer must resolve.
 
-### Quality Gate (`qg`, `<lang>/`, `tests/`, `hooks/pre-push-gate.sh`)
+### Quality Gate (`tools/quality-gate/`, `hooks/quality-gate/`)
 
+- **The gate bundle lives under `tools/quality-gate/`** (dispatcher
+  `qg`, the `<lang>/` gates, and `tests/`), NOT at the repo root -- moved
+  in 1.1.0 to keep the root plugin-only. Path references in hooks, skills,
+  and docs point there; do not move it back or split it.
 - **Self-contained -- no runtime clone/pull/cache.** The skill invokes the
-  dispatcher at `${CLAUDE_PLUGIN_ROOT}/qg` (override only via `QG_PATH`
-  for local development). Never reintroduce a `~/.<x>` clone + `git pull`
+  dispatcher at `${CLAUDE_PLUGIN_ROOT}/tools/quality-gate/qg`
+  (override only via `QG_PATH`, which points at the quality-gate dir, for
+  local development). Never reintroduce a `~/.<x>` clone + `git pull`
   cache.
 - **Tamper-resistance is law.** The gate ships and enforces its own
   rulesets (`<lang>/rules/`); project quality configs are ignored by
@@ -88,9 +103,14 @@ repos. Read them before changing anything.
   commands + consequence).
 - The full contract lives in `docs/contract.md`; adding a language follows
   the `add-quality-gate` skill and updates `docs/languages/<lang>.md` +
-  `<lang>/README.md` in the same change. Test suite: `tests/*.bats`.
+  `tools/quality-gate/<lang>/README.md` in the same change. Test
+  suite: `tools/quality-gate/tests/*.bats`.
+- **`add-quality-gate` is maintainer-only and project-local**
+  (`.claude/skills/add-quality-gate/`). It is deliberately NOT in
+  `skills/` -- end users must not receive it. Do not move it back into
+  the shipped plugin.
 
-### dev-rules (`skills/dev-rules/`, `hooks/red-first-guard.sh` et al.)
+### dev-rules (`skills/dev-rules/`, `hooks/dev-rules/`)
 
 - The hooks make RED-first deterministic: production edits blocked until a
   failing test exists (sentinels under `<project>/.dev-rules/`). Behavior
@@ -112,8 +132,11 @@ repos. Read them before changing anything.
 - Declaring `hooks` in `plugin.json` (breaks the whole plugin).
 - Reintroducing per-area plugins/marketplaces or cross-marketplace
   dependencies -- retired in 1.0.0; the `renames` map replaced them.
-- Putting skills in `.claude/skills/` (project-local, not distributed);
-  plugin skills live in `skills/<name>/SKILL.md`.
+- Putting USER-FACING skills in `.claude/skills/` (project-local, not
+  distributed); shipped plugin skills live in `skills/<name>/SKILL.md`.
+  The inverse also holds: maintainer-only skills (`add-quality-gate`)
+  stay in `.claude/skills/` and must NOT be shipped.
 - Any Portuguese string (run a language sweep before push).
 - Touching `docs/quality-gate.md` links without re-checking relative paths
-  (that file lives in `docs/`, so gate dirs are `../<lang>/`).
+  (that file lives in `docs/`, so gate dirs are
+  `../tools/quality-gate/<lang>/`).

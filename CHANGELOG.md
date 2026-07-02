@@ -1,5 +1,73 @@
 # Changelog
 
+## [1.1.0]
+
+### Changed
+
+- **Marketplace name is `xgodev`.** Installs are `claude-plugin@xgodev`.
+  The `xgodev-plugins` name introduced in 0.8.0 was never adopted in the
+  wild, so no migration is needed; README install/update/auto-update
+  instructions were updated.
+
+- **Quality Gate bundle relocated to `tools/quality-gate/`.** The
+  dispatcher `qg`, the eight per-language gate dirs (`go/`, `java/`,
+  `kotlin/`, `nodejs/`, `python/`, `rust/`, `swift/`, `web/`) and the bats
+  suite (`tests/`) moved from the repo root into
+  `tools/quality-gate/`, leaving the root with only the plugin
+  skeleton (`.claude-plugin/`, `skills/`, `hooks/`, `docs/`, `scripts/`).
+  No gate behavior changed. All path references were updated in the same
+  change: the pre-push hook, the `quality-gate` and
+  `add-quality-gate` skills (`QG_PATH` still points at the quality-gate
+  dir; its default is now `$CLAUDE_PLUGIN_ROOT/tools/quality-gate`),
+  the test helpers, `docs/**`, per-language READMEs, `README.md`,
+  `CONTRIBUTING.md`, and `CLAUDE.md`. CLI users: the dispatcher is now
+  `<clone>/tools/quality-gate/qg`.
+
+- **Hook scripts grouped by area.** The registry stays at
+  `hooks/hooks.json` (standard auto-discovered path -- unchanged), but the
+  scripts moved into per-area subdirectories:
+  `hooks/quality-gate/pre-push-gate.sh` and
+  `hooks/dev-rules/{red-first-guard.sh, clear-after-commit.sh, lib/}`.
+  `hooks/test/` still covers all of them.
+- **`add-quality-gate` is no longer shipped with the plugin.** It is a
+  maintainer tool (adding a language to the gate is this repo's task, not
+  something done in a consumer project), so it moved from `skills/` to
+  the project-local `.claude/skills/add-quality-gate/`. End-user installs
+  now receive four skills: `boost`, `quality-gate`, `dev-rules`,
+  `skill-rules`. The `quality-gate` skill still names it on exit 3 -- the
+  guidance ("open an issue / add the language in the gate repo") is
+  unchanged.
+
+### Added
+
+- **Dependency on `ux-ui-mastery`** (Design Tribe Republic,
+  `phazurlabs/ux-ui-mastery`). Declared in `plugin.json`
+  `dependencies` with `marketplace: "ux-ui-mastery-marketplace"`;
+  `marketplace.json` allowlists it via
+  `allowCrossMarketplaceDependenciesOn`. Users add that marketplace
+  first (`/plugin marketplace add phazurlabs/ux-ui-mastery`) and Claude
+  Code auto-installs the dependency with `claude-plugin`.
+- **"Context-window overhead" section in the README** with measured
+  numbers: installing the plugin costs ~510 tokens per session (+1.9% over
+  the Claude Code baseline), A/B-tested with `claude -p` on Claude Code
+  2.1.199. Skill bodies, hooks, and the gate itself cost zero until used.
+
+### Removed
+
+- **`playwright` MCP server unbundled.** The plugin ships only xgodev's
+  own capabilities; a third-party MCP server is not one of them. The
+  `mcpServers` block was removed from `plugin.json`. If you used
+  playwright through this plugin, add it to your own Claude Code config:
+  `claude mcp add playwright -- npx -y @playwright/mcp@latest`.
+
+### Fixed
+
+- `docs/consume.md` and the per-language READMEs still instructed cloning
+  the retired `xgodev/quality-gate` repo into a `~/.quality-gate` cache;
+  they now point at this repo and the bundled gate path. A stale
+  `~/.quality-gate` reinstall hint in the nodejs gate's tsconfig error
+  message was updated too.
+
 ## [1.0.0]
 
 ### Changed

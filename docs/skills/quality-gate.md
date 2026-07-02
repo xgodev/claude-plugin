@@ -1,6 +1,6 @@
 # quality-gate
 
-This plugin **is** the Quality Gate. The `quality-gate` skill calls the bundled **dispatcher** (`${CLAUDE_PLUGIN_ROOT}/qg`), which detects the project's language(s) 100% in shell (zero AI), runs the matching `<lang>/qg.sh` gate(s), parses the JSON verdict, and renders an analyzed result before the developer opens a PR. The dispatcher and the per-language scripts ship inside this plugin (under `${CLAUDE_PLUGIN_ROOT}`) -- no runtime clone.
+This plugin **is** the Quality Gate. The `quality-gate` skill calls the bundled **dispatcher** (`${CLAUDE_PLUGIN_ROOT}/tools/quality-gate/qg`), which detects the project's language(s) 100% in shell (zero AI), runs the matching `<lang>/qg.sh` gate(s), parses the JSON verdict, and renders an analyzed result before the developer opens a PR. The dispatcher and the per-language scripts ship inside this plugin (under `${CLAUDE_PLUGIN_ROOT}/tools/quality-gate`) -- no runtime clone.
 
 Language detection is **no longer the skill's (or the AI's) responsibility** — the dispatcher owns it. The skill only invokes `qg` and interprets the JSON.
 
@@ -13,7 +13,7 @@ Language detection is **no longer the skill's (or the AI's) responsibility** —
 
 User: `run quality gate`.
 
-1. **Locate the dispatcher.** The gate is bundled in this plugin: the dispatcher lives at `${CLAUDE_PLUGIN_ROOT}/qg` (no runtime clone or pull; it updates with the plugin). `QG_PATH` overrides the path for local gate development.
+1. **Locate the dispatcher.** The gate is bundled in this plugin: the dispatcher lives at `${CLAUDE_PLUGIN_ROOT}/tools/quality-gate/qg` (no runtime clone or pull; it updates with the plugin). `QG_PATH` overrides the gate directory for local gate development.
 2. **Detect `--base`**, in order: `git symbolic-ref refs/remotes/origin/HEAD`, `origin/main`, `origin/master`, `origin/develop`. None exist -> run in **absolute mode** (omit `--base`) or ask the user; never `HEAD~1`.
 3. **Run the dispatcher with `--format json`** into a timestamped `--log-dir` (never `<lang>/qg.sh` directly — detection is the dispatcher's job):
 
@@ -48,7 +48,7 @@ User: `run quality gate`.
 ## Files / templates / references
 
 - Skill: [`skills/quality-gate/SKILL.md`](../../skills/quality-gate/SKILL.md)
-- Gate is bundled in this plugin (dispatcher `qg` + per-language scripts + contract under `${CLAUDE_PLUGIN_ROOT}`).
+- Gate is bundled in this plugin (dispatcher `qg` + per-language scripts under `${CLAUDE_PLUGIN_ROOT}/tools/quality-gate`; contract under `${CLAUDE_PLUGIN_ROOT}/docs`).
 - Contract reference (bundled in the plugin): `${CLAUDE_PLUGIN_ROOT}/docs/contract.md` (dispatcher, tamper-resistance, `.qg.yaml projects:`), `${CLAUDE_PLUGIN_ROOT}/docs/output-format.md` (monorepo envelope), `${CLAUDE_PLUGIN_ROOT}/docs/consume.md`.
 
 ## Limitations (V1)

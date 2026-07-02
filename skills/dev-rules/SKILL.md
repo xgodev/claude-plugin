@@ -8,7 +8,7 @@ description: Use when writing, editing, or refactoring code in any language -- b
 Methodology and decision rules for ANY code, in ANY language. Apply BEFORE
 writing, not after. This is the judgment a mechanical gate cannot measure:
 ownership, coupling, honesty of failure, TDD order, docs sync. The
-companion gate (`xgodev/quality-gate`) catches metric regressions
+companion Quality Gate (bundled in this plugin) catches metric regressions
 (fmt/lint/build/test/complexity/coverage); this skill governs the
 decisions the gate cannot see. Use both -- they do not overlap.
 

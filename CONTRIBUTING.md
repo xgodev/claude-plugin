@@ -11,7 +11,9 @@
 
 ### With AI (recommended)
 
-Invoke the `add-quality-gate` skill (in `skills/add-quality-gate/`):
+Invoke the `add-quality-gate` skill (project-local, in
+`.claude/skills/add-quality-gate/` -- it loads when working inside this
+repo; it is NOT shipped with the plugin):
 
 ```
 add quality gate for Go
@@ -21,7 +23,7 @@ The skill follows a mandatory 22-step checklist. Do not skip any.
 
 ### Manual (without AI)
 
-Follow the same checklist documented in `skills/add-quality-gate/SKILL.md`.
+Follow the same checklist documented in `.claude/skills/add-quality-gate/SKILL.md`.
 
 ## Change the contract
 
@@ -29,14 +31,14 @@ Follow the same checklist documented in `skills/add-quality-gate/SKILL.md`.
 2. Update ALL `<lang>/qg.sh` to comply with the new version.
 3. Bump `QG_CONTRACT_VERSION` in each script's header.
 4. Update test fixtures if the change affects output.
-5. Update `skills/add-quality-gate/SKILL.md` if it affects the process.
+5. Update `.claude/skills/add-quality-gate/SKILL.md` if it affects the process.
 
 Breaking change -> bump major (v1 -> v2). V1 still has no tag-based versioning (deliberate spec decision).
 
 ## Repo structure
 
 ```
-quality-gate/
+claude-plugin/
 |-- README.md
 |-- CONTRIBUTING.md
 |-- docs/
@@ -45,19 +47,22 @@ quality-gate/
 |   |-- output-format.md
 |   |-- consume.md
 |   `-- languages/<lang>.md
-|-- skills/add-quality-gate/
-`-- <lang>/
-    |-- qg.sh
-    |-- README.md
-    `-- test-fixtures/{baseline,regressed}/
+|-- .claude/skills/add-quality-gate/   (maintainer-only, not shipped)
+`-- tools/quality-gate/
+    |-- qg                 (dispatcher)
+    |-- tests/             (bats suite + helpers)
+    `-- <lang>/
+        |-- qg.sh
+        |-- README.md
+        `-- test-fixtures/{baseline,regressed}/
 ```
 
 ## Tests for the gate itself
 
-`tests/` at the root contains tests in [bats](https://github.com/bats-core/bats-core). Run:
+`tools/quality-gate/tests/` contains tests in [bats](https://github.com/bats-core/bats-core). Run:
 
 ```bash
-bats tests/
+bats tools/quality-gate/tests/
 ```
 
-Every change to `<lang>/qg.sh` requires a corresponding test in `tests/<lang>-qg.bats`.
+Every change to `<lang>/qg.sh` requires a corresponding test in `tools/quality-gate/tests/<lang>-qg.bats`.

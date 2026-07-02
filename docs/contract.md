@@ -209,9 +209,10 @@ Env var `QG_BYPASS_REASON="<reason>"`:
 
 No equivalent CLI flag. The env var adds friction deliberately.
 
-## Deterministic dispatcher (`qg` at the root)
+## Deterministic dispatcher (`qg` at the gate root)
 
-The root of the gate repo ships a `qg` executable (`~/.quality-gate/qg`).
+The gate root (`tools/quality-gate/` in the plugin repo) ships a `qg`
+executable next to the `<lang>/` dirs.
 **100% shell detection, zero AI**: it discovers the target project's language(s) via
 `<lang>/qg.sh --detect` and runs the matching gate(s). The consumer skill
 ONLY calls this script -- it never iterates `<lang>/qg.sh` on its own nor keeps
@@ -330,7 +331,7 @@ projects:                             # monorepo: closed list of sub-projects
 
 ### `projects` block (monorepo)
 
-Read ONLY by the root `qg` dispatcher. **Closed** schema per item: allowed keys
+Read ONLY by the `qg` dispatcher. **Closed** schema per item: allowed keys
 = `path` (required), `lang` (optional). Unknown key -> exit 2.
 If `projects:` exists, the dispatcher **ignores** root detection and uses only this
 list. `lang:` does NOT select the ruleset (that is a tamper-surface) -- it only restricts which

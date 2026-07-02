@@ -11,7 +11,7 @@ user. The gate (dispatcher + per-language scripts) is bundled
 in this same plugin.
 
 Language detection is NO longer the responsibility of this skill nor of
-the AI. The dispatcher `${CLAUDE_PLUGIN_ROOT}/qg` detects the
+the AI. The dispatcher `${CLAUDE_PLUGIN_ROOT}/tools/quality-gate/qg` detects the
 language(s) on its own (100% shell, zero AI) and runs the matching
 gate(s). This skill only calls the dispatcher and interprets the JSON.
 
@@ -57,7 +57,7 @@ Do not use:
 
 - `git` installed (the dispatcher uses it to resolve the base ref).
 - Prerequisites of each supported language (documented in
-  `${CLAUDE_PLUGIN_ROOT}/<lang>/README.md`).
+  `${CLAUDE_PLUGIN_ROOT}/tools/quality-gate/<lang>/README.md`).
 
 ## Flow (mandatory steps -- do not skip)
 
@@ -65,12 +65,12 @@ Do not use:
 
 The gate (dispatcher `qg` + the `<lang>/qg.sh` scripts + contract) is
 **bundled inside this plugin**. There is NO clone or `git pull` at
-runtime -- the dispatcher lives at `${CLAUDE_PLUGIN_ROOT}/qg` and is updated
+runtime -- the dispatcher lives at `${CLAUDE_PLUGIN_ROOT}/tools/quality-gate/qg` and is updated
 together with the plugin (`claude plugin update` / auto-update). This eliminates
 any staleness window and cache divergence.
 
 ```bash
-GATE_PATH="${QG_PATH:-$CLAUDE_PLUGIN_ROOT}"
+GATE_PATH="${QG_PATH:-$CLAUDE_PLUGIN_ROOT/tools/quality-gate}"
 test -x "$GATE_PATH/qg" || { echo "::error::dispatcher 'qg' not found in $GATE_PATH -- corrupted plugin install (reinstall: /plugin install)"; exit 2; }
 ```
 
@@ -105,7 +105,7 @@ a timestamped `--log-dir` so runs do not collide:
 LOG_DIR="/tmp/qg-$(date -u +%Y%m%dT%H%M%S)"
 mkdir -p "$LOG_DIR"
 
-GATE_PATH="${QG_PATH:-$CLAUDE_PLUGIN_ROOT}"
+GATE_PATH="${QG_PATH:-$CLAUDE_PLUGIN_ROOT/tools/quality-gate}"
 
 "$GATE_PATH/qg" \
   --base "<ref>" \
@@ -289,7 +289,7 @@ exception for urgency, hotfix, or a vague request:
 ## Cross-scenario patterns (summary)
 
 1. **Confusing local tools with the gate.** The gate is the dispatcher
-   `${CLAUDE_PLUGIN_ROOT}/qg --format json`.
+   `${CLAUDE_PLUGIN_ROOT}/tools/quality-gate/qg --format json`.
 2. **Auto-fixing under pressure.** Only **propose** to the user.
 3. **Making a bypass decision on its own.** Never.
 4. **Inventing missing abstractions.** Exit 3 becomes "open an issue", not
@@ -333,4 +333,4 @@ Reference documentation (in the gate repo, bundled in the plugin):
 - `${CLAUDE_PLUGIN_ROOT}/docs/output-format.md` -- JSON/text format,
   including the monorepo envelope (`aggregate_verdict`/`results`).
 - `${CLAUDE_PLUGIN_ROOT}/docs/consume.md` -- how to use it locally.
-- `${CLAUDE_PLUGIN_ROOT}/<lang>/README.md` -- the language's prerequisites.
+- `${CLAUDE_PLUGIN_ROOT}/tools/quality-gate/<lang>/README.md` -- the language's prerequisites.

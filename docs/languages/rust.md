@@ -94,7 +94,7 @@ cargo install cargo-llvm-cov --force
 ### Stale baseline cache after changing the base branch
 
 ```bash
-~/.quality-gate/rust/qg.sh --base origin/main --refresh-baseline
+~/.claude-plugin/tools/quality-gate/rust/qg.sh --base origin/main --refresh-baseline
 ```
 
 or
@@ -121,4 +121,4 @@ None in V1. Future candidates:
 - `audit` via `cargo audit` -- vulnerabilities in dependencies.
 - `unsafe_count` via `cargo geiger` -- use of `unsafe` blocks.
 
-To add, follow the contract (section "Extending") and `skills/add-quality-gate/`.
+To add, follow the contract (section "Extending") and the maintainer-only `add-quality-gate` skill (project-local, `.claude/skills/add-quality-gate/` in the gate repo).

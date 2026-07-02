@@ -5,7 +5,7 @@ The plugin ships an **opt-in** `PreToolUse` hook that blocks `git push` and
 
 ## What it does
 
-On any `Bash` tool call, `hooks/pre-push-gate.sh` runs. It fast-exits for
+On any `Bash` tool call, `hooks/quality-gate/pre-push-gate.sh` runs. It fast-exits for
 everything except `git push` / `gh pr create`. For a gated command it:
 
 1. Exempts non-code pushes only: a pure deletion (`--delete` / `-d`, or every
@@ -15,7 +15,7 @@ everything except `git push` / `gh pr create`. For a gated command it:
    gated.
 2. Resolves the base ref: the branch upstream (`@{upstream}`), else the remote
    default branch (`origin/HEAD`), else **absolute mode** (no base).
-3. Runs `${CLAUDE_PLUGIN_ROOT}/qg [--base <ref>]` in the project.
+3. Runs `${CLAUDE_PLUGIN_ROOT}/tools/quality-gate/qg [--base <ref>]` in the project.
 4. Maps the gate exit code to a decision:
    - `0` passed / bypassed, `3` no supported language -> **allow**
    - `1` regressed / threshold, `2` tool error -> **deny** (JSON
@@ -32,7 +32,7 @@ is allowed. Example:
 ## Fail-open by design
 
 A broken hook must never brick git. If `jq` is missing, stdin is malformed,
-`qg` is not found at `${CLAUDE_PLUGIN_ROOT}`, or the project is not a git repo,
+`qg` is not found at `${CLAUDE_PLUGIN_ROOT}/tools/quality-gate`, or the project is not a git repo,
 the hook allows the command and prints a note to stderr.
 
 ## Registration

@@ -7,10 +7,10 @@ measure (data ownership, zero coupling, single source of truth, RED-first
 TDD, docs-synced commits, honest failure, verify-before-done,
 concurrency-first design).
 
-It is the companion to [`xgodev/quality-gate`](https://github.com/xgodev/quality-gate):
-the gate catches mechanical metric regressions (fmt, lint, build, test,
-complexity, coverage); `dev-rules` governs the judgment the gate cannot see.
-Use them together, not interchangeably.
+It is the companion to the [Quality Gate](quality-gate.md) bundled in this
+same plugin: the gate catches mechanical metric regressions (fmt, lint,
+build, test, complexity, coverage); `dev-rules` governs the judgment the
+gate cannot see. Use them together, not interchangeably.
 
 It is a **discipline-enforcing** skill: rigid, concise, applied **before**
 writing -- not a passive reference skimmed after the fact.

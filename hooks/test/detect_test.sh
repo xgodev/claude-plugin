@@ -2,7 +2,7 @@
 # Unit tests for detect.sh. Pure functions, no hook I/O.
 set -u
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-. "$HERE/../lib/detect.sh"
+. "$HERE/../dev-rules/lib/detect.sh"
 
 fail=0
 ok()  { if "$@"; then echo "ok  : $*"; else echo "FAIL: $*"; fail=1; fi; }

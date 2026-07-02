@@ -2,7 +2,7 @@
 # Feeds hook-input JSON to red-first-guard.sh and asserts deny/allow.
 set -u
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-GUARD="$HERE/../red-first-guard.sh"
+GUARD="$HERE/../dev-rules/red-first-guard.sh"
 SBX="$(mktemp -d)"; export CLAUDE_PROJECT_DIR="$SBX"
 trap 'rm -rf "$SBX"' EXIT
 fail=0

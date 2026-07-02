@@ -5,8 +5,8 @@ Quality gate shared across projects. Runs **the same** locally and in CI: fails 
 The Quality Gate ships as part of the all-in-one `claude-plugin`
 (see the [repo README](../README.md) for install) and is **two-in-one**:
 
-- **CLI/CI:** clone the `xgodev/claude-plugin` repo and run the dispatcher `./qg` (or `<lang>/qg.sh`) directly -- `.claude-plugin/` is inert outside Claude Code.
-- **Claude Code plugin:** the `quality-gate` and `add-quality-gate` skills install **together** with the scripts (bundled dispatcher, no runtime clone) when you install `claude-plugin@xgodev-plugins`.
+- **CLI/CI:** clone the `xgodev/claude-plugin` repo and run the dispatcher `./tools/quality-gate/qg` (or `tools/quality-gate/<lang>/qg.sh`) directly -- `.claude-plugin/` is inert outside Claude Code.
+- **Claude Code plugin:** the `quality-gate` skill installs **together** with the scripts (bundled dispatcher, no runtime clone) when you install `claude-plugin@xgodev`. (`add-quality-gate` is maintainer-only, project-local in this repo -- not shipped.)
 
 ## How it works
 
@@ -16,12 +16,13 @@ The Quality Gate ships as part of the all-in-one `claude-plugin`
 
 ### Dispatcher `qg` (entry point)
 
-The canonical way to run is the **`qg` dispatcher at the root**:
+The canonical way to run is the **bundled `qg` dispatcher** (at
+`tools/quality-gate/` in the repo):
 
 ```bash
 cd /path/to/your/project
-~/.claude-plugin/qg --base origin/main          # run the gate(s)
-~/.claude-plugin/qg --detect                    # list languages
+~/.claude-plugin/tools/quality-gate/qg --base origin/main   # run the gate(s)
+~/.claude-plugin/tools/quality-gate/qg --detect             # list languages
 ```
 
 100% shell detection (zero AI): `qg` calls `<lang>/qg.sh --detect` to
@@ -56,7 +57,7 @@ A project with `package.json` (even React/Vue/etc.) is covered by
 
 ## Enforcement hook
 
-The plugin also ships an **opt-in** `PreToolUse` hook (`hooks/pre-push-gate.sh`)
+The plugin also ships an **opt-in** `PreToolUse` hook (`hooks/quality-gate/pre-push-gate.sh`)
 that blocks `git push` and `gh pr create` unless the gate passes for the
 current HEAD, re-running `qg` against the branch upstream (falling back to
 `origin/HEAD`, then absolute mode). Exporting `QG_BYPASS_REASON` overrides it
@@ -68,14 +69,14 @@ non-git directory. See [`docs/hooks.md`](hooks.md).
 
 | Language | Script | Measured metrics | Prereqs |
 |---|---|---|---|
-| Rust | [`rust/qg.sh`](../rust/README.md) | fmt, lint, build, test, complexity, coverage | cargo, cargo-llvm-cov, jq |
-| Go | [`go/qg.sh`](../go/README.md) | fmt, lint, build, test, complexity, coverage | go, gofmt, gocyclo, golangci-lint (optional), jq |
-| Python | [`python/qg.sh`](../python/README.md) | fmt, lint, build, test, complexity, coverage | python3, ruff, pytest, pytest-cov, radon, jq |
-| Node.js | [`nodejs/qg.sh`](../nodejs/README.md) | fmt, lint, build, test, complexity, coverage | node 18+, npm, npx, jq (prettier/eslint/c8 via npx) |
-| Java | [`java/qg.sh`](../java/README.md) | fmt, lint, build, test, complexity, coverage | java 17+, mvn, google-java-format, pmd, jq (jacoco plugin in the project) |
-| Swift\* | [`swift/qg.sh`](../swift/README.md) | fmt, lint, build, test, coverage | swift 5.9+, swift-format, swiftlint, jq (xcrun on macOS) |
-| Kotlin | [`kotlin/qg.sh`](../kotlin/README.md) | fmt, lint, build, test, complexity, coverage | java 17+, gradle, ktlint, detekt, jq (kover plugin in the project) |
-| Web (HTML/CSS)\* | [`web/qg.sh`](../web/qg.sh) | fmt, lint | node 18+, jq (prettier/stylelint/htmlhint via npx) |
+| Rust | [`rust/qg.sh`](../tools/quality-gate/rust/README.md) | fmt, lint, build, test, complexity, coverage | cargo, cargo-llvm-cov, jq |
+| Go | [`go/qg.sh`](../tools/quality-gate/go/README.md) | fmt, lint, build, test, complexity, coverage | go, gofmt, gocyclo, golangci-lint (optional), jq |
+| Python | [`python/qg.sh`](../tools/quality-gate/python/README.md) | fmt, lint, build, test, complexity, coverage | python3, ruff, pytest, pytest-cov, radon, jq |
+| Node.js | [`nodejs/qg.sh`](../tools/quality-gate/nodejs/README.md) | fmt, lint, build, test, complexity, coverage | node 18+, npm, npx, jq (prettier/eslint/c8 via npx) |
+| Java | [`java/qg.sh`](../tools/quality-gate/java/README.md) | fmt, lint, build, test, complexity, coverage | java 17+, mvn, google-java-format, pmd, jq (jacoco plugin in the project) |
+| Swift\* | [`swift/qg.sh`](../tools/quality-gate/swift/README.md) | fmt, lint, build, test, coverage | swift 5.9+, swift-format, swiftlint, jq (xcrun on macOS) |
+| Kotlin | [`kotlin/qg.sh`](../tools/quality-gate/kotlin/README.md) | fmt, lint, build, test, complexity, coverage | java 17+, gradle, ktlint, detekt, jq (kover plugin in the project) |
+| Web (HTML/CSS)\* | [`web/qg.sh`](../tools/quality-gate/web/qg.sh) | fmt, lint | node 18+, jq (prettier/stylelint/htmlhint via npx) |
 
 \* `complexity` omitted in Swift -- see [`docs/languages/swift.md`](languages/swift.md) section "Omitted metrics". `build`, `test`, `complexity` and `coverage` omitted in Web (static HTML/CSS has no build/test/complexity/coverage) -- see [`docs/languages/web.md`](languages/web.md). A React/Vue/etc. project with `package.json` = **nodejs** project (`nodejs/qg.sh`), not web.
 
@@ -87,7 +88,7 @@ git clone git@github.com:xgodev/claude-plugin.git ~/.claude-plugin
 
 # Run in your project (the dispatcher detects the language on its own)
 cd /path/to/your/project
-~/.claude-plugin/qg --base origin/main
+~/.claude-plugin/tools/quality-gate/qg --base origin/main
 ```
 
 ## Documentation
@@ -107,4 +108,4 @@ cd /path/to/your/project
 
 ## Contributing
 
-See [`CONTRIBUTING.md`](../CONTRIBUTING.md). To add a new language with AI assistance, use the `add-quality-gate` skill in `skills/`.
+See [`CONTRIBUTING.md`](../CONTRIBUTING.md). To add a new language with AI assistance, use the maintainer-only `add-quality-gate` skill (project-local, in this repo's `.claude/skills/`).
