@@ -19,6 +19,11 @@ capability:
 - **`skill-rules`** -- skill-authoring discipline: every skill must be
   portable across all developers and machines. See
   [`docs/skill-rules.md`](docs/skill-rules.md).
+- **Dependency: [`ux-ui-mastery`](https://github.com/xgodev/ux-ui-mastery)**
+  -- UX/UI design mastery plugin by Design Tribe Republic (19 skills, 10
+  commands), served from the `xgodev` fork carrying a Claude Code
+  manifest fix, listed in the `xgodev` marketplace and auto-installed
+  with `claude-plugin`.
 - **Dependency: [`superpowers`](https://github.com/obra/superpowers)** --
   core skills library by Jesse Vincent (TDD, debugging, collaboration
   patterns), resolved from the official `claude-plugins-official`
@@ -40,9 +45,10 @@ not shipped with the plugin.)
 /plugin install claude-plugin@xgodev
 ```
 
-The `superpowers` dependency resolves from `claude-plugins-official`
-(preconfigured in Claude Code), so it auto-installs with
-`claude-plugin` -- no extra step, and an existing install satisfies it.
+Dependencies auto-install with `claude-plugin`, no extra step:
+`superpowers` resolves from `claude-plugins-official` (preconfigured in
+Claude Code; an existing install satisfies it) and `ux-ui-mastery` from
+the `xgodev` marketplace itself.
 
 ## Update
 
@@ -146,4 +152,4 @@ See [`docs/quality-gate.md`](docs/quality-gate.md) and
 
 MIT -- see [LICENSE](LICENSE).
 
-- Version: 1.1.3
+- Version: 1.1.4

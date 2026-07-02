@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.1.4]
+
+### Added
+
+- **Dependency on `ux-ui-mastery`** (Design Tribe Republic). Upstream
+  `phazurlabs/ux-ui-mastery` ships a `plugin.json` that Claude Code
+  rejects (`skills` entries point at `SKILL.md` files instead of skill
+  directories, and custom paths lack the `./` prefix), which blocked the
+  1.1.0 attempt. It is now served from the `xgodev/ux-ui-mastery` fork
+  carrying exactly that manifest fix, listed in the `xgodev` marketplace
+  with a GitHub source, and declared in `plugin.json` `dependencies` --
+  auto-installs with `claude-plugin`. Switch the source back to upstream
+  once the fix lands there.
+
 ## [1.1.3]
 
 ### Fixed
