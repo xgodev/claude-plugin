@@ -152,4 +152,4 @@ See [`docs/quality-gate.md`](docs/quality-gate.md) and
 
 MIT -- see [LICENSE](LICENSE).
 
-- Version: 1.1.6
+- Version: 1.1.7

@@ -28,10 +28,11 @@ repos. Read them before changing anything.
   plugin version, or auto-update will not pick it up.
 - **English only. Everywhere.** Docs, manifests, skills, code comments, and
   all runtime output. Public OSS -- no Portuguese anywhere.
-- **Zero proprietary / internal references.** No internal company/product
-  names, hosts, or repo URLs -- in code, docs, keywords, or examples.
-  Before push: `grep -ri -E 'carrefour|bitbucket' . | grep -v '\.git/'`
-  must be empty.
+- **Zero proprietary / internal references.** No employer/client company
+  or product names, internal hosts, or private repo URLs -- in code,
+  docs, keywords, or examples. Before push, sweep for the internal names
+  you know apply (the pattern itself must NOT be written in this public
+  repo -- naming the names here is itself a leak).
 - **ASCII identifiers/commands; `--` not em-dash** in anything new.
 - **Never guess Claude Code plugin specifics.** Verify against
   https://code.claude.com/docs (plugins / plugin-marketplaces /

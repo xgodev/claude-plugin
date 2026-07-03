@@ -67,7 +67,7 @@ per-language gates, and the pre-push hook that invokes the gate).
 1. Full bats suite (`tools/quality-gate/tests/*.bats`).
 2. `hooks/test/*.sh` all green.
 3. `python3 scripts/verify_references.py`.
-4. `grep -ri -E 'carrefour|bitbucket' . | grep -v '\.git/'` empty, plus a
+4. Proprietary/internal-name sweep empty, plus a
    Portuguese-language sweep on changed files.
 5. Stale-path sweep: no remaining reference to root-level `qg`, `<lang>/`
    or `tests/` paths outside `tools/quality-gate/`.

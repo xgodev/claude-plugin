@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.7]
+
+### Fixed
+
+- The pre-push sweep instruction in CLAUDE.md embedded the very names it
+  exists to keep out of a public repo; the rule is now stated
+  generically (the concrete pattern lives outside the repo).
+
 ## [1.1.6]
 
 ### Changed
