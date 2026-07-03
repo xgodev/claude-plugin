@@ -1,38 +1,32 @@
-# UX Catalog — skills de design web
+# ux-ui — a skill-porta de design
 
-Catálogo de design UI/UX absorvido do `ui-ux-pro-max`, organizado como um **core
-compartilhado** + **skills finas por framework**.
+Design UI/UX absorvido do `ui-ux-pro-max` + `ux-ui-mastery`, consolidado numa
+**única skill-porta** `ux-ui`, no mesmo molde da `boost` (SKILL.md = índice que
+roteia; conteúdo pesado nas leaves/engine).
 
-## Arquitetura
+## Estrutura (`skills/ux-ui/`)
 
-- **`web-core`** — a ferramenta: engine de busca BM25 (`scripts/search.py`) +
-  todos os dados (`data/`): paletas, estilos, tipografia, charts, ux-guidelines,
-  ui-reasoning, icons, products, landing, e `data/stacks/*.csv` por framework.
-  Os dados **não entram no contexto** — são consultados pelo script.
-- **skills por framework** (`web-react`, `web-vue`, …) — ponteiros finos que
-  roteiam para `web-core --stack <fw>` e remetem ao `web-core` para o catálogo
-  agnóstico. **Não carregam dados próprios** (DRY: dado só no core).
+- **`SKILL.md`** — a porta: uma tabela roteia por **catálogo** (flags do engine) e
+  outra por **metodologia** (`references/*.md`).
+- **`scripts/`** — engine de busca BM25 (`search.py` + `core.py` + `design_system.py`).
+- **`data/`** — catálogo: paletas, estilos, tipografia, charts, ux-guidelines,
+  ui-reasoning, icons, products, landing + `data/stacks/*.csv` (17 frameworks).
+  **Não entra no contexto** — consultado pelo script.
+- **`references/`** — 19 leaves de metodologia (nomes curtos: `heuristics`, `a11y`,
+  `design-systems`, `visual`, `components`, `motion`, `states`, `mobile`, `desktop`,
+  `cognitive`, `research`, `metrics`, `ethics`, `i18n`, `critique`, `figma`,
+  `agentic`, `spatial`, `ambient`), migradas do fork `ux-ui-mastery`.
 
-## Por que assim
+## Por que uma porta só
 
-O engine resolve os dados relativos a si (`DATA_DIR = scripts/../data`) e o
-`--stack` lê `data/stacks/<fw>.csv`. Separar os CSVs de stack em skills diferentes
-quebraria a busca. Então o dado fica todo no `web-core`; as skills de framework
-existem para **descoberta** (a SKILL.md certa aparece pro projeto certo) e
-**roteamento** (o `--stack` correto).
+Igual `boost`: um índice enxuto que o agente lê e então salta pra leaf/engine
+certo — em vez de dezenas de skills concorrendo na lista. O engine resolve os
+dados relativos a si (`DATA_DIR = scripts/../data`), então tudo mora junto.
 
-## Adicionar um novo framework
+## Origem e follow-up
 
-1. Confirmar que `web-core/data/stacks/<fw>.csv` existe (todos os 17 stacks já vieram).
-2. Criar `skills/web-<fw>/SKILL.md` fino: `description` = "Use when building/reviewing
-   UI in <fw>"; corpo remete ao `web-core` (`**REQUIRED BACKGROUND:** web-core`) e
-   dá os comandos `--stack <fw>`. Sem `data/` próprio.
-3. Autorar via `superpowers:writing-skills` (baseline de retrieval).
-
-## Estado
-
-- **Piloto entregue:** `web-core`, `web-react`, `web-vue`.
-- **Follow-on:** demais frameworks (`web-svelte`, `web-tailwind`, `mobile-flutter`,
-  `mobile-swiftui`, …); migração das 19 skills de metodologia do fork
-  `xgodev/ux-ui-mastery`; depois remover a dep `ux-ui-mastery` do `marketplace.json`
-  e arquivar o fork.
+- Catálogo + engine: `ui-ux-pro-max` (histórico do repo Laudo, commit `ea43b57`).
+- Metodologia (`references/`): fork `xgodev/ux-ui-mastery`.
+- Com isso a entrada `ux-ui-mastery` sai do `marketplace.json` e o fork é arquivado.
+- Refino futuro: revisar as leaves de metodologia (foram migradas as-is) e
+  descrições por leaf; ajustar `references/*` que citem paths do fork.
