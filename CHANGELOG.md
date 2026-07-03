@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.1.9]
+
+### Fixed
+
+- A `.dev-rules/.mode-feature` sentinel was accidentally committed,
+  which would disable the RED-first gate for every clone of this repo.
+  Removed from the index; `.dev-rules/` is now gitignored (sentinels are
+  per-machine runtime state, never repo content).
+
 ## [1.1.8]
 
 ### Fixed

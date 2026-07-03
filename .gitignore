@@ -33,3 +33,6 @@ __pycache__/
 *.war
 TEST*.xml
 */test-fixtures/*/package-lock.json
+
+# dev-rules runtime sentinels (never commit -- a committed sentinel disables the gate for everyone)
+.dev-rules/
