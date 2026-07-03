@@ -1,5 +1,16 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- **UX design catalog** absorbed from `ui-ux-pro-max` as skills under `skills/`:
+  `web-core` (BM25 search engine + framework-agnostic data: 161 palettes, 85
+  styles, font pairings, chart types, 99 UX guidelines, per-stack CSVs) plus thin
+  per-framework entry-point skills `web-react` and `web-vue` that route to
+  `web-core --stack <fw>`. Pilot; further frameworks and the `ux-ui-mastery`
+  methodology migration are follow-on. See `docs/ux-catalog.md`.
+
 ## [1.1.9]
 
 ### Fixed
