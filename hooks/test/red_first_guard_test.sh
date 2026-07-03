@@ -62,6 +62,17 @@ reset
 out="$(run Edit '{"tool_name":"Edit","tool_input":{"file_path":"README.md"}}')"
 if denied "$out"; then echo "FAIL: docs must be allowed"; fail=1; else echo "ok  : docs allowed"; fi
 
+# 7. Absolute paths (Claude Code always sends them for Edit/Write) must match
+# relative production_globs from .dev-rules.json -- deny, same as the relative form.
+reset
+printf '%s' '{"production_globs":["crates/**/src/**"]}' > "$SBX/.dev-rules.json"
+out="$(run Edit "{\"tool_name\":\"Edit\",\"tool_input\":{\"file_path\":\"$SBX/crates/engine/src/lib.rs\"}}")"
+if denied "$out"; then echo "ok  : absolute path matches relative production_globs"; else echo "FAIL: absolute path should match relative production_globs"; fail=1; fi
+# 7b. Same file inside an isolated workspace clone (.solvers/<name>/) is production too.
+out="$(run Edit "{\"tool_name\":\"Edit\",\"tool_input\":{\"file_path\":\"$SBX/.solvers/issue-9/crates/engine/src/lib.rs\"}}")"
+if denied "$out"; then echo "ok  : .solvers clone path matches production_globs"; else echo "FAIL: .solvers clone path should match production_globs"; fail=1; fi
+rm -f "$SBX/.dev-rules.json"
+
 # Malformed / empty stdin must not crash or block -- clean allow (exit 0, no deny).
 printf '%s' 'not-json' | bash "$GUARD" >/dev/null 2>&1; rc=$?
 if [ "$rc" = 0 ]; then echo "ok  : malformed stdin exits 0 (allow)"; else echo "FAIL: malformed stdin exit $rc"; fail=1; fi

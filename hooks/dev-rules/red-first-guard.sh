@@ -62,9 +62,13 @@ case "$tool" in
 esac
 [ -n "$target" ] || exit 0
 
-# Production implicated (and not a test file)?
+# Production implicated (and not a test file)? Claude Code sends ABSOLUTE
+# paths for Edit/Write, while production_globs are project-relative: strip the
+# project prefix (and an isolated-workspace .solvers/<name>/ prefix) first.
 prod_touched=""
 for tok in $target; do
+  tok="${tok#"$proj"/}"
+  case "$tok" in .solvers/*/*) tok="${tok#.solvers/*/}" ;; esac
   if dr_is_production "$tok"; then prod_touched="yes"; break; fi
 done
 [ -n "$prod_touched" ] || exit 0

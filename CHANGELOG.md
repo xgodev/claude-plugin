@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.1.8]
+
+### Fixed
+
+- `red-first-guard.sh` never matched project-relative `production_globs`
+  against the absolute paths Claude Code sends for Edit/Write, so a
+  `.dev-rules.json` with explicit globs silently disabled the gate. The
+  guard now strips the project prefix (and an isolated-workspace
+  `.solvers/<name>/` prefix) before classifying the path.
+
 ## [1.1.7]
 
 ### Fixed
