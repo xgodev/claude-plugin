@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.2.0]
+
+### Added
+
+- **`ux-ui` design skill** — a single door skill (same shape as `boost`): an index
+  SKILL.md that routes by **catalog** (a BM25 search engine over palettes, styles,
+  typography, charts, UX guidelines, icons + per-framework `--stack` patterns for
+  17 stacks; from `ui-ux-pro-max`) and by **methodology** (19 short-named
+  `references/*.md` leaves — heuristics, a11y, design-systems, visual, components,
+  motion, states, mobile, desktop, cognitive, research, metrics, ethics, i18n,
+  critique, figma, agentic, spatial, ambient — migrated from the `ux-ui-mastery`
+  fork). Catalog data is queried by the engine, never loaded into context. See
+  `docs/ux-catalog.md`.
+
+### Changed
+
+- **Absorbed the `ux-ui-mastery` dependency into the bundle.** Removed the
+  `ux-ui-mastery` plugin entry from `.claude-plugin/marketplace.json` and the
+  dependency from `.claude-plugin/plugin.json`; the design content now ships in the
+  `ux-ui` skill. The `xgodev/ux-ui-mastery` fork repo is retired/archived.
+
 ## [1.1.9]
 
 ### Fixed

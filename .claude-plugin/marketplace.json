@@ -18,19 +18,9 @@
     {
       "name": "claude-plugin",
       "source": "./",
-      "description": "All-in-one xgodev plugin: the boost skill set (github.com/xgodev/boost), the Quality Gate (dispatcher + per-language gates + the quality-gate skill + opt-in pre-push hook), the dev-rules engineering-discipline skill with RED-first enforcement hooks, and the skill-rules skill-authoring discipline.",
+      "description": "All-in-one xgodev plugin: the boost skill set (github.com/xgodev/boost), the Quality Gate (dispatcher + per-language gates + the quality-gate skill + opt-in pre-push hook), the dev-rules engineering-discipline skill with RED-first enforcement hooks, the skill-rules skill-authoring discipline, and the ux-ui design skill (searchable catalog + per-framework routing + UX methodology references).",
       "category": "bundle",
-      "tags": ["go", "golang", "boost", "quality-gate", "tdd", "discipline", "skills", "hooks"]
-    },
-    {
-      "name": "ux-ui-mastery",
-      "source": {
-        "source": "github",
-        "repo": "xgodev/ux-ui-mastery"
-      },
-      "description": "UX/UI design mastery plugin by Design Tribe Republic (fork of phazurlabs/ux-ui-mastery with a manifest fix so Claude Code can install it). Auto-installs as a dependency of claude-plugin.",
-      "category": "design",
-      "tags": ["ux", "ui", "design"]
+      "tags": ["go", "golang", "boost", "quality-gate", "tdd", "discipline", "skills", "hooks", "ux", "ui", "design"]
     }
   ]
 }
