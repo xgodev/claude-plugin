@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.3.0]
+
+### Added
+
+- **Two new dev-rules hooks** (issue #2), registered in
+  `hooks/hooks.json` next to the RED-first guard, each with its own test
+  in `hooks/test/`:
+  - `main-folder-guard.sh` (opt-in via `"main_folder_guard": true` in
+    `.dev-rules.json`): denies `Edit`/`Write` targeting the main working
+    tree and bare mutating VCS commands there -- work happens in
+    `.solvers/<task>/` clones. Keyed off the operation's TARGET, so a
+    session rooted in the main folder can still drive the clone; reads,
+    `git status/log/diff/fetch`, `worktree add`, and `.dev-rules/` /
+    `.claude/` writes always pass.
+  - `line-cap-guard.sh` (on by default): denies edits that GROW a source
+    file already over its line cap, forcing a split first. Shrinking
+    edits, new files, tests, and docs/config always pass. Configurable
+    per repo: `line_caps` (per extension), `line_cap_default` (500),
+    `line_cap_guard: false` to disable.
+  Consumer projects carrying local copies of these hooks can delete them
+  and rely on the plugin registration.
+
 ## [1.2.0]
 
 ### Added

@@ -128,6 +128,7 @@ skills/                boost/  quality-gate/  dev-rules/  skill-rules/ (shipped)
 .claude/skills/        add-quality-gate/ (maintainer-only, project-local)
 hooks/                 hooks.json (merged registry) + test/; scripts grouped by area:
                        quality-gate/pre-push-gate.sh, dev-rules/{red-first-guard.sh,
+                       main-folder-guard.sh, line-cap-guard.sh,
                        clear-after-commit.sh, lib/}
 tools/quality-gate/
                        qg (dispatcher; also a plain CLI), per-language gates
@@ -152,4 +153,4 @@ See [`docs/quality-gate.md`](docs/quality-gate.md) and
 
 MIT -- see [LICENSE](LICENSE).
 
-- Version: 1.1.9
+- Version: 1.3.0

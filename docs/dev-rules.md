@@ -57,10 +57,36 @@ both sentinels, so the next cycle re-brainstorms and re-REDs.
 {
   "enabled": true,
   "production_globs": ["src/**", "internal/**", "crates/**/src/**"],
-  "test_globs": ["**/*_test.*", "**/tests/**", "**/*.spec.*"]
+  "test_globs": ["**/*_test.*", "**/tests/**", "**/*.spec.*"],
+  "main_folder_guard": false,
+  "line_cap_guard": true,
+  "line_cap_default": 500,
+  "line_caps": { ".go": 600, ".ts": 400 }
 }
 ```
 
 `"enabled": false` disables all gating for the project. Omit the file to use
 built-in detection (production segments: `src lib app cmd internal pkg crates
 domain`, minus test/docs/config).
+
+### main-folder guard (opt-in)
+
+With `"main_folder_guard": true`, the plugin enforces the isolated-workspace
+flow: `Edit`/`Write` targeting files in the MAIN working tree is denied, and
+so are bare mutating VCS commands (`git commit/push/merge/rebase/reset/
+checkout/...`) whose working tree is the main folder -- work happens inside
+`.solvers/<task-name>/` clones (`git -C .solvers/<name> ...` and any command
+referencing `.solvers/` pass). Keyed off what the operation TARGETS, so a
+session rooted in the main folder can still set up and drive the clone.
+Reads/greps, `git status/log/diff/fetch`, `git worktree add`/`clone`, and
+writes to `.dev-rules/`, `.claude/`, or outside the project are never
+blocked. Default: OFF (projects not using the `.solvers/` convention are
+unaffected).
+
+### line-cap guard (on by default)
+
+Denies `Edit`/`Write` that would GROW a source file already over its line
+cap, forcing a split BEFORE the file gets bigger. Shrinking edits and split
+rewrites always pass, as do new files, test files, and docs/config. Caps:
+per-extension via `"line_caps"`, global default via `"line_cap_default"`
+(built-in default: 500). Disable with `"line_cap_guard": false`.

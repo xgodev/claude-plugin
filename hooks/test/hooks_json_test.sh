@@ -7,7 +7,11 @@ chk() { if eval "$1"; then echo "ok  : $2"; else echo "FAIL: $2"; fail=1; fi; }
 
 chk '[ -f "$J" ]' "hooks.json exists"
 chk 'jq -e . "$J" >/dev/null 2>&1' "hooks.json is valid JSON"
-chk 'jq -e ".hooks.PreToolUse[] | select(.matcher | test(\"Edit\")) | .hooks[].command | test(\"red-first-guard.sh\")" "$J" >/dev/null 2>&1' "PreToolUse wires red-first-guard.sh"
-chk 'jq -e ".hooks.PostToolUse[] | .hooks[].command | test(\"clear-after-commit.sh\")" "$J" >/dev/null 2>&1' "PostToolUse wires clear-after-commit.sh"
+pre_wires() { jq -e "[.hooks.PreToolUse[].hooks[].command] | any(test(\"$1\"))" "$J" >/dev/null 2>&1; }
+chk 'pre_wires "red-first-guard.sh"' "PreToolUse wires red-first-guard.sh"
+chk 'jq -e "[.hooks.PostToolUse[].hooks[].command] | any(test(\"clear-after-commit.sh\"))" "$J" >/dev/null 2>&1' "PostToolUse wires clear-after-commit.sh"
+chk 'pre_wires "main-folder-guard.sh"' "PreToolUse wires main-folder-guard.sh"
+chk 'pre_wires "line-cap-guard.sh"' "PreToolUse wires line-cap-guard.sh"
+chk 'pre_wires "pre-push-gate.sh"' "PreToolUse wires pre-push-gate.sh"
 chk 'grep -q "CLAUDE_PLUGIN_ROOT" "$J"' "uses CLAUDE_PLUGIN_ROOT path var"
 exit $fail
