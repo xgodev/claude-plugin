@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.4.4]
+
+### Changed
+
+- **main-folder guard prescribes the clone naming rule** in its deny
+  messages: the agent creates the worktree itself
+  (`git worktree add .solvers/<name> -b <name>`), named `issue-<n>` when
+  the work has a related issue, or a session/task slug
+  (`sess-<yyyymmdd>-<short-task>`) when there is none -- every session
+  gets its own isolated folder. Contract covered by tests.
+
 ## [1.4.3]
 
 ### Fixed

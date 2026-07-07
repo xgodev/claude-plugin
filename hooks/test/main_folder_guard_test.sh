@@ -25,6 +25,13 @@ if grep -qi 'not recommended' <<<"$out" && grep -qi 'ask the user' <<<"$out" && 
 else
   echo "FAIL: edit deny must say not-recommended, ask the user, and mention main_folder_guard disable"; fail=1
 fi
+# The deny must also prescribe the clone NAMING rule: issue-<n> when there is
+# a related issue, a session/task-derived name when there is none.
+if grep -q 'issue-<n>' <<<"$out" && grep -qi 'no related issue' <<<"$out"; then
+  echo "ok  : edit deny prescribes clone naming (issue vs session)"
+else
+  echo "FAIL: edit deny must prescribe issue-<n> naming and the no-issue session fallback"; fail=1
+fi
 out="$(run Write "{\"tool_name\":\"Write\",\"tool_input\":{\"file_path\":\"$SBX/README.md\"}}")"
 if denied "$out"; then echo "ok  : main-tree write denied (docs too)"; else echo "FAIL: main-tree write should be denied"; fail=1; fi
 

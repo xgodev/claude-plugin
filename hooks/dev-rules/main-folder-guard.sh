@@ -44,7 +44,7 @@ case "$tool" in
     case "$rel" in
       .solvers/*|.dev-rules/*|.claude/*) exit 0 ;;
     esac
-    deny "An agent changing the MAIN working tree is not recommended (dev-rules main-folder guard). Do NOT decide alone -- ASK THE USER how to proceed: (a) RECOMMENDED: work in an isolated clone .solvers/<task-name>/ (e.g. git worktree add .solvers/<task-name> -b <branch>) and edit there; (b) the dev may disable this guard (\"main_folder_guard\": false in .dev-rules.json) or all dev-rules gates (touch .dev-rules/.off, or DEV_RULES_OFF=1)."
+    deny "An agent changing the MAIN working tree is not recommended (dev-rules main-folder guard). Do NOT decide alone -- ASK THE USER how to proceed: (a) RECOMMENDED: create the isolated clone yourself and edit there -- git worktree add .solvers/<name> -b <name>; name it issue-<n> when the work has a related issue, or a session/task slug when there is no related issue (e.g. sess-<yyyymmdd>-<short-task>); (b) the dev may disable this guard (\"main_folder_guard\": false in .dev-rules.json) or all dev-rules gates (touch .dev-rules/.off, or DEV_RULES_OFF=1)."
     ;;
   Bash)
     cmd="$(printf '%s' "$input" | jq -r '.tool_input.command // empty')"
@@ -57,7 +57,7 @@ case "$tool" in
     for sub in commit push merge rebase "reset" "checkout" switch restore cherry-pick revert apply stash am; do
       case "$c" in
         *" git $sub "*|*" git $sub"|*" git -"*" $sub "*)
-          deny "An agent mutating VCS in the MAIN working tree is not recommended (dev-rules main-folder guard). Do NOT decide alone -- ASK THE USER how to proceed: (a) RECOMMENDED: run git $sub inside a .solvers/<task-name>/ clone (git -C .solvers/<task-name> $sub ...); (b) the dev may disable this guard (\"main_folder_guard\": false in .dev-rules.json) or all dev-rules gates (touch .dev-rules/.off, or DEV_RULES_OFF=1)." ;;
+          deny "An agent mutating VCS in the MAIN working tree is not recommended (dev-rules main-folder guard). Do NOT decide alone -- ASK THE USER how to proceed: (a) RECOMMENDED: run git $sub inside a .solvers/<name>/ clone (git -C .solvers/<name> $sub ...); create it first if needed (git worktree add .solvers/<name> -b <name>; name it issue-<n> with a related issue, or a session/task slug like sess-<yyyymmdd>-<short-task> when there is no related issue); (b) the dev may disable this guard (\"main_folder_guard\": false in .dev-rules.json) or all dev-rules gates (touch .dev-rules/.off, or DEV_RULES_OFF=1)." ;;
       esac
     done
     exit 0

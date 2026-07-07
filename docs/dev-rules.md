@@ -99,6 +99,12 @@ writes to `.dev-rules/`, `.claude/`, or outside the project are never
 blocked. Default: OFF (projects not using the `.solvers/` convention are
 unaffected).
 
+The guard never creates the clone itself -- it instructs the AGENT to
+create it (`git worktree add .solvers/<name> -b <name>`) after asking the
+user. **Clone naming:** `issue-<n>` when the work has a related issue;
+when there is none, a session/task slug (e.g. `sess-<yyyymmdd>-<short-task>`),
+so every session still gets its own isolated folder.
+
 ### line-cap guard (on by default)
 
 Denies `Edit`/`Write` that would GROW a source file already over its line
