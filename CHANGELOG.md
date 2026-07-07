@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.4.3]
+
+### Fixed
+
+- English-only compliance for the 1.2.0 additions: the shipped
+  `ux-ui` SKILL.md body and `docs/ux-catalog.md` were in Portuguese;
+  both are now English (same routing tables, flags, and paths). The
+  catalog doc also dropped an internal-repo provenance mention, and
+  CLAUDE.md no longer instructs maintaining the retired
+  `ux-ui-mastery` fork.
+
 ## [1.4.2]
 
 ### Fixed

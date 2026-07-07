@@ -1,32 +1,33 @@
-# ux-ui — a skill-porta de design
+# ux-ui -- the design door skill
 
-Design UI/UX absorvido do `ui-ux-pro-max` + `ux-ui-mastery`, consolidado numa
-**única skill-porta** `ux-ui`, no mesmo molde da `boost` (SKILL.md = índice que
-roteia; conteúdo pesado nas leaves/engine).
+UI/UX design capability consolidated into a **single door skill**, `ux-ui`,
+in the same shape as `boost`: the SKILL.md is a small index that routes;
+the heavy content lives in leaves and a search engine.
 
-## Estrutura (`skills/ux-ui/`)
+## Structure (`skills/ux-ui/`)
 
-- **`SKILL.md`** — a porta: uma tabela roteia por **catálogo** (flags do engine) e
-  outra por **metodologia** (`references/*.md`).
-- **`scripts/`** — engine de busca BM25 (`search.py` + `core.py` + `design_system.py`).
-- **`data/`** — catálogo: paletas, estilos, tipografia, charts, ux-guidelines,
-  ui-reasoning, icons, products, landing + `data/stacks/*.csv` (17 frameworks).
-  **Não entra no contexto** — consultado pelo script.
-- **`references/`** — 19 leaves de metodologia (nomes curtos: `heuristics`, `a11y`,
-  `design-systems`, `visual`, `components`, `motion`, `states`, `mobile`, `desktop`,
-  `cognitive`, `research`, `metrics`, `ethics`, `i18n`, `critique`, `figma`,
-  `agentic`, `spatial`, `ambient`), migradas do fork `ux-ui-mastery`.
+- **`SKILL.md`** -- the door: one table routes by **catalog** (engine
+  flags), another by **methodology** (`references/*.md`).
+- **`scripts/`** -- BM25 search engine (`search.py` + `core.py` +
+  `design_system.py`).
+- **`data/`** -- the catalog: palettes, styles, typography, charts,
+  UX guidelines, UI reasoning, icons, products, landing patterns +
+  `data/stacks/*.csv` (17 frameworks). **Never loaded into context** --
+  queried through the script.
+- **`references/`** -- 19 methodology leaves (short names: `heuristics`,
+  `a11y`, `design-systems`, `visual`, `components`, `motion`, `states`,
+  `mobile`, `desktop`, `cognitive`, `research`, `metrics`, `ethics`,
+  `i18n`, `critique`, `figma`, `agentic`, `spatial`, `ambient`).
 
-## Por que uma porta só
+## Why a single door
 
-Igual `boost`: um índice enxuto que o agente lê e então salta pra leaf/engine
-certo — em vez de dezenas de skills concorrendo na lista. O engine resolve os
-dados relativos a si (`DATA_DIR = scripts/../data`), então tudo mora junto.
+Same reasoning as `boost`: one lean index the agent reads, then jumps to
+the right leaf or engine call -- instead of dozens of skills competing in
+the skills list. The engine resolves its data relative to itself
+(`DATA_DIR = scripts/../data`), so everything lives together.
 
-## Origem e follow-up
+## Follow-up
 
-- Catálogo + engine: `ui-ux-pro-max` (histórico do repo Laudo, commit `ea43b57`).
-- Metodologia (`references/`): fork `xgodev/ux-ui-mastery`.
-- Com isso a entrada `ux-ui-mastery` sai do `marketplace.json` e o fork é arquivado.
-- Refino futuro: revisar as leaves de metodologia (foram migradas as-is) e
-  descrições por leaf; ajustar `references/*` que citem paths do fork.
+- Review the methodology leaves (migrated as-is) and their per-leaf
+  descriptions; fix any `references/*` that cite paths from their
+  pre-consolidation layout.

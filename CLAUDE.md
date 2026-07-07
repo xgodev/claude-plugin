@@ -57,12 +57,9 @@ repos. Read them before changing anything.
   marketplace with a GitHub source when it is NOT in the official
   marketplace. ALWAYS smoke-test an install from a temp project before
   pushing a dependency change: a dependency with an invalid upstream
-  manifest fails the WHOLE claude-plugin install. `ux-ui-mastery` is
-  served from the `xgodev/ux-ui-mastery` FORK (upstream
-  `phazurlabs/ux-ui-mastery` plugin.json is invalid: skills must point
-  at directories, custom paths need `./`); keep the fork rebased on
-  upstream, and point the marketplace entry back at upstream once they
-  fix the manifest.
+  manifest fails the WHOLE claude-plugin install. Today the only
+  external dependency is `superpowers` (official marketplace); design
+  content ships in the bundled `ux-ui` skill.
 - **Hooks live in `hooks/hooks.json` ONLY (auto-discovered).** Never also
   declare `"hooks"` in `plugin.json` -- the manifest key is only for
   ADDITIONAL non-standard files, and double registration breaks the whole
