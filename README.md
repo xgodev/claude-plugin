@@ -19,11 +19,11 @@ capability:
 - **`skill-rules`** -- skill-authoring discipline: every skill must be
   portable across all developers and machines. See
   [`docs/skill-rules.md`](docs/skill-rules.md).
-- **Dependency: [`ux-ui-mastery`](https://github.com/xgodev/ux-ui-mastery)**
-  -- UX/UI design mastery plugin by Design Tribe Republic (19 skills, 10
-  commands), served from the `xgodev` fork carrying a Claude Code
-  manifest fix, listed in the `xgodev` marketplace and auto-installed
-  with `claude-plugin`.
+- **`ux-ui`** -- design door skill: a searchable catalog (palettes,
+  styles, typography, charts, UX guidelines, per-framework patterns)
+  plus UX methodology references. Catalog data is queried by a bundled
+  engine, never loaded into context. See
+  [`docs/ux-catalog.md`](docs/ux-catalog.md).
 - **Dependency: [`superpowers`](https://github.com/obra/superpowers)** --
   core skills library by Jesse Vincent (TDD, debugging, collaboration
   patterns), resolved from the official `claude-plugins-official`
@@ -33,8 +33,8 @@ capability:
 
 Skills are namespaced by the plugin name: `claude-plugin:boost`,
 `claude-plugin:quality-gate`, `claude-plugin:dev-rules`,
-`claude-plugin:skill-rules`. They trigger on natural phrases (e.g. "run
-quality gate" / "run QG") without the prefix. (The `add-quality-gate`
+`claude-plugin:skill-rules`, `claude-plugin:ux-ui`. They trigger on
+natural phrases (e.g. "run quality gate" / "run QG") without the prefix. (The `add-quality-gate`
 skill is maintainer-only and lives project-local in this repo -- it is
 not shipped with the plugin.)
 
@@ -45,10 +45,9 @@ not shipped with the plugin.)
 /plugin install claude-plugin@xgodev
 ```
 
-Dependencies auto-install with `claude-plugin`, no extra step:
-`superpowers` resolves from `claude-plugins-official` (preconfigured in
-Claude Code; an existing install satisfies it) and `ux-ui-mastery` from
-the `xgodev` marketplace itself.
+The `superpowers` dependency auto-installs with `claude-plugin`, no
+extra step: it resolves from `claude-plugins-official` (preconfigured in
+Claude Code; an existing install satisfies it).
 
 ## Update
 
@@ -104,12 +103,14 @@ tokens of the first request; 2 runs each, +/-11 tokens run-to-run noise):
 | With `claude-plugin` installed | ~26,970 tokens |
 | **Plugin overhead, per session** | **~370 tokens (+1.4%)** |
 
-That ~370 tokens is the WHOLE always-on cost: the name + description lines
-of the 4 bundled skills plus plugin registration metadata. Everything else
-is pay-per-use:
+That always-on cost is ONLY the name + description lines of the bundled
+skills plus plugin registration metadata (the `ux-ui` skill added in
+1.2.0 contributes its ~110-token description on top of the measured
+~370). Everything else is pay-per-use:
 
 | Component | Always-on | Loaded when |
 |---|---|---|
+| `ux-ui` description | ~110 tokens | every session |
 | `boost` description | ~55 tokens | every session |
 | `quality-gate` description | ~55 tokens | every session |
 | `skill-rules` description | ~40 tokens | every session |
@@ -124,7 +125,7 @@ is pay-per-use:
 
 ```
 .claude-plugin/        plugin.json (the single plugin) + marketplace.json (xgodev)
-skills/                boost/  quality-gate/  dev-rules/  skill-rules/ (shipped)
+skills/                boost/  quality-gate/  dev-rules/  skill-rules/  ux-ui/ (shipped)
 .claude/skills/        add-quality-gate/ (maintainer-only, project-local)
 hooks/                 hooks.json (merged registry) + test/; scripts grouped by area:
                        quality-gate/pre-push-gate.sh, dev-rules/{red-first-guard.sh,
@@ -153,4 +154,4 @@ See [`docs/quality-gate.md`](docs/quality-gate.md) and
 
 MIT -- see [LICENSE](LICENSE).
 
-- Version: 1.4.1
+- Version: 1.4.2

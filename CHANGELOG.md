@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.4.2]
+
+### Fixed
+
+- README caught up with 1.2.0 reality: the retired `ux-ui-mastery`
+  dependency no longer appears (the content ships in the `ux-ui` skill,
+  now listed with its namespace, layout entry, and context-overhead
+  row); the only dependency is `superpowers`.
+
 ## [1.4.1]
 
 ### Changed
