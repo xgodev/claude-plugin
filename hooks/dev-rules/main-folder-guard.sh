@@ -44,7 +44,7 @@ case "$tool" in
     case "$rel" in
       .solvers/*|.dev-rules/*|.claude/*) exit 0 ;;
     esac
-    deny "Main working tree is read-only (dev-rules main-folder guard). Work in an isolated clone: create/use .solvers/<task-name>/ (e.g. git worktree add .solvers/<task-name> -b <branch>) and edit the file there. Disable per-repo with \"main_folder_guard\": false in .dev-rules.json."
+    deny "An agent changing the MAIN working tree is not recommended (dev-rules main-folder guard). Do NOT decide alone -- ASK THE USER how to proceed: (a) RECOMMENDED: work in an isolated clone .solvers/<task-name>/ (e.g. git worktree add .solvers/<task-name> -b <branch>) and edit there; (b) the dev may disable this guard (\"main_folder_guard\": false in .dev-rules.json) or all dev-rules gates (touch .dev-rules/.off, or DEV_RULES_OFF=1)."
     ;;
   Bash)
     cmd="$(printf '%s' "$input" | jq -r '.tool_input.command // empty')"
@@ -57,7 +57,7 @@ case "$tool" in
     for sub in commit push merge rebase "reset" "checkout" switch restore cherry-pick revert apply stash am; do
       case "$c" in
         *" git $sub "*|*" git $sub"|*" git -"*" $sub "*)
-          deny "Mutating VCS in the main working tree is blocked (dev-rules main-folder guard): git $sub must run inside a .solvers/<task-name>/ clone (git -C .solvers/<task-name> $sub ...). Disable per-repo with \"main_folder_guard\": false in .dev-rules.json." ;;
+          deny "An agent mutating VCS in the MAIN working tree is not recommended (dev-rules main-folder guard). Do NOT decide alone -- ASK THE USER how to proceed: (a) RECOMMENDED: run git $sub inside a .solvers/<task-name>/ clone (git -C .solvers/<task-name> $sub ...); (b) the dev may disable this guard (\"main_folder_guard\": false in .dev-rules.json) or all dev-rules gates (touch .dev-rules/.off, or DEV_RULES_OFF=1)." ;;
       esac
     done
     exit 0

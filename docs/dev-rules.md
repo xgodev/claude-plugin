@@ -86,7 +86,8 @@ the line-cap guard together.
 
 ### main-folder guard (opt-in)
 
-With `"main_folder_guard": true`, the plugin enforces the isolated-workspace
+With `"main_folder_guard": true`, the plugin treats agent changes to the
+main working tree as NOT RECOMMENDED and enforces the isolated-workspace
 flow: `Edit`/`Write` targeting files in the MAIN working tree is denied, and
 so are bare mutating VCS commands (`git commit/push/merge/rebase/reset/
 checkout/...`) whose working tree is the main folder -- work happens inside

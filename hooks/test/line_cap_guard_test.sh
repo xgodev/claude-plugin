@@ -23,10 +23,16 @@ mkfile "$SBX/src/small.go" 50
 out="$(run Edit "{\"tool_name\":\"Edit\",\"tool_input\":{\"file_path\":\"$SBX/src/small.go\",\"old_string\":\"line 1\",\"new_string\":\"line 1\\nplus\"}}")"
 if denied "$out"; then echo "FAIL: under-cap growth must be allowed"; fail=1; else echo "ok  : under-cap growth allowed"; fi
 
-# 3. File OVER cap: growing edit DENIED.
+# 3. File OVER cap: growing edit DENIED, and the deny message must tell the
+# agent to ASK THE USER (split now vs raising the cap vs disabling).
 mkfile "$SBX/src/big.go" 150
 out="$(run Edit "{\"tool_name\":\"Edit\",\"tool_input\":{\"file_path\":\"$SBX/src/big.go\",\"old_string\":\"line 1\",\"new_string\":\"line 1\\nplus\"}}")"
 if denied "$out"; then echo "ok  : over-cap growth denied"; else echo "FAIL: over-cap growth should be denied"; fail=1; fi
+if grep -qi 'ask the user' <<<"$out" && grep -q 'line_cap_guard' <<<"$out"; then
+  echo "ok  : deny questions the user and offers the disable path"
+else
+  echo "FAIL: deny must instruct to ask the user and mention line_cap_guard disable"; fail=1
+fi
 
 # 4. File over cap: SHRINKING edit allowed (that is the split happening).
 out="$(run Edit "{\"tool_name\":\"Edit\",\"tool_input\":{\"file_path\":\"$SBX/src/big.go\",\"old_string\":\"line 1\\nline 2\\nline 3\",\"new_string\":\"line 1\"}}")"

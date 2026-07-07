@@ -15,9 +15,16 @@ if denied "$out"; then echo "FAIL: guard must be opt-in (no config => allow)"; f
 
 printf '%s' '{"main_folder_guard": true}' > "$SBX/.dev-rules.json"
 
-# 2. Enabled: Edit/Write in the main working tree is DENIED.
+# 2. Enabled: Edit/Write in the main working tree is DENIED, and the deny
+# message must state it is NOT RECOMMENDED for an agent and tell the agent
+# to ASK THE USER (clone flow vs disabling the guard).
 out="$(run Edit "{\"tool_name\":\"Edit\",\"tool_input\":{\"file_path\":\"$SBX/src/x.go\"}}")"
 if denied "$out"; then echo "ok  : main-tree edit denied"; else echo "FAIL: main-tree edit should be denied"; fail=1; fi
+if grep -qi 'not recommended' <<<"$out" && grep -qi 'ask the user' <<<"$out" && grep -q 'main_folder_guard' <<<"$out"; then
+  echo "ok  : edit deny says not-recommended, questions the user, offers disable"
+else
+  echo "FAIL: edit deny must say not-recommended, ask the user, and mention main_folder_guard disable"; fail=1
+fi
 out="$(run Write "{\"tool_name\":\"Write\",\"tool_input\":{\"file_path\":\"$SBX/README.md\"}}")"
 if denied "$out"; then echo "ok  : main-tree write denied (docs too)"; else echo "FAIL: main-tree write should be denied"; fail=1; fi
 
@@ -40,6 +47,11 @@ if denied "$out"; then echo "FAIL: reads must be allowed"; fail=1; else echo "ok
 # 6. Bare mutating VCS command in the main folder is DENIED...
 out="$(run Bash '{"tool_name":"Bash","tool_input":{"command":"git commit -m x"}}')"
 if denied "$out"; then echo "ok  : bare git commit denied"; else echo "FAIL: bare git commit should be denied"; fail=1; fi
+if grep -qi 'not recommended' <<<"$out" && grep -qi 'ask the user' <<<"$out"; then
+  echo "ok  : vcs deny says not-recommended and questions the user"
+else
+  echo "FAIL: vcs deny must say not-recommended and ask the user"; fail=1
+fi
 out="$(run Bash '{"tool_name":"Bash","tool_input":{"command":"git add -A && git push"}}')"
 if denied "$out"; then echo "ok  : bare git push denied"; else echo "FAIL: bare git push should be denied"; fail=1; fi
 # ...but the same command targeting a .solvers clone is ALLOWED.

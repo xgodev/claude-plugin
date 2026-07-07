@@ -56,6 +56,6 @@ else
   [ "${new_lines:-0}" -gt "$lines" ] || exit 0
 fi
 
-jq -nc --arg r "File over its line cap (dev-rules line-cap guard): $rel has $lines lines, cap for $ext is $cap. Split it into focused modules BEFORE adding more lines -- shrinking edits and split rewrites pass. Tune per-repo in .dev-rules.json (line_caps / line_cap_default / line_cap_guard:false)." \
+jq -nc --arg r "File over its line cap (dev-rules line-cap guard): $rel has $lines lines, cap for $ext is $cap. Do NOT decide alone -- ASK THE USER how to proceed: (a) RECOMMENDED: split the file into focused modules BEFORE adding more lines (shrinking edits and split rewrites pass); (b) the dev may raise the cap or disable (.dev-rules.json: line_caps / line_cap_default / line_cap_guard:false, or touch .dev-rules/.off)." \
   '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:"deny",permissionDecisionReason:$r}}'
 exit 0

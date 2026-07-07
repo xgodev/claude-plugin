@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.4.1]
+
+### Changed
+
+- **main-folder and line-cap deny messages now question the dev** (same
+  contract as the RED-first guard in 1.4.0): they state that an agent
+  changing the main working tree is NOT RECOMMENDED, and instruct the
+  agent to ASK THE USER -- recommended flow (.solvers/ clone / split the
+  file) or dev-authorized disable (guard-specific config key, or the
+  .dev-rules/.off / DEV_RULES_OFF=1 kill switches). Message contracts
+  covered by tests.
+
 ## [1.4.0]
 
 ### Added
