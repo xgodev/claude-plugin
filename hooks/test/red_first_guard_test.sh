@@ -14,14 +14,26 @@ run() { # tool, json-input
 
 reset() { rm -rf "$SBX/.dev-rules"; }
 
-# 1. No sentinel => bug discipline: reading production is DENIED.
+# 1. No sentinel => bug discipline: reading production is DENIED, and the
+# deny message must tell the agent to ASK THE USER which flow applies and
+# that the dev may disable the gate (.dev-rules/.off).
 reset
 out="$(run Read '{"tool_name":"Read","tool_input":{"file_path":"internal/x.go"}}')"
 if denied "$out"; then echo "ok  : read prod blocked (bug default)"; else echo "FAIL: read prod should be blocked"; fail=1; fi
+if grep -qi 'ask the user' <<<"$out" && grep -q '.dev-rules/.off' <<<"$out"; then
+  echo "ok  : read deny questions the user and offers the disable path"
+else
+  echo "FAIL: read deny must instruct to ask the user and mention .dev-rules/.off"; fail=1
+fi
 
 # 1b. No sentinel => EDIT and WRITE of production are DENIED too (bug discipline).
 out="$(run Edit '{"tool_name":"Edit","tool_input":{"file_path":"internal/x.go"}}')"
 if denied "$out"; then echo "ok  : edit prod blocked (bug default)"; else echo "FAIL: edit prod should be blocked (no sentinel)"; fail=1; fi
+if grep -qi 'ask the user' <<<"$out" && grep -q '.dev-rules/.off' <<<"$out"; then
+  echo "ok  : edit deny questions the user and offers the disable path"
+else
+  echo "FAIL: edit deny must instruct to ask the user and mention .dev-rules/.off"; fail=1
+fi
 out="$(run Write '{"tool_name":"Write","tool_input":{"file_path":"internal/x.go"}}')"
 if denied "$out"; then echo "ok  : write prod blocked (bug default)"; else echo "FAIL: write prod should be blocked (no sentinel)"; fail=1; fi
 
@@ -61,6 +73,19 @@ if denied "$out"; then echo "FAIL: edit must be allowed after RED"; fail=1; else
 reset
 out="$(run Edit '{"tool_name":"Edit","tool_input":{"file_path":"README.md"}}')"
 if denied "$out"; then echo "FAIL: docs must be allowed"; fail=1; else echo "ok  : docs allowed"; fi
+
+# 6b. Kill switch: .dev-rules/.off disables the gate entirely (read AND edit),
+# and survives commits (clear-after-commit never touches it).
+reset; mkdir -p "$SBX/.dev-rules"; : >"$SBX/.dev-rules/.off"
+out="$(run Read '{"tool_name":"Read","tool_input":{"file_path":"internal/x.go"}}')"
+if denied "$out"; then echo "FAIL: .off must disable read gate"; fail=1; else echo "ok  : .off disables read gate"; fi
+out="$(run Edit '{"tool_name":"Edit","tool_input":{"file_path":"internal/x.go"}}')"
+if denied "$out"; then echo "FAIL: .off must disable edit gate"; fail=1; else echo "ok  : .off disables edit gate"; fi
+
+# 6c. Kill switch: DEV_RULES_OFF=1 env disables the gate for the session.
+reset
+out="$(printf '%s' '{"tool_name":"Edit","tool_input":{"file_path":"internal/x.go"}}' | DEV_RULES_OFF=1 bash "$GUARD")"
+if denied "$out"; then echo "FAIL: DEV_RULES_OFF=1 must disable gate"; fail=1; else echo "ok  : DEV_RULES_OFF=1 disables gate"; fi
 
 # 7. Absolute paths (Claude Code always sends them for Edit/Write) must match
 # relative production_globs from .dev-rules.json -- deny, same as the relative form.

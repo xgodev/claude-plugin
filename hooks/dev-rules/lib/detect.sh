@@ -19,7 +19,17 @@ dr_config() {
   printf '%s' "$default"
 }
 
-dr_enabled() { [ "$(dr_config '.enabled' 'true')" != "false" ]; }
+# Kill switches, checked before anything else:
+#   DEV_RULES_OFF=1        -> off for the whole session (set when launching:
+#                             DEV_RULES_OFF=1 claude); dies with the process.
+#   .dev-rules/.off        -> off until the file is removed; toggled any time
+#                             (touch/rm) and NEVER cleared by clear-after-commit.
+#   .dev-rules.json enabled:false -> off permanently for the project.
+dr_enabled() {
+  [ "${DEV_RULES_OFF:-}" = "1" ] && return 1
+  [ -f "${CLAUDE_PROJECT_DIR:-.}/.dev-rules/.off" ] && return 1
+  [ "$(dr_config '.enabled' 'true')" != "false" ]
+}
 
 # Translate `**` -> `*` (bash [[ ]] `*` already spans `/`). The replacement is a
 # bare `*`, NOT `\*`: an escaped `\*` would match a literal asterisk, so globs

@@ -81,9 +81,9 @@ deny() {
 if [ "$intent" = "write" ]; then
   red_unlocked && exit 0
   feature_mode && exit 0
-  deny "Production EDIT locked (dev-rules). BUG (default): no edit before a failing test -- write the test for the INTENDED behavior, run it, SEE it fail (RED), then create .dev-rules/.red-first-unlocked. FEATURE/IMPROVEMENT: create .dev-rules/.mode-feature after brainstorming (a feature is governed by the plan, not by RED)."
+  deny "Production EDIT locked (dev-rules). Do NOT pick a flow yourself -- ASK THE USER which applies: (a) BUG: write the failing test for the INTENDED behavior, run it, SEE it fail (RED), then create .dev-rules/.red-first-unlocked; (b) FEATURE/IMPROVEMENT: create .dev-rules/.mode-feature after brainstorming (plan-governed, not RED); (c) the dev may DISABLE the gates: touch .dev-rules/.off (until removed) or relaunch with DEV_RULES_OFF=1."
 else
   red_unlocked && exit 0
   feature_mode && exit 0
-  deny "Read-locked (dev-rules LAW 13): choose a flow first. BUG: brainstorm with the user and write the failing test from the intended behavior BEFORE reading the code (reading the buggy code first contaminates the oracle), then create .dev-rules/.red-first-unlocked. FEATURE/IMPROVEMENT: after brainstorming, create .dev-rules/.mode-feature to proceed with the feature flow (plan-governed; unlocks read and edit)."
+  deny "Read-locked (dev-rules LAW 13). Do NOT pick a flow yourself -- ASK THE USER which applies: (a) BUG: write the failing test from the INTENDED behavior BEFORE reading the code (reading the buggy code first contaminates the oracle), see it RED, then create .dev-rules/.red-first-unlocked; (b) FEATURE/IMPROVEMENT: after brainstorming, create .dev-rules/.mode-feature (plan-governed; unlocks read and edit); (c) the dev may DISABLE the gates: touch .dev-rules/.off (until removed) or relaunch with DEV_RULES_OFF=1."
 fi

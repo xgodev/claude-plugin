@@ -69,6 +69,21 @@ both sentinels, so the next cycle re-brainstorms and re-REDs.
 built-in detection (production segments: `src lib app cmd internal pkg crates
 domain`, minus test/docs/config).
 
+### Kill switches (all dev-rules guards at once)
+
+When a gate blocks, the agent is instructed to ASK THE USER which flow
+applies (bug -> RED first; feature -> `.mode-feature`) -- or the dev may
+simply disable the gates:
+
+| Switch | Scope | How |
+|---|---|---|
+| `DEV_RULES_OFF=1` | one session | launch with `DEV_RULES_OFF=1 claude` (env dies with the process) |
+| `.dev-rules/.off` | until removed | `touch .dev-rules/.off` / `rm .dev-rules/.off` any time; commits never clear it |
+| `"enabled": false` | the project | in `.dev-rules.json` |
+
+They disable the RED-first guard (read and edit), the main-folder guard, and
+the line-cap guard together.
+
 ### main-folder guard (opt-in)
 
 With `"main_folder_guard": true`, the plugin enforces the isolated-workspace

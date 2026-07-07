@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.4.0]
+
+### Added
+
+- **Kill switches for all dev-rules guards**: `DEV_RULES_OFF=1` in the
+  environment disables gating for the whole session
+  (`DEV_RULES_OFF=1 claude`), and a `.dev-rules/.off` sentinel disables
+  it until removed (toggled any time; cycle-closing commits never clear
+  it, unlike `.mode-feature`/`.red-first-unlocked`). Both act in
+  `dr_enabled`, so the RED-first, main-folder, and line-cap guards all
+  honor them.
+
+### Changed
+
+- **RED-first deny messages now question the dev** instead of letting
+  the agent pick a flow on its own: ask the user whether it is a BUG
+  (RED first), a FEATURE (`.mode-feature`), or whether to disable the
+  gates (`.dev-rules/.off` / `DEV_RULES_OFF=1`). Message contract
+  covered by tests.
+
 ## [1.3.0]
 
 ### Added
