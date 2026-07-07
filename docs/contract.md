@@ -49,7 +49,7 @@ Reserved sentinels per language:
 
 For the JVM gates, `build.gradle[.kts]` alone is a build-system sentinel shared by Java and Kotlin projects (Java projects routinely use the Kotlin Gradle DSL). Detection therefore requires a source file of the language under `src/` so that pure-Java projects are not classified as Kotlin and vice-versa. Mixed Java+Kotlin Gradle projects continue to match both gates.
 
-Consumers (the `quality-gate` skill) iterate `<lang>/qg.sh --detect`, collect the ones that exit 0 and run only those -- no hardcoded sentinel table.
+Consumers (the `dev` skill's gate leaf) iterate `<lang>/qg.sh --detect`, collect the ones that exit 0 and run only those -- no hardcoded sentinel table.
 
 ## Absolute mode (`--base` optional)
 

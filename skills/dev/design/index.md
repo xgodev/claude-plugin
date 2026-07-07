@@ -1,23 +1,14 @@
----
-name: ux-ui
-description: "Use for any UI/UX design work on web or mobile: choosing colors, palettes, visual styles, typography/fonts, charts, and icons; component/layout patterns per framework (React, Vue, Svelte, Next, Nuxt, Tailwind, SwiftUI, Flutter, React Native, Jetpack Compose, Angular, Astro, Three.js, Laravel, JavaFX); plus UX heuristics, accessibility, design systems, motion, states, research, and metrics. The design door for the xgodev stack."
-license: MIT
-metadata:
-  author: jpfaria
-  version: "1.0.0"
----
-
 Index for UI/UX design. Two tools: (1) a **searchable catalog** (engine +
 data) for concrete choices -- palettes, styles, fonts, charts, per-framework
 patterns; (2) **methodology references** for judgment -- heuristics, a11y,
 design systems, etc. Read the row that matches, then the leaf it points to.
-Paths are relative to this directory (`skills/ux-ui/`). Catalog data is
+Paths are relative to this directory (`skills/dev/design/`). Catalog data is
 **never loaded into context** -- it is queried through the script.
 
 ## Catalog -- concrete data (via the engine)
 
 ```bash
-python3 skills/ux-ui/scripts/search.py "<query>" <flag>
+python3 skills/dev/design/scripts/search.py "<query>" <flag>
 ```
 
 | I need... | Flag |

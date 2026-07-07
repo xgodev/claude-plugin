@@ -1,8 +1,3 @@
----
-name: dev-rules
-description: Use when writing, editing, or refactoring code in any language -- before writing, not after
----
-
 # dev-rules -- Engineering Discipline
 
 Methodology and decision rules for ANY code, in ANY language. Apply BEFORE

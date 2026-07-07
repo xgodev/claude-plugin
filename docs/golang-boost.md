@@ -1,4 +1,4 @@
-# golang-boost (the `boost` skill)
+# golang-boost (the `dev` skill's golang leaf)
 
 Claude Code skill set for **[github.com/xgodev/boost](https://github.com/xgodev/boost)** —
 the modular Go service framework. A single `boost` entry skill whose small
@@ -13,7 +13,7 @@ demand only when the question actually needs it.
 
 ## Install
 
-`golang-boost` (the `boost` skill) ships as part of the all-in-one
+`golang-boost` (the `dev` skill's golang leaf) ships as part of the all-in-one
 `claude-plugin` -- see the [repo README](../README.md) for install and
 update instructions.
 
@@ -49,7 +49,7 @@ instead of loading a 39-row table every time any factory topic comes up.
 - `references/factory.md` — database, messaging, HTTP/RPC, observability, cloud/infra domains, each expanding into its own leaves (Echo, Resty, Mongo, Cassandra, Redis, Kafka, AWS, gRPC, OTel, …).
 
 Run `python3 scripts/verify_references.py` after editing any reference file —
-it confirms every `references/....md` pointer in `skills/boost/` still
+it confirms every `references/....md` pointer in `skills/dev/golang/` still
 resolves.
 
 ## Maintenance
@@ -57,7 +57,7 @@ resolves.
 The `boost` skill co-evolves with the boost framework but lives in this
 separate repo. See [`CLAUDE.md`](../CLAUDE.md) for the sync rule: whenever a
 boost component changes in `xgodev/boost`, the matching reference file (under
-`skills/boost/references/`) must be updated here in a corresponding PR, with
+`skills/dev/golang/references/`) must be updated here in a corresponding PR, with
 a `plugin.json` version bump.
 
 ## License

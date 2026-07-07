@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.5.0]
+
+### Changed
+
+- **BREAKING (skill namespace): skills unified into two doors.** The
+  plugin now ships `dev` -- one door skill routing to
+  `engineering/rules.md` (the former dev-rules), `engineering/gate.md`
+  (the former quality-gate flow), `golang/` (the former boost index +
+  references), and `design/` (the former ux-ui catalog engine +
+  methodology) -- and `skill-rules` (unchanged; skill authoring is a
+  separate concern). Always-on context cost drops from 5 skill lines to
+  2. All gate scripts, hooks, engine, data, and references are intact --
+  only the routing layer changed. Former namespaces
+  (`claude-plugin:boost`, `:quality-gate`, `:dev-rules`, `:ux-ui`) are
+  gone; the natural-phrase triggers all live in the `dev` description.
+
 ## [1.4.4]
 
 ### Changed

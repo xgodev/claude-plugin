@@ -1,8 +1,3 @@
----
-name: quality-gate
-description: Use when checking code quality before opening a PR. Triggers -- "run quality gate", "run QG", "check quality", "check quality before PR", "validate before PR", "is it ready for PR", "qa before push", "run gate", "run the gate".
----
-
 # Quality Gate
 
 Skill that invokes the shared gate's **dispatcher**

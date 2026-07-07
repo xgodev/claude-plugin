@@ -1,13 +1,13 @@
-# ux-ui -- the design door skill
+# design -- the design leaf of the dev skill
 
-UI/UX design capability consolidated into a **single door skill**, `ux-ui`,
+UI/UX design capability consolidated into the `design` leaf of the **`dev` door skill**,
 in the same shape as `boost`: the SKILL.md is a small index that routes;
 the heavy content lives in leaves and a search engine.
 
-## Structure (`skills/ux-ui/`)
+## Structure (`skills/dev/design/`)
 
-- **`SKILL.md`** -- the door: one table routes by **catalog** (engine
-  flags), another by **methodology** (`references/*.md`).
+- **`index.md`** -- the leaf's own index: one table routes by **catalog**
+  (engine flags), another by **methodology** (`references/*.md`).
 - **`scripts/`** -- BM25 search engine (`search.py` + `core.py` +
   `design_system.py`).
 - **`data/`** -- the catalog: palettes, styles, typography, charts,

@@ -59,7 +59,7 @@ repos. Read them before changing anything.
   pushing a dependency change: a dependency with an invalid upstream
   manifest fails the WHOLE claude-plugin install. Today the only
   external dependency is `superpowers` (official marketplace); design
-  content ships in the bundled `ux-ui` skill.
+  content ships in the bundled `dev` skill (design leaf).
 - **Hooks live in `hooks/hooks.json` ONLY (auto-discovered).** Never also
   declare `"hooks"` in `plugin.json` -- the manifest key is only for
   ADDITIONAL non-standard files, and double registration breaks the whole
@@ -78,14 +78,14 @@ repos. Read them before changing anything.
 
 ## Area rules
 
-### boost skill (`skills/boost/`)
+### boost docs (`skills/dev/golang/`)
 
 - Skills cite boost as a Go import path (`github.com/xgodev/boost/...`),
   never as a file path of this repo.
 - Sync with `xgodev/boost` is manual and mandatory: a component change
   there requires updating the matching
-  `skills/boost/references/<group>/<name>.md` here (+ index line in
-  `skills/boost/SKILL.md` for a new component), with a version bump.
+  `skills/dev/golang/references/<group>/<name>.md` here (+ index line in
+  `skills/dev/golang/index.md` for a new component), with a version bump.
 - Run `python3 scripts/verify_references.py` after editing any reference
   file -- every `references/*.md` pointer must resolve.
 
@@ -120,7 +120,7 @@ repos. Read them before changing anything.
   `skills/` -- end users must not receive it. Do not move it back into
   the shipped plugin.
 
-### dev-rules (`skills/dev-rules/`, `hooks/dev-rules/`)
+### dev-rules (`skills/dev/engineering/rules.md`, `hooks/dev-rules/`)
 
 - The hooks make RED-first deterministic: production edits blocked until a
   failing test exists (sentinels under `<project>/.dev-rules/`). Behavior

@@ -4,11 +4,14 @@ The **all-in-one Claude Code plugin** by `xgodev`, and home of the
 **`xgodev`** marketplace. One install brings every `xgodev`
 capability:
 
-- **`boost` skill set** -- grouped-index documentation skill for
+- **`dev` skill (door)** -- one skill routing to: engineering discipline
+  (`dev-rules`), the quality-gate flow, boost docs, and design. Leaves:
+  grouped-index documentation for
   [`xgodev/boost`](https://github.com/xgodev/boost), the modular Go service
   framework. See [`docs/golang-boost.md`](docs/golang-boost.md).
 - **Quality Gate** -- the `qg` dispatcher + per-language gates (Rust, Go,
-  Python, Node.js, Java, Swift, Kotlin, Web), the `quality-gate` skill,
+  Python, Node.js, Java, Swift, Kotlin, Web), the gate flow inside the
+  `dev` skill,
   and an opt-in pre-push enforcement hook. Fails only when a PR worsens a
   metric vs a base ref. Also usable as a plain CLI in CI. See
   [`docs/quality-gate.md`](docs/quality-gate.md).
@@ -31,9 +34,8 @@ capability:
   `superpowers@claude-plugins-official` install satisfies it -- no
   duplicate copy.
 
-Skills are namespaced by the plugin name: `claude-plugin:boost`,
-`claude-plugin:quality-gate`, `claude-plugin:dev-rules`,
-`claude-plugin:skill-rules`, `claude-plugin:ux-ui`. They trigger on
+Skills are namespaced by the plugin name: `claude-plugin:dev`,
+`claude-plugin:skill-rules`. They trigger on
 natural phrases (e.g. "run quality gate" / "run QG") without the prefix. (The `add-quality-gate`
 skill is maintainer-only and lives project-local in this repo -- it is
 not shipped with the plugin.)
@@ -92,40 +94,34 @@ or declaratively in `~/.claude/settings.json`:
 
 ## Context-window overhead
 
-Measured cost of installing this plugin, A/B-tested with Claude Code 2.1.199
-(`claude -p` in two identical fresh projects, one with the plugin installed
-at project scope, total context = `input + cache_creation + cache_read`
-tokens of the first request; 2 runs each, +/-11 tokens run-to-run noise):
+Measured cost of installing this plugin, A/B-tested with Claude Code
+(`claude -p` in the same fresh project with the plugin disabled vs
+enabled; total context = `input + cache_creation + cache_read` tokens of
+the first request):
 
 | Configuration | Total context (first request) |
 |---|---|
-| Claude Code baseline, no plugin | ~26,600 tokens |
-| With `claude-plugin` installed | ~26,970 tokens |
-| **Plugin overhead, per session** | **~370 tokens (+1.4%)** |
+| Claude Code baseline, plugin disabled | ~25,123 tokens |
+| With `claude-plugin` enabled | ~25,427 tokens |
+| **Plugin overhead, per session** | **~304 tokens (+1.2%)** |
 
-That always-on cost is ONLY the name + description lines of the bundled
-skills plus plugin registration metadata (the `ux-ui` skill added in
-1.2.0 contributes its ~110-token description on top of the measured
-~370). Everything else is pay-per-use:
+That always-on cost is ONLY the name + description lines of the two
+bundled skills plus plugin registration metadata. Everything else is
+pay-per-use:
 
 | Component | Always-on | Loaded when |
 |---|---|---|
-| `ux-ui` description | ~110 tokens | every session |
-| `boost` description | ~55 tokens | every session |
-| `quality-gate` description | ~55 tokens | every session |
+| `dev` description (door: engineering, gate, boost, design) | ~150 tokens | every session |
 | `skill-rules` description | ~40 tokens | every session |
-| `dev-rules` description | ~25 tokens | every session |
-| `quality-gate` SKILL.md (~2.5k words) | 0 | only when the skill fires |
-| `dev-rules` SKILL.md (~4.3k words) | 0 | only when the skill fires |
-| `boost` SKILL.md index + per-component references | 0 | only when the skill fires |
-| Hooks (pre-push gate, RED-first) | 0 | never (run as processes) |
+| `dev` router SKILL.md + the leaf it routes to | 0 | only when the skill fires |
+| Hooks (pre-push gate, RED-first, main-folder, line-cap) | 0 | never (run as processes) |
 | MCP servers | 0 | none bundled |
 
 ## Repository layout
 
 ```
 .claude-plugin/        plugin.json (the single plugin) + marketplace.json (xgodev)
-skills/                boost/  quality-gate/  dev-rules/  skill-rules/  ux-ui/ (shipped)
+skills/                dev/{SKILL.md router, engineering/, golang/, design/}  skill-rules/ (shipped)
 .claude/skills/        add-quality-gate/ (maintainer-only, project-local)
 hooks/                 hooks.json (merged registry) + test/; scripts grouped by area:
                        quality-gate/pre-push-gate.sh, dev-rules/{red-first-guard.sh,
@@ -154,4 +150,4 @@ See [`docs/quality-gate.md`](docs/quality-gate.md) and
 
 MIT -- see [LICENSE](LICENSE).
 
-- Version: 1.4.4
+- Version: 1.5.0

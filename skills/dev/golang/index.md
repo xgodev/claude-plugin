@@ -1,14 +1,4 @@
----
-name: boost
-description: "Use for any work with github.com/xgodev/boost, the modular Go service framework: any import under github.com/xgodev/boost, boot/wiring questions, writing or reviewing Go services on boost, or contributing a boost component."
-license: MIT
-metadata:
-  author: jpfaria
-  version: "2.0.0"
-allowed-tools: Read Edit Write Glob Grep Bash(go:*) Bash(golangci-lint:*) Bash(git:*) Agent
----
-
-Index for `github.com/xgodev/boost`. Read the matching context row below, then the leaf reference it points to, before answering. Paths are relative to this skill's directory (`skills/boost/`). Follow any `REQUIRED BACKGROUND` pointer inside a leaf file too.
+Index for `github.com/xgodev/boost`. Read the matching context row below, then the leaf reference it points to, before answering. Paths are relative to this skill's directory (`skills/dev/golang/`). Follow any `REQUIRED BACKGROUND` pointer inside a leaf file too.
 
 When wiring or configuring any factory, read that factory's own "Plugins" section too — most accept more than the default/required set shown in the main example (JSON codecs, compression, retry, profiling, docs UI, circuit breakers, observability, …). If the task specifically names OpenTelemetry, Datadog, or Prometheus, or asks for tracing/metrics, also read `references/plugins.md` — that vendor coverage is per-component, not automatic; activating it for one library doesn't activate it for the rest of the stack.
 

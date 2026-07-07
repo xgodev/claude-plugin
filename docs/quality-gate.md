@@ -6,7 +6,7 @@ The Quality Gate ships as part of the all-in-one `claude-plugin`
 (see the [repo README](../README.md) for install) and is **two-in-one**:
 
 - **CLI/CI:** clone the `xgodev/claude-plugin` repo and run the dispatcher `./tools/quality-gate/qg` (or `tools/quality-gate/<lang>/qg.sh`) directly -- `.claude-plugin/` is inert outside Claude Code.
-- **Claude Code plugin:** the `quality-gate` skill installs **together** with the scripts (bundled dispatcher, no runtime clone) when you install `claude-plugin@xgodev`. (`add-quality-gate` is maintainer-only, project-local in this repo -- not shipped.)
+- **Claude Code plugin:** the gate flow (a leaf of the `dev` skill) installs **together** with the scripts (bundled dispatcher, no runtime clone) when you install `claude-plugin@xgodev`. (`add-quality-gate` is maintainer-only, project-local in this repo -- not shipped.)
 
 ## How it works
 

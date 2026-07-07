@@ -47,7 +47,7 @@ User: `run quality gate`.
 
 ## Files / templates / references
 
-- Skill: [`skills/quality-gate/SKILL.md`](../../skills/quality-gate/SKILL.md)
+- Skill leaf: [`skills/dev/engineering/gate.md`](../../skills/dev/engineering/gate.md) (routed by the `dev` door skill)
 - Gate is bundled in this plugin (dispatcher `qg` + per-language scripts under `${CLAUDE_PLUGIN_ROOT}/tools/quality-gate`; contract under `${CLAUDE_PLUGIN_ROOT}/docs`).
 - Contract reference (bundled in the plugin): `${CLAUDE_PLUGIN_ROOT}/docs/contract.md` (dispatcher, tamper-resistance, `.qg.yaml projects:`), `${CLAUDE_PLUGIN_ROOT}/docs/output-format.md` (monorepo envelope), `${CLAUDE_PLUGIN_ROOT}/docs/consume.md`.
 

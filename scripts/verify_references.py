@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-"""Verify every `references/....md` pointer inside skills/boost/**/*.md resolves to a real file."""
+"""Verify every `references/....md` pointer inside skills/dev/golang/**/*.md resolves to a real file."""
 import re
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent / "skills" / "boost"
+ROOT = Path(__file__).resolve().parent.parent / "skills" / "dev" / "golang"
 POINTER_RE = re.compile(r"`references/([a-zA-Z0-9/_.-]+\.md)`")
 
 
 def main():
     if not ROOT.exists():
-        print(f"NO skills/boost DIRECTORY YET: {ROOT}")
+        print(f"NO skills/dev/golang DIRECTORY YET: {ROOT}")
         sys.exit(1)
 
     md_files = sorted(ROOT.rglob("*.md"))
