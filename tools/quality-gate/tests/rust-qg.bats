@@ -632,3 +632,32 @@ EOF
   [ "$result" -gt 0 ] || { echo "expected >0 even with a loosened clippy.toml; got $result"; cat "$logdir/cx.log"; return 1; }
   rm -rf "$tmp" "$logdir"
 }
+
+@test "measure_test_and_coverage: ONE run yields failures AND coverage (perf fusion)" {
+  source "$QG_REPO_ROOT/rust/lib/measure.sh"
+  local logdir
+  logdir=$(qg_tmp_dir)
+  result=$(measure_test_and_coverage "$(qg_fixture_path rust regressed)" "$logdir/test.log" "$logdir/cov.json")
+  fails=$(echo "$result" | awk '{print $1}')
+  cov=$(echo "$result" | awk '{print $2}')
+  [ "$fails" -ge 1 ]                                   # test_failing_on_purpose detected
+  awk -v c="$cov" 'BEGIN { exit !(c > 0 && c < 100) }' # coverage measured in the same run
+  grep -qE 'test result:' "$logdir/test.log"           # test output captured for analysis
+  rm -rf "$logdir"
+}
+
+@test "comparative: base metrics are cached by base SHA (second run skips base measurement)" {
+  command -v cargo >/dev/null || skip "cargo not available"
+  repo=$(qg_tmp_dir)
+  cp -R "$(qg_fixture_path rust baseline)/." "$repo/"
+  cd "$repo"
+  git init -q . && git config user.email t@t && git config user.name t
+  git add -A && git commit -qm base
+  git checkout -qb feature
+  echo '// touch' >> src/lib.rs && git add -A && git commit -qm change
+  cache_root="$repo/.qg-cache"
+  QG_BASELINE_CACHE_DIR="$cache_root" run bash "$QG_REPO_ROOT/rust/qg.sh" --base main --force-full --log-dir "$repo/logs1"
+  QG_BASELINE_CACHE_DIR="$cache_root" run bash "$QG_REPO_ROOT/rust/qg.sh" --base main --force-full --log-dir "$repo/logs2"
+  [[ "$output" == *"base metrics: cached"* ]]
+  cd / && rm -rf "$repo"
+}

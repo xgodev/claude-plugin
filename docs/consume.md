@@ -57,7 +57,7 @@ QG_BASE_REF=origin/main ~/.claude-plugin/tools/quality-gate/rust/qg.sh
 ~/.claude-plugin/tools/quality-gate/rust/qg.sh --base origin/main --format json > result.json
 ```
 
-## Git pre-push hook (optional)
+## Local git pre-push hook (optional, your choice)
 
 Add to `.git/hooks/pre-push`:
 
@@ -104,7 +104,7 @@ The bypass is recorded in `target/qg-logs/bypass.log`. Use with discretion.
 | `::error::--base is required` | Did not pass a base ref | Add `--base origin/main` |
 | `::error::cargo-llvm-cov not found` | Missing prereq | `cargo install cargo-llvm-cov` |
 | Red gate on a PR that did not touch Rust | Fast-path did not trigger | Check whether some `Cargo.*` or `.rs` was modified |
-| Stale baseline cache | Divergent cache (when the gate's own staleness check is bypassed via `--baseline-dir`) | `--refresh-baseline` or `rm -rf /tmp/qg-baseline-*`. For default-cache runs, staleness is detected automatically via the `.qg-baseline-prepared` sentinel. |
+| Stale baseline cache | Divergent cache (when the gate's own staleness check is bypassed via `--baseline-dir`) | `--refresh-baseline` or `rm -rf /tmp/qg-baseline-*`. For default-cache runs the baseline dir is keyed by project and base SHA, so a new base automatically gets a fresh extraction. |
 | `git archive` failed | Ref does not exist locally | `git fetch origin` |
 | `::warning::baseline: submodule '<x>' is not initialized` | A submodule the build needs is absent from the working tree, so it cannot be extracted into the baseline | `git submodule update --init --recursive`, then re-run (or `--refresh-baseline`) |
 

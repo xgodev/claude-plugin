@@ -12,7 +12,7 @@ capability:
 - **Quality Gate** -- the `qg` dispatcher + per-language gates (Rust, Go,
   Python, Node.js, Java, Swift, Kotlin, Web), the gate flow inside the
   `dev` skill,
-  and an opt-in pre-push enforcement hook. Fails only when a PR worsens a
+  and an opt-in PR-gate hook (`gh pr create` is gated; `git push` never is). Fails only when a PR worsens a
   metric vs a base ref. Also usable as a plain CLI in CI. See
   [`docs/quality-gate.md`](docs/quality-gate.md).
 - **`dev-rules`** -- macro, language-agnostic engineering-discipline skill
@@ -114,7 +114,7 @@ pay-per-use:
 | `dev` description (door: engineering, gate, boost, design) | ~150 tokens | every session |
 | `skill-rules` description | ~40 tokens | every session |
 | `dev` router SKILL.md + the leaf it routes to | 0 | only when the skill fires |
-| Hooks (pre-push gate, RED-first, main-folder, line-cap) | 0 | never (run as processes) |
+| Hooks (PR gate, RED-first, main-folder, line-cap) | 0 | never (run as processes) |
 | MCP servers | 0 | none bundled |
 
 ## Repository layout
@@ -124,7 +124,7 @@ pay-per-use:
 skills/                dev/{SKILL.md router, engineering/, golang/, design/}  skill-rules/ (shipped)
 .claude/skills/        add-quality-gate/ (maintainer-only, project-local)
 hooks/                 hooks.json (merged registry) + test/; scripts grouped by area:
-                       quality-gate/pre-push-gate.sh, dev-rules/{red-first-guard.sh,
+                       quality-gate/pr-gate.sh, dev-rules/{red-first-guard.sh,
                        main-folder-guard.sh, line-cap-guard.sh,
                        clear-after-commit.sh, lib/}
 tools/quality-gate/
@@ -150,4 +150,4 @@ See [`docs/quality-gate.md`](docs/quality-gate.md) and
 
 MIT -- see [LICENSE](LICENSE).
 
-- Version: 1.5.0
+- Version: 1.6.0

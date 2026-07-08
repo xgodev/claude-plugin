@@ -1,22 +1,24 @@
-# Enforcement hook (pre-push quality gate)
+# Enforcement hook (PR quality gate)
 
-The plugin ships an **opt-in** `PreToolUse` hook that blocks `git push` and
-`gh pr create` unless the quality gate passes for the current HEAD.
+The plugin ships an **opt-in** `PreToolUse` hook that blocks `gh pr create`
+unless the quality gate passes for the current HEAD.
+
+**`git push` is NEVER gated.** The gate belongs to the PR moment (and to
+CI): pushing work-in-progress must stay cheap, and on a heavy project a
+per-push gate costs minutes. Enforce the same gate in CI for the hard,
+server-side guarantee.
 
 ## What it does
 
-On any `Bash` tool call, `hooks/quality-gate/pre-push-gate.sh` runs. It fast-exits for
-everything except `git push` / `gh pr create`. For a gated command it:
+On any `Bash` tool call, `hooks/quality-gate/pr-gate.sh` runs. It fast-exits
+for everything except `gh pr create` (matched as the leading tokens of a
+command segment, not as a substring). For a gated command it:
 
-1. Exempts non-code pushes only: a pure deletion (`--delete` / `-d`, or every
-   refspec is a `:branch` delete or a `refs/tags/...` tag), or a tag-only push
-   (`--tags` with no branch/commit refspec beyond the remote). Mixing a tag or
-   delete with a real code refspec (e.g. `git push origin main --tags`) is still
-   gated.
-2. Resolves the base ref: the branch upstream (`@{upstream}`), else the remote
+1. Resolves the base ref: the branch upstream (`@{upstream}`), else the remote
    default branch (`origin/HEAD`), else **absolute mode** (no base).
-3. Runs `${CLAUDE_PLUGIN_ROOT}/tools/quality-gate/qg [--base <ref>]` in the project.
-4. Maps the gate exit code to a decision:
+2. Runs `${CLAUDE_PLUGIN_ROOT}/tools/quality-gate/qg [--base <ref>]` in the
+   project.
+3. Maps the gate exit code to a decision:
    - `0` passed / bypassed, `3` no supported language -> **allow**
    - `1` regressed / threshold, `2` tool error -> **deny** (JSON
      `permissionDecision: "deny"` with a concise reason)
@@ -24,16 +26,17 @@ everything except `git push` / `gh pr create`. For a gated command it:
 ## Bypass
 
 The hook adds no bypass logic of its own. Exporting `QG_BYPASS_REASON` (already
-honored by every gate, and audit-logged) makes the gate return `0`, so the push
+honored by every gate, and audit-logged) makes the gate return `0`, so the PR
 is allowed. Example:
 
-    QG_BYPASS_REASON="hotfix: gate infra down, reviewed manually" git push
+    QG_BYPASS_REASON="hotfix: gate infra down, reviewed manually" gh pr create
 
 ## Fail-open by design
 
-A broken hook must never brick git. If `jq` is missing, stdin is malformed,
-`qg` is not found at `${CLAUDE_PLUGIN_ROOT}/tools/quality-gate`, or the project is not a git repo,
-the hook allows the command and prints a note to stderr.
+A broken hook must never brick the user's git. If `jq` is missing, stdin is
+malformed, `qg` is not found at `${CLAUDE_PLUGIN_ROOT}/tools/quality-gate`, or
+the project is not a git repo, the hook allows the command and prints a note
+to stderr.
 
 ## Registration
 
@@ -49,10 +52,6 @@ non-standard hook files). The script locates the gate through
 
 This hook is **advisory enforcement**, not a hard security boundary: it is
 opt-in and it fails open. Detection keys on the leading tokens of each command
-segment, so a few uncommon forms that push code are not gated -- notably
-`git -C <dir> push ...`, a push wrapped in a subshell (`(git push ...)`), or
-`eval`-ed push commands. The common forms (`git push origin main`,
-`git push -u origin <branch>`, `A=b git push`, `... && git push`) are all
-gated. If you need a hard gate that cannot be sidestepped, enforce `qg` in CI
-as well -- the hook is a fast local check, not a replacement for a server-side
-gate.
+segment, so uncommon forms (a subshell-wrapped or `eval`-ed `gh pr create`)
+are not gated. For a gate that cannot be sidestepped, enforce `qg` in CI --
+the hook is a fast local check, not a replacement for a server-side gate.

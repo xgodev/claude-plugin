@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
-# pre-push-gate.sh -- PreToolUse hook (quality-gate plugin).
-# Blocks `git push` / `gh pr create` unless the gate passes for HEAD.
+# pr-gate.sh -- PreToolUse hook (quality-gate plugin).
+# Blocks `gh pr create` unless the gate passes for HEAD. The gate belongs to
+# the PR moment (and CI) -- `git push` is NEVER gated: pushing work-in-progress
+# must stay cheap, and on a heavy project a per-push gate costs minutes.
 # English only. Fails OPEN on its own errors: a broken hook must never
 # brick the user's git.
 
@@ -17,48 +19,14 @@ fi
 cmd="$(printf '%s' "$input" | jq -r '.tool_input.command // empty' 2>/dev/null)"
 [ -z "$cmd" ] && exit 0   # not a readable Bash command -> allow
 
-# Returns 0 (true) if a `git push ...` segment pushes NO code and is therefore
-# exempt: a pure deletion (--delete/-d, or every refspec is a ':ref' delete or
-# a 'refs/tags/*' tag) or a tag-only push (--tags with no refspec beyond the
-# remote). Returns 1 (false) otherwise. Fail-safe: anything ambiguous -> false.
-push_is_exempt() {
-  local seg="$1"
-  local rest="${seg#git push}"
-  local has_tags=0 has_delete=0 npos=0 all_noncode=1 seen_remote=0 t
-  for t in $rest; do
-    case "$t" in
-      --tags)        has_tags=1 ;;
-      --delete|-d)   has_delete=1 ;;
-      -*)            : ;;                 # ignore other flags
-      *)
-        npos=$((npos + 1))
-        if [ "$seen_remote" -eq 0 ]; then
-          seen_remote=1                   # first positional is the remote
-        else
-          case "$t" in
-            :*|refs/tags/*) ;;            # delete or tag ref -> non-code
-            *) all_noncode=0 ;;           # a code refspec
-          esac
-        fi
-        ;;
-    esac
-  done
-  [ "$has_delete" -eq 1 ] && return 0                      # all refspecs deleted
-  [ "$npos" -ge 2 ] && [ "$all_noncode" -eq 1 ] && return 0  # only delete/tag refs
-  [ "$has_tags" -eq 1 ] && [ "$npos" -le 1 ] && return 0     # tag-only push
-  return 1
-}
-
-# --- decide whether any gated, non-exempt operation is present ------------
-# Match `git push` / `gh pr create` as the leading tokens of any &&/||/;/|
-# segment (not a bare substring), after stripping leading env assignments
-# (FOO=bar cmd). Any non-exempt gated segment forces the gate to run.
+# --- decide whether a gated operation is present ---------------------------
+# Match `gh pr create` as the leading tokens of any &&/||/;/| segment (not a
+# bare substring), after stripping leading env assignments (FOO=bar cmd).
 should_gate=0
 while IFS= read -r seg; do
   seg="$(printf '%s' "$seg" | sed -E 's/^[[:space:]]+//; s/^([A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*[[:space:]]+)+//')"
   case "$seg" in
-    "git push"|"git push "*)         push_is_exempt "$seg" || should_gate=1 ;;
-    "gh pr create"|"gh pr create "*) should_gate=1 ;;   # never exempt PR creation
+    "gh pr create"|"gh pr create "*) should_gate=1 ;;
   esac
 done <<< "$(printf '%s' "$cmd" | sed -E 's/(\|\||&&|;|\|)/\n/g')"
 

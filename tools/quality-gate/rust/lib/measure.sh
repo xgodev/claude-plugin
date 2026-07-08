@@ -166,6 +166,24 @@ measure_coverage() {
   printf '%s\n' "$(_num "$pct")"
 }
 
+# Perf fusion: cargo llvm-cov already RUNS the test suite to collect coverage
+# profiles, so one invocation yields BOTH the test-failure count and the
+# coverage percentage -- the separate `cargo test` execution was a full extra
+# suite run per side. Echoes "<failures> <coverage_pct>".
+measure_test_and_coverage() {
+  local dir="$1" log="$2" out="$3"
+  : > "$log"
+  ( cd "$dir" && cargo llvm-cov --ignore-run-fail --json --output-path "$out" ) > "$log" 2>&1 || true
+  local n pct=0
+  n=$(grep -E '^test result:' "$log" 2>/dev/null \
+      | sed -E 's/.*([0-9]+) failed.*/\1/' \
+      | awk '{ s += $1 } END { print s+0 }')
+  if [ -s "$out" ]; then
+    pct=$(jq -r '.data[0].totals.lines.percent // 0' "$out" 2>/dev/null || echo 0)
+  fi
+  printf '%d %s\n' "${n:-0}" "$(_num "$pct")"
+}
+
 # Baseline submodule extraction (shared logic across all language gates).
 # `git archive` does NOT expand git submodules: in the baseline checkout the
 # submodule dirs are empty, so a submodule-dependent build fails, the base

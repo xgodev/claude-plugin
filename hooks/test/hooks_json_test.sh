@@ -12,6 +12,6 @@ chk 'pre_wires "red-first-guard.sh"' "PreToolUse wires red-first-guard.sh"
 chk 'jq -e "[.hooks.PostToolUse[].hooks[].command] | any(test(\"clear-after-commit.sh\"))" "$J" >/dev/null 2>&1' "PostToolUse wires clear-after-commit.sh"
 chk 'pre_wires "main-folder-guard.sh"' "PreToolUse wires main-folder-guard.sh"
 chk 'pre_wires "line-cap-guard.sh"' "PreToolUse wires line-cap-guard.sh"
-chk 'pre_wires "pre-push-gate.sh"' "PreToolUse wires pre-push-gate.sh"
+chk 'pre_wires "pr-gate.sh"' "PreToolUse wires pr-gate.sh"
 chk 'grep -q "CLAUDE_PLUGIN_ROOT" "$J"' "uses CLAUDE_PLUGIN_ROOT path var"
 exit $fail

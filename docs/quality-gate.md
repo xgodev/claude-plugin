@@ -57,9 +57,9 @@ A project with `package.json` (even React/Vue/etc.) is covered by
 
 ## Enforcement hook
 
-The plugin also ships an **opt-in** `PreToolUse` hook (`hooks/quality-gate/pre-push-gate.sh`)
-that blocks `git push` and `gh pr create` unless the gate passes for the
-current HEAD, re-running `qg` against the branch upstream (falling back to
+The plugin also ships an **opt-in** `PreToolUse` hook (`hooks/quality-gate/pr-gate.sh`)
+that blocks `gh pr create` unless the gate passes for the current HEAD
+(`git push` is never gated), re-running `qg` against the branch upstream (falling back to
 `origin/HEAD`, then absolute mode). Exporting `QG_BYPASS_REASON` overrides it
 the same way it overrides the gate itself, and the hook fails **open** (never
 blocks) on its own errors -- missing `jq`/`qg`, malformed input, or a
@@ -96,7 +96,7 @@ cd /path/to/your/project
 - [`docs/contract.md`](contract.md) -- contract common to every language (CLI, exit codes, output, bypass, `.qg.yaml`).
 - [`docs/output-format.md`](output-format.md) -- detailed text and JSON formats.
 - [`docs/consume.md`](consume.md) -- how to integrate it in your project (local now; CI in V2).
-- [`docs/hooks.md`](hooks.md) -- the opt-in pre-push enforcement hook (blocks push/PR-create on a failing gate).
+- [`docs/hooks.md`](hooks.md) -- the opt-in PR-gate hook (blocks `gh pr create` on a failing gate; `git push` is never gated).
 - [`docs/languages/rust.md`](languages/rust.md) -- prereqs, metrics and troubleshooting for Rust.
 - [`docs/languages/go.md`](languages/go.md) -- prereqs, metrics and troubleshooting for Go.
 - [`docs/languages/python.md`](languages/python.md) -- prereqs, metrics and troubleshooting for Python.

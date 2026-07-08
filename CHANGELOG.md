@@ -1,5 +1,34 @@
 # Changelog
 
+## [1.6.0]
+
+### Changed
+
+- **The QG hook gates ONLY `gh pr create` -- `git push` is never gated.**
+  The gate belongs to the PR moment (and CI); a per-push gate costs
+  minutes on heavy projects. The hook was renamed
+  `hooks/quality-gate/pr-gate.sh`, its push-exemption logic removed, and
+  the bats suite rewritten (`tests/hook-pr.bats`).
+- **Rust gate: test and coverage fused into ONE suite execution.**
+  `cargo llvm-cov --ignore-run-fail` yields the failure count and the
+  coverage percentage from a single run -- the separate `cargo test`
+  execution was a full extra suite run per side. Applies to comparative
+  (base and PR) and absolute modes.
+- **Rust gate: base metrics cached per (base SHA, ruleset).** Base
+  metrics are a pure function of the base commit; re-runs against the
+  same base now measure only the PR side. `--refresh-baseline`
+  invalidates.
+
+### Fixed
+
+- **Rust baseline dir was shared across projects and base SHAs**
+  (`/tmp/qg-baseline-rust` with a prepared-once sentinel), silently
+  reusing another project's or an older base's extraction -- wrong
+  verdicts and pathological runtimes. The baseline dir is now keyed by
+  project and base SHA, which also makes staleness detection automatic
+  (docs/consume.md described a staleness behavior the code did not
+  implement; now it does).
+
 ## [1.5.0]
 
 ### Changed

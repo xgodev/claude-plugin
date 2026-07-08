@@ -4,7 +4,7 @@ This repo is the **all-in-one `claude-plugin`** by `xgodev` AND the single
 `xgodev` marketplace (`.claude-plugin/marketplace.json`, one plugin
 entry, source `./`). Everything that used to live in the retired repos'
 plugin form -- `boost-claude` (`boost` skill), `quality-gate` (dispatcher +
-gates + skills + pre-push hook), `dev-rules` (skill + RED-first hooks),
+gates + skills + PR-gate hook), `dev-rules` (skill + RED-first hooks),
 `skill-rules` (skill) -- now lives HERE, as one plugin, one version, one
 install. The plugin ships ONLY what is its own: no third-party MCP
 servers (the `playwright` MCP wiring was removed in 1.1.0 -- users who
@@ -64,7 +64,7 @@ repos. Read them before changing anything.
   declare `"hooks"` in `plugin.json` -- the manifest key is only for
   ADDITIONAL non-standard files, and double registration breaks the whole
   plugin ("Duplicate hooks file detected", quality-gate 0.3.1 incident).
-  `hooks/hooks.json` is the MERGE of the QG pre-push hook and the
+  `hooks/hooks.json` is the MERGE of the QG PR-gate hook and the
   dev-rules hooks; when editing, keep all entries and run
   `hooks/test/hooks_json_test.sh`. The registry stays at
   `hooks/hooks.json`; the SCRIPTS are grouped by area

@@ -35,7 +35,7 @@ qg_clean_env() {
 
 # --- pre-push hook helpers -------------------------------------------------
 qg_hook_path() {
-  echo "$QG_GIT_ROOT/hooks/quality-gate/pre-push-gate.sh"
+  echo "$QG_GIT_ROOT/hooks/quality-gate/pr-gate.sh"
 }
 
 # Makes a temp "plugin root" holding a qg stub (at the bundled path
