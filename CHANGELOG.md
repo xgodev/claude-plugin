@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.7.0]
+
+### Changed
+
+- **All 7 remaining gates got the rust 1.6.0 treatment.** Baseline dirs
+  are now keyed by project + base SHA in every language (go, python,
+  nodejs, java, kotlin, swift, web) -- fixing the same cross-project /
+  stale-base poisoning bug -- and base metrics are cached per
+  (base SHA, ruleset), so re-runs against the same base only measure the
+  PR side. Test+coverage fused into a single suite execution for **go**
+  (`go test -coverprofile` yields both) and **swift** (the gate literally
+  ran the same `swift test --enable-code-coverage` twice). Fusion for
+  python/nodejs/java/kotlin is follow-up work -- their base-metrics cache
+  already halves repeat runs.
+
 ## [1.6.0]
 
 ### Changed

@@ -12,7 +12,7 @@ For the canonical specification, see [`contract.md`](contract.md). This document
 ═══ Quality Gate — rust ═══
   branch:        feature/INT-1234
   base ref:      origin/main
-  baseline:      /tmp/qg-baseline-rust
+  baseline:      /tmp/qg-baseline-rust/<project>-<base-sha>
   cov margin:    1.0pp
   logs:          target/qg-logs/
 

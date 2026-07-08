@@ -198,6 +198,23 @@ count_complexity() {
   printf '%d\n' "$(_num "${n:-0}")"
 }
 
+# Perf fusion: `go test -coverprofile` runs the suite ONCE and yields both the
+# failure count and the coverage percentage -- the separate plain `go test`
+# execution was a full extra suite run per side. Echoes "<failures> <pct>".
+measure_test_and_coverage() {
+  local dir="$1" log="$2" out="$3"
+  : > "$log"
+  local profile
+  profile="${out%.json}.profile"
+  ( cd "$dir" && GOFLAGS=-mod=mod go test ./... -count=1 -vet=off -covermode=atomic -coverprofile="$profile" ) > "$log" 2>&1 || true
+  local n pct=0
+  n=$(_grep_count '^--- FAIL:' "$log")
+  if [ -s "$profile" ]; then
+    pct=$( ( cd "$dir" && go tool cover -func="$profile" ) 2>/dev/null             | awk '/^total:/ { gsub("%","",$NF); print $NF; exit }')
+  fi
+  printf '%d %s\n' "$(_num "${n:-0}")" "$(_num "${pct:-0}")"
+}
+
 measure_coverage() {
   local dir="$1" out="$2"
   local profile
