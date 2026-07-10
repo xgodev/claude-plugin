@@ -1,6 +1,6 @@
 ---
 name: dev
-description: "Use when developing software: writing, editing, or refactoring code in any language (engineering discipline -- before writing, not after); any work with github.com/xgodev/boost or Go services built on it; checking code quality before opening a PR -- \"run quality gate\", \"run QG\", \"check quality\", \"validate before PR\", \"qa before push\"; and any UI/UX design work on web or mobile -- colors, palettes, visual styles, typography, charts, icons, component/layout patterns per framework (React, Vue, Svelte, Next, SwiftUI, Flutter, Tailwind, and more), UX heuristics, accessibility, design systems, motion, states, research, metrics."
+description: "Use when developing software OR doing ANY UI/UX design work. Design triggers (route to a full design catalog + methodology): design or redesign a screen, page, or component; fix a layout, navbar, table, or spacing; choose colors, palettes, typography, styles, charts, or icons; review or polish a UI -- on any stack (React, Vue, Svelte, Next, SwiftUI, Flutter, Tailwind, Thymeleaf/Bootstrap, and more). Code triggers: writing, editing, or refactoring code in any language (engineering discipline -- before writing, not after); any work with github.com/xgodev/boost or Go services built on it; checking code quality before opening a PR -- \"run quality gate\", \"run QG\", \"check quality\", \"validate before PR\", \"qa before push\"."
 license: MIT
 metadata:
   author: jpfaria

@@ -27,6 +27,8 @@ capability:
   plus UX methodology references. Catalog data is queried by a bundled
   engine, never loaded into context. See
   [`docs/ux-catalog.md`](docs/ux-catalog.md).
+- **`ux-ui` (design door)** -- a thin routing skill so pure design tasks
+  find the catalog directly; it lands on the same `dev/design/` content.
 - **Dependency: [`superpowers`](https://github.com/obra/superpowers)** --
   core skills library by Jesse Vincent (TDD, debugging, collaboration
   patterns), resolved from the official `claude-plugins-official`
@@ -35,7 +37,7 @@ capability:
   duplicate copy.
 
 Skills are namespaced by the plugin name: `claude-plugin:dev`,
-`claude-plugin:skill-rules`. They trigger on
+`claude-plugin:ux-ui` (thin design door), `claude-plugin:skill-rules`. They trigger on
 natural phrases (e.g. "run quality gate" / "run QG") without the prefix. (The `add-quality-gate`
 skill is maintainer-only and lives project-local in this repo -- it is
 not shipped with the plugin.)
@@ -112,6 +114,7 @@ pay-per-use:
 | Component | Always-on | Loaded when |
 |---|---|---|
 | `dev` description (door: engineering, gate, boost, design) | ~150 tokens | every session |
+| `ux-ui` description (thin design door) | ~85 tokens | every session |
 | `skill-rules` description | ~40 tokens | every session |
 | `dev` router SKILL.md + the leaf it routes to | 0 | only when the skill fires |
 | Hooks (PR gate, RED-first, main-folder, line-cap) | 0 | never (run as processes) |
@@ -121,7 +124,8 @@ pay-per-use:
 
 ```
 .claude-plugin/        plugin.json (the single plugin) + marketplace.json (xgodev)
-skills/                dev/{SKILL.md router, engineering/, golang/, design/}  skill-rules/ (shipped)
+skills/                dev/{SKILL.md router, engineering/, golang/, design/}
+                       ux-ui/ (thin design door -> dev/design)  skill-rules/ (shipped)
 .claude/skills/        add-quality-gate/ (maintainer-only, project-local)
 hooks/                 hooks.json (merged registry) + test/; scripts grouped by area:
                        quality-gate/pr-gate.sh, dev-rules/{red-first-guard.sh,
@@ -150,4 +154,4 @@ See [`docs/quality-gate.md`](docs/quality-gate.md) and
 
 MIT -- see [LICENSE](LICENSE).
 
-- Version: 1.7.0
+- Version: 1.8.0

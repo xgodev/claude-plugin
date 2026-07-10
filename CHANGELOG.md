@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.8.0]
+
+### Fixed
+
+- **Pure UI/UX tasks now route to the design content** (issue #4). The
+  `dev` description buried its design clause behind boost/Go/gate
+  triggers, so design-only tasks lost the skill-selection race to
+  generic UI skills. Two changes: the design triggers now LEAD the `dev`
+  description with concrete phrases (design/redesign a screen, fix a
+  navbar/layout, choose palette/typography, polish a UI), and a thin
+  `ux-ui` door skill (~85 always-on tokens) exposes the same
+  `dev/design/` content under a design-named skill that competes head-on
+  with UI-branded third-party skills.
+
 ## [1.7.0]
 
 ### Changed
