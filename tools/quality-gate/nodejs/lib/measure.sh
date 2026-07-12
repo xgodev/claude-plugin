@@ -274,6 +274,39 @@ measure_coverage() {
   # Bug 2: never returns empty/"Unknown" -> 0.
   printf '%s\n' "$(_num "$pct")"
 }
+
+# Perf fusion: for the node --test path, ONE c8-wrapped run yields both the
+# failure count and the coverage percentage. Projects with a package.json
+# "test" script keep the two separate runs (their script drives the suite;
+# c8 only wraps node --test), matching the previous behavior exactly.
+measure_test_and_coverage() {
+  local dir="$1" log="$2" out="$3"
+  : > "$log"
+  if [ -f "$dir/package.json" ] && jq -e '.scripts.test' "$dir/package.json" >/dev/null 2>&1; then
+    local n cov
+    n=$(count_test_failures "$dir" "$log")
+    cov=$(measure_coverage "$dir" "$out")
+    printf '%d %s\n' "$(_num "$n")" "$(_num "$cov")"
+    return
+  fi
+  local cov_dir
+  cov_dir=$(dirname "$out")/coverage-tmp-$$
+  ( cd "$dir" && npx --yes c8 --reports-dir="$cov_dir" --reporter=json-summary node --test ) > "$log" 2>&1 || true
+  local n pct=0
+  n=$(awk '
+    /^[[:space:]]*ℹ fail / { print $3; exit }
+    /^# fail / { print $3; exit }
+  ' "$log")
+  n=$(_num "$n")
+  if [ -f "$cov_dir/coverage-summary.json" ]; then
+    pct=$(jq -r '.total.lines.pct // 0' "$cov_dir/coverage-summary.json" 2>/dev/null || echo 0)
+    cp "$cov_dir/coverage-summary.json" "$out" 2>/dev/null || true
+  else
+    printf '{"coverage_percent": 0}\n' > "$out"
+  fi
+  rm -rf "$cov_dir"
+  printf '%d %s\n' "${n%.*}" "$(_num "$pct")"
+}
 # Baseline submodule extraction (shared logic across all language gates).
 # `git archive` does NOT expand git submodules: in the baseline checkout the
 # submodule dirs are empty, so a submodule-dependent build fails, the base

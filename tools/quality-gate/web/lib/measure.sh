@@ -128,7 +128,7 @@ count_lint_errors() {
         | xargs npx --yes stylelint \
         --config "$rules/.stylelintrc.json" ) > "$log.style" 2>&1 || true
     local s
-    # stylelint default formatter: linhas " N:N  ✖  msg  rule".
+    # stylelint default formatter: lines " N:N  ✖  msg  rule".
     s=$(_grep_count '^[[:space:]]+[0-9]+:[0-9]+' "$log.style")
     total=$((total + s))
     cat "$log.style" >> "$log"

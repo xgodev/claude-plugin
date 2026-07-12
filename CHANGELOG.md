@@ -1,5 +1,35 @@
 # Changelog
 
+## [1.10.0]
+
+### Added
+
+- **CI (GitHub Actions).** `.github/workflows/tests.yml` runs on every
+  push and PR: manifest validation, the 3-file version discipline check,
+  all hook unit tests, skill reference integrity, and the bats suites
+  with CI-installable toolchains (dispatcher, PR-gate hook, python,
+  nodejs, go).
+
+### Changed
+
+- **Test+coverage fusion for the python, nodejs, java, and kotlin
+  gates.** Each gate now runs its test suite ONCE per side and extracts
+  both the failure count and the coverage percentage from that single
+  run (`measure_test_and_coverage`), as rust/go/swift already did --
+  previously each side ran the full suite twice. Safe fallbacks keep the
+  failure count correct when the coverage plugin is absent (pytest-cov /
+  kover), and nodejs projects with a custom `package.json` test script
+  keep the previous two-run behavior.
+
+### Fixed
+
+- Translated the remaining non-English code comments and test messages
+  (go, python, java, web gate sources; go/java/nodejs bats suites) --
+  the repo is English-only.
+- Removed a stale non-English planning document from `docs/`.
+- `tools/quality-gate/tests/README.md` no longer lists a nonexistent
+  `contract.bats` and now documents which suites run in CI.
+
 ## [1.9.0]
 
 ### Added

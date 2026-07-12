@@ -342,9 +342,9 @@ if [ "$QG_ABSOLUTE_MODE" = "1" ]; then
   abs_fmt=$(count_fmt_errors "." "$QG_LOG_DIR_ARG/abs-fmt.log")
   abs_lint=$(count_lint_errors "." "$QG_LOG_DIR_ARG/abs-lint.log")
   abs_build=$(count_build_errors "." "$QG_LOG_DIR_ARG/abs-build.log")
-  abs_test=$(count_test_failures "." "$QG_LOG_DIR_ARG/abs-test.log")
   abs_complex=$(count_complexity "." "$QG_LOG_DIR_ARG/abs-complex.log")
-  abs_cov=$(measure_coverage "." "$QG_LOG_DIR_ARG/abs-cov.json")
+  set -- $(measure_test_and_coverage "." "$QG_LOG_DIR_ARG/abs-test.log" "$QG_LOG_DIR_ARG/abs-cov.json")
+  abs_test="$1"; abs_cov="$2"
 
   branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "<detached>")
   started_at=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -532,9 +532,9 @@ echo "-- measuring base --" >&2
 base_fmt=$(count_fmt_errors "$QG_BASELINE_DIR_ARG" "$QG_LOG_DIR_ARG/base-fmt.log")
 base_lint=$(count_lint_errors "$QG_BASELINE_DIR_ARG" "$QG_LOG_DIR_ARG/base-lint.log")
 base_build=$(count_build_errors "$QG_BASELINE_DIR_ARG" "$QG_LOG_DIR_ARG/base-build.log")
-base_test=$(count_test_failures "$QG_BASELINE_DIR_ARG" "$QG_LOG_DIR_ARG/base-test.log")
 base_complex=$(count_complexity "$QG_BASELINE_DIR_ARG" "$QG_LOG_DIR_ARG/base-complex.log")
-base_cov=$(measure_coverage "$QG_BASELINE_DIR_ARG" "$QG_LOG_DIR_ARG/base-cov.json")
+set -- $(measure_test_and_coverage "$QG_BASELINE_DIR_ARG" "$QG_LOG_DIR_ARG/base-test.log" "$QG_LOG_DIR_ARG/base-cov.json")
+base_test="$1"; base_cov="$2"
   if [ -n "$QG_BASE_METRICS_CACHE" ]; then
     printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$base_fmt" "$base_lint" "$base_build" "$base_test" "$base_complex" "$base_cov" > "$QG_BASE_METRICS_CACHE"
   fi
@@ -544,9 +544,9 @@ echo "-- measuring PR --" >&2
 pr_fmt=$(count_fmt_errors "." "$QG_LOG_DIR_ARG/pr-fmt.log")
 pr_lint=$(count_lint_errors "." "$QG_LOG_DIR_ARG/pr-lint.log")
 pr_build=$(count_build_errors "." "$QG_LOG_DIR_ARG/pr-build.log")
-pr_test=$(count_test_failures "." "$QG_LOG_DIR_ARG/pr-test.log")
 pr_complex=$(count_complexity "." "$QG_LOG_DIR_ARG/pr-complex.log")
-pr_cov=$(measure_coverage "." "$QG_LOG_DIR_ARG/pr-cov.json")
+set -- $(measure_test_and_coverage "." "$QG_LOG_DIR_ARG/pr-test.log" "$QG_LOG_DIR_ARG/pr-cov.json")
+pr_test="$1"; pr_cov="$2"
 
 branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "<detached>")
 started_at=$(date -u +"%Y-%m-%dT%H:%M:%SZ")

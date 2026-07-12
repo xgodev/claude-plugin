@@ -498,7 +498,7 @@ EOF
   local rd
   rd=$(qg_ruleset_dir)
   [ -f "$rd/.golangci.yml" ] || { echo "QG ruleset absent: "; return 1; }
-  command -v golangci-lint >/dev/null 2>&1 || skip "golangci-lint not available (fallback go vet ja eh sem-config / tamper-proof)"
+  command -v golangci-lint >/dev/null 2>&1 || skip "golangci-lint not available (the go vet fallback is already config-free / tamper-proof)"
   local tmp logdir
   tmp=$(qg_tmp_dir); logdir=$(qg_tmp_dir)
   cp -R "$(qg_fixture_path go regressed)/." "$tmp/"

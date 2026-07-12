@@ -1,0 +1,56 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  # Fast, toolchain-free checks: manifests, version discipline, hook unit
+  # tests, and skill reference integrity.
+  plugin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate manifests
+        run: |
+          jq -e . .claude-plugin/plugin.json > /dev/null
+          jq -e . .claude-plugin/marketplace.json > /dev/null
+          jq -e . hooks/hooks.json > /dev/null
+      - name: Version discipline (plugin.json == README == CHANGELOG)
+        run: |
+          v=$(jq -r .version .claude-plugin/plugin.json)
+          grep -q -- "- Version: $v" README.md
+          grep -q "## \[$v\]" CHANGELOG.md
+      - name: Hook unit tests
+        run: |
+          for t in hooks/test/*.sh; do
+            echo "== $t"
+            bash "$t"
+          done
+      - name: Skill reference integrity
+        run: python3 scripts/verify_references.py
+
+  # Quality-gate bats suites that run with CI-installable toolchains:
+  # dispatcher, PR-gate hook, python, nodejs, and go. The java, kotlin,
+  # rust, swift, and web suites need heavier toolchains and stay local
+  # (tools/quality-gate/tests/README.md).
+  quality-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+      - name: Install test tooling
+        run: |
+          npm install -g bats
+          pip install pytest pytest-cov radon ruff
+      - name: Run bats suites
+        working-directory: tools/quality-gate/tests
+        run: bats dispatcher.bats hook-pr.bats python-qg.bats nodejs-qg.bats go-qg.bats

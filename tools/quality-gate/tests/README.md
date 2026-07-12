@@ -17,9 +17,18 @@ bats tools/quality-gate/tests/rust-qg.bats
 ## Structure
 
 - `tests/<lang>-qg.bats` -- tests for each language's script.
+- `tests/dispatcher.bats` -- dispatcher (`qg`) routing tests.
+- `tests/hook-pr.bats` -- PR-gate hook tests.
 - `tests/helpers/setup.bash` -- shared helpers.
-- `tests/contract.bats` -- contract tests (valid for ANY language).
 
 ## Fixtures
 
 Each `<lang>/test-fixtures/{baseline,regressed}/` is used by the tests via `qg_fixture_path "<lang>" "baseline"`.
+
+## CI
+
+`.github/workflows/tests.yml` runs on every push and PR: the hook unit
+tests, manifest validation, and the bats suites whose toolchains are
+CI-installable (`dispatcher`, `hook-pr`, `python`, `nodejs`, `go`). The
+`java`, `kotlin`, `rust`, `swift`, and `web` suites need heavier
+toolchains and run locally before a gate change ships.
