@@ -10,6 +10,7 @@ chk 'jq -e . "$J" >/dev/null 2>&1' "hooks.json is valid JSON"
 pre_wires() { jq -e "[.hooks.PreToolUse[].hooks[].command] | any(test(\"$1\"))" "$J" >/dev/null 2>&1; }
 chk 'pre_wires "red-first-guard.sh"' "PreToolUse wires red-first-guard.sh"
 chk 'jq -e "[.hooks.PostToolUse[].hooks[].command] | any(test(\"clear-after-commit.sh\"))" "$J" >/dev/null 2>&1' "PostToolUse wires clear-after-commit.sh"
+chk 'jq -e "[.hooks.PostToolUse[].hooks[].command] | any(test(\"issue-comment-reminder.sh\"))" "$J" >/dev/null 2>&1' "PostToolUse wires issue-comment-reminder.sh"
 chk 'pre_wires "main-folder-guard.sh"' "PreToolUse wires main-folder-guard.sh"
 chk 'pre_wires "line-cap-guard.sh"' "PreToolUse wires line-cap-guard.sh"
 chk 'pre_wires "pr-gate.sh"' "PreToolUse wires pr-gate.sh"

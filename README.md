@@ -117,7 +117,7 @@ pay-per-use:
 | `ux-ui` description (thin design door) | ~85 tokens | every session |
 | `skill-rules` description | ~40 tokens | every session |
 | `dev` router SKILL.md + the leaf it routes to | 0 | only when the skill fires |
-| Hooks (PR gate, RED-first, main-folder, line-cap) | 0 | never (run as processes) |
+| Hooks (PR gate, RED-first, main-folder, line-cap, issue reminder) | 0 | never (run as processes) |
 | MCP servers | 0 | none bundled |
 
 ## Repository layout
@@ -130,7 +130,7 @@ skills/                dev/{SKILL.md router, engineering/, golang/, design/}
 hooks/                 hooks.json (merged registry) + test/; scripts grouped by area:
                        quality-gate/pr-gate.sh, dev-rules/{red-first-guard.sh,
                        main-folder-guard.sh, line-cap-guard.sh,
-                       clear-after-commit.sh, lib/}
+                       issue-comment-reminder.sh, clear-after-commit.sh, lib/}
 tools/quality-gate/
                        qg (dispatcher; also a plain CLI), per-language gates
                        (<lang>/qg.sh + lib/ + rules/ + test-fixtures/ for go, java,
@@ -154,4 +154,4 @@ See [`docs/quality-gate.md`](docs/quality-gate.md) and
 
 MIT -- see [LICENSE](LICENSE).
 
-- Version: 1.8.0
+- Version: 1.9.0

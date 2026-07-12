@@ -105,6 +105,14 @@ user. **Clone naming:** `issue-<n>` when the work has a related issue;
 when there is none, a session/task slug (e.g. `sess-<yyyymmdd>-<short-task>`),
 so every session still gets its own isolated folder.
 
+### issue-comment reminder (on by default, never blocks)
+
+After a `git push` on an issue branch (`feature/issue-N`, `bugfix/issue-N`,
+any branch containing `issue-N`), a PostToolUse hook injects a reminder to
+comment issue #N with the commit hash(es), files changed, and build/test
+result. Reminder only -- it never denies anything, and it is silent off
+issue branches, outside git repos, and under the kill switches.
+
 ### line-cap guard (on by default)
 
 Denies `Edit`/`Write` that would GROW a source file already over its line

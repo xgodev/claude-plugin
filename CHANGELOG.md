@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.9.0]
+
+### Added
+
+- **Issue-comment reminder hook** (issue #5): after a `git push` on an
+  issue branch (any branch containing `issue-N`), a PostToolUse(Bash)
+  hook injects a reminder to `gh issue comment N` with the commit
+  hash(es), files changed, and build/test result. Reminder only -- never
+  blocks; silent off issue branches, outside git repos, and under the
+  dev-rules kill switches. Registered in `hooks/hooks.json` with its own
+  test in `hooks/test/`.
+
 ## [1.8.0]
 
 ### Fixed
