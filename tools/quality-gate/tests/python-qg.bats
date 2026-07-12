@@ -195,8 +195,8 @@ EOF
 @test "python/qg.sh detects a missing tool and exits 2 with an installable message" {
   run env PATH="/usr/bin:/bin" "$(qg_script_path python)" --base origin/main
   [ "$status" -eq 2 ]
-  [[ "$output" == *"python"* ]]
-  [[ "$output" == *"install"* ]]
+  printf '%s' "$output" | grep -q pytest
+  printf '%s' "$output" | grep -q install
 }
 
 @test "python/qg.sh with QG_BYPASS_REASON exits 0 and emits a warning" {

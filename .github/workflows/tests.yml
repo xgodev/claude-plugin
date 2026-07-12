@@ -49,8 +49,10 @@ jobs:
           go-version: stable
       - name: Install test tooling
         run: |
-          npm install -g bats
+          npm install -g bats prettier eslint c8
           pip install pytest pytest-cov radon ruff
+          go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
       - name: Run bats suites
         working-directory: tools/quality-gate/tests
         run: bats dispatcher.bats hook-pr.bats python-qg.bats nodejs-qg.bats go-qg.bats

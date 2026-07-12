@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.10.1]
+
+### Fixed
+
+- **Two quality-gate tests asserted nothing and one asserted the wrong
+  thing.** The pr-gate hook swallows all gate output on the allow path, so
+  the two --base forwarding tests (which used a PASSING stub) could never
+  see the forwarded argv -- they now use a failing stub and assert on the
+  deny reason. The python missing-tool test asserted on "python", which is
+  present at /usr/bin on Linux -- it now asserts on pytest. Root cause of
+  the false local greens: under macOS bash 3.2 a failing `[[ ]]` does not
+  trip bats' `set -e` detection (documented in the tests README; CI runs
+  bash 5).
+- **CI toolchain gaps**: install gocyclo (the go gate treats it as
+  required, per contract) and pin prettier/eslint/c8 as npm globals so
+  the nodejs suite does not depend on ad-hoc npx downloads.
+
 ## [1.10.0]
 
 ### Added

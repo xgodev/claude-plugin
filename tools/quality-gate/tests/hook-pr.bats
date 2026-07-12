@@ -94,19 +94,27 @@ setup() {
 }
 
 @test "hook: absolute mode when no upstream (qg called WITHOUT --base)" {
+  # Failing stub: the deny reason embeds the stub's argv, so the assertion
+  # sees what the hook actually forwarded. (A passing stub produces NO
+  # output at all -- nothing to assert on.)
   local plug proj
-  plug="$(qg_make_stub_plugin 0)"
+  plug="$(qg_make_stub_plugin 1)"
   proj="$(qg_make_git_repo)"
   CLAUDE_PLUGIN_ROOT="$plug" CLAUDE_PROJECT_DIR="$proj" \
     run --separate-stderr bash -c "printf '%s' '{\"tool_input\":{\"command\":\"gh pr create\"}}' | \"$(qg_hook_path)\" 2>&1"
   [ "$status" -eq 0 ]
-  [[ "$output" != *"--base"* ]]
+  printf '%s' "$output" | grep -q 'stub-qg-args:'
+  if printf '%s' "$output" | grep -q -- '--base'; then
+    echo "hook forwarded --base with no upstream: $output"; return 1
+  fi
   rm -rf "$plug" "$proj"
 }
 
 @test "hook: base resolved from origin/HEAD is forwarded as --base" {
+  # Failing stub for the same reason as above: only the deny path surfaces
+  # the forwarded argv.
   local plug proj clone
-  plug="$(qg_make_stub_plugin 0)"
+  plug="$(qg_make_stub_plugin 1)"
   proj="$(qg_make_git_repo)"
   clone="$(mktemp -d -t qg-clone-XXXXXX)"
   git clone -q "$proj" "$clone/repo"
@@ -114,7 +122,7 @@ setup() {
   CLAUDE_PLUGIN_ROOT="$plug" CLAUDE_PROJECT_DIR="$clone/repo" \
     run --separate-stderr bash -c "printf '%s' '{\"tool_input\":{\"command\":\"gh pr create\"}}' | \"$(qg_hook_path)\" 2>&1"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"--base"* ]]
+  printf '%s' "$output" | grep -q -- '--base origin/'
   rm -rf "$plug" "$proj" "$clone"
 }
 
