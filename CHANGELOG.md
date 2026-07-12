@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.10.3]
+
+### Fixed
+
+- **fmt count broke under CI color.** prettier and stylelint colorize
+  their output when they detect a CI environment (GITHUB_ACTIONS), so
+  the `[warn]` parsing counted 0 formatting issues there. The nodejs and
+  web gates now invoke them with `NO_COLOR=1 FORCE_COLOR=0`.
+- Two web e2e test names translated to English.
+
 ## [1.10.2]
 
 ### Fixed

@@ -117,7 +117,7 @@ count_fmt_errors() {
   # project's .prettierrc and .editorconfig). --ignore-path points at QG's
   # CANONICAL .prettierignore (NEVER the project's): LAW -- measures
   # SOURCE CODE, generated/vendored dirs stay out.
-  ( cd "$dir" && npx --yes prettier --check \
+  ( cd "$dir" && NO_COLOR=1 FORCE_COLOR=0 npx --yes prettier --check \
       --config "$rules/.prettierrc.json" --no-editorconfig \
       --ignore-path "$rules/.prettierignore" . ) > "$log" 2>&1 || true
   # prettier emits "[warn] <path>" for each diverging file. A second defensive
