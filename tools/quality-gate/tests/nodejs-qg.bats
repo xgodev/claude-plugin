@@ -350,7 +350,7 @@ EOF
   local logdir
   logdir=$(qg_tmp_dir)
   result=$(count_fmt_errors "$(qg_fixture_path nodejs regressed)" "$logdir/test.log")
-  [ "$result" -gt 0 ]
+  [ "$result" -gt 0 ] || { echo "count_fmt=$result -- prettier log:"; cat "$logdir/test.log"; return 1; }
   rm -rf "$logdir"
 }
 

@@ -587,12 +587,12 @@ EOF
   repo=$(qg_tmp_dir)
   cp -R "$(qg_fixture_path go baseline)/." "$repo/"
   cd "$repo"
-  git init -q . && git config user.email t@t && git config user.name t
+  git -c init.defaultBranch=main init -q . && git config user.email t@t && git config user.name t
   git add -A && git commit -qm base
   git checkout -qb feature
   echo '// touch' >> lib.go && git add -A && git commit -qm change
   QG_BASELINE_CACHE_DIR="$repo/.qg-cache" run bash "$QG_REPO_ROOT/go/qg.sh" --base main --force-full --log-dir "$repo/logs1"
   QG_BASELINE_CACHE_DIR="$repo/.qg-cache" run bash "$QG_REPO_ROOT/go/qg.sh" --base main --force-full --log-dir "$repo/logs2"
-  [[ "$output" == *"base metrics: cached"* ]]
+  printf '%s' "$output" | grep -q 'base metrics: cached'
   cd / && rm -rf "$repo"
 }

@@ -651,13 +651,13 @@ EOF
   repo=$(qg_tmp_dir)
   cp -R "$(qg_fixture_path rust baseline)/." "$repo/"
   cd "$repo"
-  git init -q . && git config user.email t@t && git config user.name t
+  git -c init.defaultBranch=main init -q . && git config user.email t@t && git config user.name t
   git add -A && git commit -qm base
   git checkout -qb feature
   echo '// touch' >> src/lib.rs && git add -A && git commit -qm change
   cache_root="$repo/.qg-cache"
   QG_BASELINE_CACHE_DIR="$cache_root" run bash "$QG_REPO_ROOT/rust/qg.sh" --base main --force-full --log-dir "$repo/logs1"
   QG_BASELINE_CACHE_DIR="$cache_root" run bash "$QG_REPO_ROOT/rust/qg.sh" --base main --force-full --log-dir "$repo/logs2"
-  [[ "$output" == *"base metrics: cached"* ]]
+  printf '%s' "$output" | grep -q 'base metrics: cached'
   cd / && rm -rf "$repo"
 }

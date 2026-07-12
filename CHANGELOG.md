@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.10.2]
+
+### Fixed
+
+- The go/rust "base metrics cached" tests created their repo without
+  pinning `init.defaultBranch=main` and then gated against `--base main`
+  -- red on any machine whose git defaults to `master` (CI). Pinned, and
+  the assertion converted to a bash-3.2-safe grep.
+- The nodejs `count_fmt` test now dumps the prettier log on failure so an
+  environment-only red is diagnosable from the bats output.
+
 ## [1.10.1]
 
 ### Fixed
