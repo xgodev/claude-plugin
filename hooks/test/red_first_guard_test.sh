@@ -98,6 +98,25 @@ out="$(run Edit "{\"tool_name\":\"Edit\",\"tool_input\":{\"file_path\":\"$SBX/.s
 if denied "$out"; then echo "ok  : .solvers clone path matches production_globs"; else echo "FAIL: .solvers clone path should match production_globs"; fail=1; fi
 rm -f "$SBX/.dev-rules.json"
 
+# 8. Issue #6: directory-scoped Bash reads must NOT bypass file-shaped
+# production_globs -- a directory that is a prefix of (or contains) a
+# production glob is production too.
+reset
+mkdir -p "$SBX/crates/engine/src" "$SBX/docs" "$SBX/tests"
+printf '%s' '{"production_globs":["crates/**/src/**"]}' > "$SBX/.dev-rules.json"
+out="$(run Bash '{"tool_name":"Bash","tool_input":{"command":"grep -rln foo crates/"}}')"
+if denied "$out"; then echo "ok  : grep -r over glob-prefix dir blocked"; else echo "FAIL: grep -rln foo crates/ should be blocked (issue #6)"; fail=1; fi
+out="$(run Bash '{"tool_name":"Bash","tool_input":{"command":"rg foo crates/engine/src/"}}')"
+if denied "$out"; then echo "ok  : rg over production dir blocked"; else echo "FAIL: rg foo crates/engine/src/ should be blocked (issue #6)"; fail=1; fi
+out="$(run Bash '{"tool_name":"Bash","tool_input":{"command":"ls crates/engine/src"}}')"
+if denied "$out"; then echo "ok  : ls of production dir blocked"; else echo "FAIL: ls crates/engine/src should be blocked (issue #6)"; fail=1; fi
+# Non-production directories still pass with the same config.
+out="$(run Bash '{"tool_name":"Bash","tool_input":{"command":"grep -r foo docs/"}}')"
+if denied "$out"; then echo "FAIL: grep -r docs/ must stay allowed"; fail=1; else echo "ok  : grep -r over docs/ allowed"; fi
+out="$(run Bash '{"tool_name":"Bash","tool_input":{"command":"ls tests/"}}')"
+if denied "$out"; then echo "FAIL: ls tests/ must stay allowed"; fail=1; else echo "ok  : ls tests/ allowed"; fi
+rm -f "$SBX/.dev-rules.json"
+
 # Malformed / empty stdin must not crash or block -- clean allow (exit 0, no deny).
 printf '%s' 'not-json' | bash "$GUARD" >/dev/null 2>&1; rc=$?
 if [ "$rc" = 0 ]; then echo "ok  : malformed stdin exits 0 (allow)"; else echo "FAIL: malformed stdin exit $rc"; fail=1; fi

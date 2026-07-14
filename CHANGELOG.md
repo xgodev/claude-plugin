@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.11.0]
+
+### Fixed
+
+- **red-first-guard: directory-scoped reads no longer bypass the RED
+  gate** (issue #6). With file-shaped `production_globs` (e.g.
+  `crates/**/src/**`), `grep -r crates/`, `rg crates/x/src/`, and
+  `ls crates/x/src` all slipped through: a directory token is a prefix
+  of the glob, never a match, and `ls` was not in the guard's read-command
+  list at all. `detect.sh` now treats a directory that can CONTAIN
+  glob-matching files as production, and `ls`/`find`/`tree` are gated
+  reads. Non-production directories (docs/, tests/) still pass.
+
+### Added
+
+- **mode-prompt hook (UserPromptSubmit)**: while no mode is chosen for
+  the cycle, every user prompt gets the LAW 13 instruction injected (ask
+  bug vs feature; bug => failing test before reading production), so the
+  gate engages at the START of a flow instead of at the first production
+  token (issue #6). Silent once a sentinel exists and under the kill
+  switches; never blocks.
+
 ## [1.10.3]
 
 ### Fixed

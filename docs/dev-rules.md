@@ -38,7 +38,16 @@ under `.solvers/*/.dev-rules/`):
 | `.mode-feature` | allowed | allowed |
 | `.red-first-unlocked` | allowed | allowed |
 
-Test files, docs, and config are never blocked.
+Test files, docs, and config are never blocked. Directory-scoped Bash
+reads (`grep -r dir/`, `rg dir/`, `ls dir`, `find`, `tree`) are gated
+like file reads: a directory that can contain files matching a
+production glob counts as production (issue #6).
+
+**Start of a cycle:** while no mode is chosen, a `UserPromptSubmit`
+hook announces LAW 13 on every prompt (ask the user: bug vs feature vs
+disable) so the gate engages before the first production read, not at
+it. It goes silent as soon as a sentinel exists and under the kill
+switches; it never blocks.
 
 **Bug flow:** brainstorm with the user -> write the failing test (allowed) ->
 see it RED -> `touch .dev-rules/.red-first-unlocked` -> read code and fix.

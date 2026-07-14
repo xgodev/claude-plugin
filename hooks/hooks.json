@@ -4,25 +4,37 @@
       {
         "matcher": "Read|Grep|Glob|Bash|Edit|Write",
         "hooks": [
-          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/dev-rules/red-first-guard.sh\"" }
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/dev-rules/red-first-guard.sh\""
+          }
         ]
       },
       {
         "matcher": "Bash",
         "hooks": [
-          { "type": "command", "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/quality-gate/pr-gate.sh" }
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/quality-gate/pr-gate.sh"
+          }
         ]
       },
       {
         "matcher": "Edit|Write|Bash",
         "hooks": [
-          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/dev-rules/main-folder-guard.sh\"" }
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/dev-rules/main-folder-guard.sh\""
+          }
         ]
       },
       {
         "matcher": "Edit|Write",
         "hooks": [
-          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/dev-rules/line-cap-guard.sh\"" }
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/dev-rules/line-cap-guard.sh\""
+          }
         ]
       }
     ],
@@ -30,13 +42,29 @@
       {
         "matcher": "Bash",
         "hooks": [
-          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/dev-rules/clear-after-commit.sh\"" }
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/dev-rules/clear-after-commit.sh\""
+          }
         ]
       },
       {
         "matcher": "Bash",
         "hooks": [
-          { "type": "command", "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/dev-rules/issue-comment-reminder.sh\"" }
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/dev-rules/issue-comment-reminder.sh\""
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/dev-rules/mode-prompt.sh\""
+          }
         ]
       }
     ]

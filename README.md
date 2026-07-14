@@ -130,7 +130,8 @@ skills/                dev/{SKILL.md router, engineering/, golang/, design/}
 hooks/                 hooks.json (merged registry) + test/; scripts grouped by area:
                        quality-gate/pr-gate.sh, dev-rules/{red-first-guard.sh,
                        main-folder-guard.sh, line-cap-guard.sh,
-                       issue-comment-reminder.sh, clear-after-commit.sh, lib/}
+                       issue-comment-reminder.sh, mode-prompt.sh,
+                       clear-after-commit.sh, lib/}
 tools/quality-gate/
                        qg (dispatcher; also a plain CLI), per-language gates
                        (<lang>/qg.sh + lib/ + rules/ + test-fixtures/ for go, java,
@@ -154,4 +155,4 @@ See [`docs/quality-gate.md`](docs/quality-gate.md) and
 
 MIT -- see [LICENSE](LICENSE).
 
-- Version: 1.10.3
+- Version: 1.11.0

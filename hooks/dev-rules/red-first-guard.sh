@@ -55,7 +55,7 @@ case "$tool" in
         # Normalize: replace > with a space so tight redirects like "echo x>file"
         # split into separate whitespace-delimited tokens for hits_prod scanning.
         target="$(printf '%s' "$cmd" | tr '>' ' ')" ;;
-      *" grep "*|*" rg "*|*" cat "*|*" sed "*|*" awk "*|*" head "*|*" tail "*|*" less "*|*" nl "*) intent="read"; target="$cmd" ;;
+      *" grep "*|*" rg "*|*" cat "*|*" sed "*|*" awk "*|*" head "*|*" tail "*|*" less "*|*" nl "*|*" ls "*|*" find "*|*" tree "*) intent="read"; target="$cmd" ;;
       *) exit 0 ;;
     esac ;;
   *) exit 0 ;;

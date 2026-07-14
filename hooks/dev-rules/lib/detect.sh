@@ -59,14 +59,47 @@ dr_is_docs_or_config() {
   return 1
 }
 
+# Issue #6: a directory that can CONTAIN files matching a production glob is
+# production too -- otherwise directory-scoped reads (grep -r dir/, rg dir,
+# ls dir) slip under file-shaped globs like crates/**/src/**. Walks the two
+# segment lists; `**` in the glob means everything below may match.
+dr_dir_may_contain() { # <dir> <glob>
+  local dir="${1%/}" glob="$2"
+  local IFS=/
+  local -a ds gs
+  read -ra ds <<<"$dir"; read -ra gs <<<"$glob"
+  local i=0 n=${#ds[@]} m=${#gs[@]} g
+  while [ "$i" -lt "$n" ]; do
+    [ "$i" -ge "$m" ] && return 1
+    g="${gs[$i]}"
+    [ "$g" = '**' ] && return 0
+    case "${ds[$i]}" in $g) ;; *) return 1 ;; esac
+    i=$((i+1))
+  done
+  return 0
+}
+
 dr_is_production() {
   local path="$1"
   dr_is_test_file "$path" && return 1
   dr_is_docs_or_config "$path" && return 1
   # Explicit production_globs in config win exclusively when present.
+  # A token counts as a directory when it ends in `/` or exists as a dir
+  # (relative to the project or the cwd).
+  local proj="${CLAUDE_PROJECT_DIR:-.}"
+  local dirchk="${path%/}"
+  dirchk="${dirchk#"$proj"/}"; dirchk="${dirchk#./}"
+  local is_dir=1
+  if [ "${path%/}" != "$path" ] || [ -d "$proj/$dirchk" ] || [ -d "$dirchk" ]; then
+    is_dir=0
+  fi
   local g had_cfg=1
   while IFS= read -r g; do
-    if [ -n "$g" ]; then had_cfg=0; dr_glob_match "$path" "$g" && return 0; fi
+    if [ -n "$g" ]; then
+      had_cfg=0
+      dr_glob_match "$path" "$g" && return 0
+      [ "$is_dir" = 0 ] && dr_dir_may_contain "$dirchk" "$g" && return 0
+    fi
   done <<EOF
 $(dr_config '.production_globs[]?' '')
 EOF
