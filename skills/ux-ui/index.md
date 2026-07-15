@@ -2,13 +2,13 @@ Index for UI/UX design. Two tools: (1) a **searchable catalog** (engine +
 data) for concrete choices -- palettes, styles, fonts, charts, per-framework
 patterns; (2) **methodology references** for judgment -- heuristics, a11y,
 design systems, etc. Read the row that matches, then the leaf it points to.
-Paths are relative to this directory (`skills/dev/design/`). Catalog data is
+Paths are relative to this directory (`skills/ux-ui/`). Catalog data is
 **never loaded into context** -- it is queried through the script.
 
 ## Catalog -- concrete data (via the engine)
 
 ```bash
-python3 skills/dev/design/scripts/search.py "<query>" <flag>
+python3 skills/ux-ui/scripts/search.py "<query>" <flag>
 ```
 
 | I need... | Flag |

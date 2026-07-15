@@ -59,7 +59,7 @@ repos. Read them before changing anything.
   pushing a dependency change: a dependency with an invalid upstream
   manifest fails the WHOLE claude-plugin install. Today the only
   external dependency is `superpowers` (official marketplace); design
-  content ships in the bundled `dev` skill (design leaf).
+  content ships in the bundled `ux-ui` skill.
 - **Hooks live in `hooks/hooks.json` ONLY (auto-discovered).** Never also
   declare `"hooks"` in `plugin.json` -- the manifest key is only for
   ADDITIONAL non-standard files, and double registration breaks the whole
@@ -78,14 +78,14 @@ repos. Read them before changing anything.
 
 ## Area rules
 
-### boost docs (`skills/dev/golang/`)
+### boost docs (`skills/dev/golang/boost/`)
 
 - Skills cite boost as a Go import path (`github.com/xgodev/boost/...`),
   never as a file path of this repo.
 - Sync with `xgodev/boost` is manual and mandatory: a component change
   there requires updating the matching
-  `skills/dev/golang/references/<group>/<name>.md` here (+ index line in
-  `skills/dev/golang/index.md` for a new component), with a version bump.
+  `skills/dev/golang/boost/references/<group>/<name>.md` here (+ index line in
+  `skills/dev/golang/boost/index.md` for a new component), with a version bump.
 - Run `python3 scripts/verify_references.py` after editing any reference
   file -- every `references/*.md` pointer must resolve.
 
@@ -134,7 +134,7 @@ repos. Read them before changing anything.
   EVERY code session in every language -- a Rust idiom there is a token
   tax on a Java session. Language-specific shapes (unsafe/SAFETY:, clippy
   discipline, Go/boost, framework rules) live in their own leaf
-  (`golang/`, `rust/`, ...), routed by the `dev` door table, loaded ONLY
+  (`golang/`, `rust/`, ... -- frameworks nest under their language, e.g. `golang/boost/`), routed by the `dev` door table, loaded ONLY
   when that language is in play. Adding a language-specific rule to
   rules.md is a defect (1.12.0 -> 1.12.1 incident: Rust idioms in LAWs
   15/16/18 shipped to every session).

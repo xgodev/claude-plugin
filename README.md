@@ -5,7 +5,7 @@ The **all-in-one Claude Code plugin** by `xgodev`, and home of the
 capability:
 
 - **`dev` skill (door)** -- one skill routing to: engineering discipline
-  (`dev-rules`), the quality-gate flow, boost docs, and design. Leaves:
+  (`dev-rules`), the quality-gate flow, boost docs, and Rust discipline. Leaves:
   grouped-index documentation for
   [`xgodev/boost`](https://github.com/xgodev/boost), the modular Go service
   framework. See [`docs/golang-boost.md`](docs/golang-boost.md).
@@ -22,13 +22,13 @@ capability:
 - **`skill-rules`** -- skill-authoring discipline: every skill must be
   portable across all developers and machines. See
   [`docs/skill-rules.md`](docs/skill-rules.md).
-- **`ux-ui`** -- design door skill: a searchable catalog (palettes,
+- **`ux-ui`** -- the design skill: a searchable catalog (palettes,
   styles, typography, charts, UX guidelines, per-framework patterns)
   plus UX methodology references. Catalog data is queried by a bundled
   engine, never loaded into context. See
   [`docs/ux-catalog.md`](docs/ux-catalog.md).
-- **`ux-ui` (design door)** -- a thin routing skill so pure design tasks
-  find the catalog directly; it lands on the same `dev/design/` content.
+- **`ux-ui` (design skill)** -- owns the design catalog, references, and
+  search engine; the `dev` door cross-references it for design mid-feature.
 - **Dependency: [`superpowers`](https://github.com/obra/superpowers)** --
   core skills library by Jesse Vincent (TDD, debugging, collaboration
   patterns), resolved from the official `claude-plugins-official`
@@ -37,7 +37,7 @@ capability:
   duplicate copy.
 
 Skills are namespaced by the plugin name: `claude-plugin:dev`,
-`claude-plugin:ux-ui` (thin design door), `claude-plugin:skill-rules`. They trigger on
+`claude-plugin:ux-ui` (design), `claude-plugin:skill-rules`. They trigger on
 natural phrases (e.g. "run quality gate" / "run QG") without the prefix. (The `add-quality-gate`
 skill is maintainer-only and lives project-local in this repo -- it is
 not shipped with the plugin.)
@@ -113,8 +113,8 @@ pay-per-use:
 
 | Component | Always-on | Loaded when |
 |---|---|---|
-| `dev` description (door: engineering, gate, boost, design) | ~150 tokens | every session |
-| `ux-ui` description (thin design door) | ~85 tokens | every session |
+| `dev` description (door: engineering, gate, boost, rust, design) | ~110 tokens | every session |
+| `ux-ui` description (design) | ~85 tokens | every session |
 | `skill-rules` description | ~40 tokens | every session |
 | `dev` router SKILL.md + the leaf it routes to | 0 | only when the skill fires |
 | Hooks (PR gate, RED-first, main-folder, line-cap, issue reminder) | 0 | never (run as processes) |
@@ -124,8 +124,8 @@ pay-per-use:
 
 ```
 .claude-plugin/        plugin.json (the single plugin) + marketplace.json (xgodev)
-skills/                dev/{SKILL.md router, engineering/, golang/, design/}
-                       ux-ui/ (thin design door -> dev/design)  skill-rules/ (shipped)
+skills/                dev/{SKILL.md router, engineering/, golang/boost/, rust/}
+                       ux-ui/ (design: catalog + references)  skill-rules/ (shipped)
 .claude/skills/        add-quality-gate/ (maintainer-only, project-local)
 hooks/                 hooks.json (merged registry) + test/; scripts grouped by area:
                        quality-gate/pr-gate.sh, dev-rules/{red-first-guard.sh,
@@ -155,4 +155,4 @@ See [`docs/quality-gate.md`](docs/quality-gate.md) and
 
 MIT -- see [LICENSE](LICENSE).
 
-- Version: 1.12.1
+- Version: 1.13.0

@@ -1,10 +1,11 @@
-# design -- the design leaf of the dev skill
+# ux-ui -- the design skill
 
-UI/UX design capability consolidated into the `design` leaf of the **`dev` door skill**,
-in the same shape as `boost`: the SKILL.md is a small index that routes;
-the heavy content lives in leaves and a search engine.
+UI/UX design capability owned by the **`ux-ui` skill**, in the same shape
+as `boost`: the SKILL.md routes to a small index; the heavy content lives
+in leaves and a search engine. The `dev` door cross-references it for
+design done mid-feature.
 
-## Structure (`skills/dev/design/`)
+## Structure (`skills/ux-ui/`)
 
 - **`index.md`** -- the leaf's own index: one table routes by **catalog**
   (engine flags), another by **methodology** (`references/*.md`).

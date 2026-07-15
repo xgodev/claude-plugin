@@ -6,9 +6,8 @@ metadata:
   author: jpfaria
 ---
 
-This is the design door. Read `../dev/design/index.md` (relative to this
-directory, i.e. `skills/dev/design/index.md` in the plugin) and follow it:
-one table routes to a searchable catalog engine (palettes, styles,
+This is the design skill. Read `index.md` in this directory and follow
+it: one table routes to a searchable catalog engine (palettes, styles,
 typography, charts, per-framework patterns), the other to methodology
 references (heuristics, a11y, design systems, motion, states, research,
 metrics, and more).

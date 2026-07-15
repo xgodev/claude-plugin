@@ -1,6 +1,6 @@
 {
   "name": "claude-plugin",
-  "version": "1.12.1",
+  "version": "1.13.0",
   "description": "All-in-one Claude Code plugin by xgodev. Two skills: `dev` -- a door routing to engineering discipline (RED-first rules + enforcement hooks), the Quality Gate (dispatcher `qg` + per-language gates + opt-in PR-gate hook), boost docs (github.com/xgodev/boost), and UI/UX design (searchable catalog + methodology) -- and `skill-rules`, the skill-authoring discipline.",
   "author": {
     "name": "xgodev"

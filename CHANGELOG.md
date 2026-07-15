@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.13.0]
+
+### Changed
+
+- **Coherent skill layout, language-first.** The boost docs moved from
+  `skills/dev/golang/` (a language-named folder holding framework docs)
+  to `skills/dev/golang/boost/` -- `golang/` is the language area,
+  frameworks nest inside it, same pattern as `rust/`. The design content
+  moved out of `skills/dev/design/` into the `ux-ui` skill that owns it
+  (`skills/ux-ui/{index.md,references/,data/,scripts/}`); the old thin
+  ux-ui pointer skill is gone -- `dev` now cross-references
+  `../ux-ui/index.md` for design done mid-feature. The `dev` door
+  description dropped its design-trigger lead (ux-ui owns those
+  triggers), shrinking the always-on cost. No name changes to the plugin
+  or marketplace; always-on skill count unchanged (dev, ux-ui,
+  skill-rules).
+
 ## [1.12.1]
 
 ### Fixed
