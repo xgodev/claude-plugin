@@ -1,19 +1,19 @@
 
-# Mobile UX Design — Platform-Native Excellence
+# Mobile UX Design -- Platform-Native Excellence
 
 ## Mobile-First Philosophy (Luke Wroblewski)
 
-"Mobile forces you to focus. There's simply not enough room for anything extraneous." — Luke Wroblewski
+"Mobile forces you to focus. There's simply not enough room for anything extraneous." -- Luke Wroblewski
 
 Mobile-first design is not about making desktop designs smaller. It is about starting with the most constrained environment to identify what truly matters, then progressively enhancing for larger screens. This constraint-driven approach produces cleaner, more focused experiences across all platforms.
 
 ### Core Principles
 
-1. **Content first, navigation second** — prioritize the user's primary task above all interface chrome
-2. **One primary action per screen** — resist the urge to present multiple equal-weight choices
-3. **Design for interruption** — mobile users are frequently interrupted; support save, resume, and quick task completion
-4. **Respect the thumb** — the most natural interaction zone determines layout hierarchy
-5. **Performance is UX** — a 100ms delay feels instant, 1s feels responsive, 3s+ feels broken
+1. **Content first, navigation second** -- prioritize the user's primary task above all interface chrome
+2. **One primary action per screen** -- resist the urge to present multiple equal-weight choices
+3. **Design for interruption** -- mobile users are frequently interrupted; support save, resume, and quick task completion
+4. **Respect the thumb** -- the most natural interaction zone determines layout hierarchy
+5. **Performance is UX** -- a 100ms delay feels instant, 1s feels responsive, 3s+ feels broken
 
 ## Touch Interaction Design
 
@@ -21,19 +21,19 @@ Mobile-first design is not about making desktop designs smaller. It is about sta
 
 Based on Steven Hoober's research on how people hold phones:
 
-- **Primary zone (easy reach):** Bottom-center of screen — place primary actions here
-- **Secondary zone (stretch):** Middle and sides — place secondary content and navigation
-- **Tertiary zone (hard reach):** Top corners — avoid placing frequent-use controls here
+- **Primary zone (easy reach):** Bottom-center of screen -- place primary actions here
+- **Secondary zone (stretch):** Middle and sides -- place secondary content and navigation
+- **Tertiary zone (hard reach):** Top corners -- avoid placing frequent-use controls here
 - **Bottom navigation pattern** now dominates both iOS and Android for this reason
-- Large phones (6.5"+) make top-left especially difficult — anchor critical UI to bottom
+- Large phones (6.5"+) make top-left especially difficult -- anchor critical UI to bottom
 
 ### Touch Target Sizing
 
-- **Minimum:** 44x44pt (iOS) / 48x48dp (Android) — Apple and Google guidelines
-- **Recommended:** 48x48pt for primary actions — NNG recommends even larger for critical actions
+- **Minimum:** 44x44pt (iOS) / 48x48dp (Android) -- Apple and Google guidelines
+- **Recommended:** 48x48pt for primary actions -- NNG recommends even larger for critical actions
 - **Spacing between targets:** Minimum 8pt gap to prevent mis-taps
 - **Edge targets:** Add extra padding near screen edges where grip interferes
-- Text links in body copy need generous tap targets — extend the clickable area beyond visible text
+- Text links in body copy need generous tap targets -- extend the clickable area beyond visible text
 
 ### Gesture Design
 
@@ -45,7 +45,7 @@ Based on Steven Hoober's research on how people hold phones:
 
 **Avoid:**
 - Custom gestures that conflict with system gestures (especially edge swipes on iOS/Android)
-- Gestures as the only path to an action — always provide a visible alternative
+- Gestures as the only path to an action -- always provide a visible alternative
 - Multi-finger gestures beyond pinch-to-zoom on phones
 
 ## Platform Conventions
@@ -65,23 +65,23 @@ Based on Steven Hoober's research on how people hold phones:
 - **Navigation:** Bottom navigation bar (3-5 destinations), navigation drawer for 5+, top app bar
 - **Typography:** Roboto or system font, Material Type Scale
 - **Spacing:** 16dp standard margins, 4dp base grid
-- **Material You:** Dynamic color theming from user wallpaper — design systems must be color-flexible
+- **Material You:** Dynamic color theming from user wallpaper -- design systems must be color-flexible
 - **FAB (Floating Action Button):** One primary action per screen, bottom-right
 - **Predictive back gesture:** Support the new Android predictive back animation
 - **Edge-to-edge:** Content extends behind system bars with appropriate insets
 
 ### Cross-Platform Considerations
 
-- Respect platform conventions — do not force iOS patterns onto Android or vice versa
+- Respect platform conventions -- do not force iOS patterns onto Android or vice versa
 - Shared design systems need platform-adaptive components (different navigation, typography, interaction)
 - React Native and Flutter apps should still feel native to each platform
-- Test on real devices — emulators miss touch feel, performance, and gesture edge cases
+- Test on real devices -- emulators miss touch feel, performance, and gesture edge cases
 
 ## Mobile Navigation Patterns
 
 ### Bottom Tab Navigation (Preferred)
 - Maximum 5 tabs; use "More" tab if exceeding
-- Always show labels with icons — icons alone are ambiguous
+- Always show labels with icons -- icons alone are ambiguous
 - Highlight active tab clearly with color and/or indicator
 - Maintain tab state: users expect to return to where they left off
 
@@ -89,7 +89,7 @@ Based on Steven Hoober's research on how people hold phones:
 - Clear back button and swipe-back gesture support
 - Show meaningful page titles
 - Deep links must resolve to the correct stack position
-- Avoid deep stacks (>4 levels) — restructure IA instead
+- Avoid deep stacks (>4 levels) -- restructure IA instead
 
 ### Search-First Navigation
 - For content-heavy apps (e-commerce, media), elevate search to primary navigation
@@ -101,16 +101,16 @@ Based on Steven Hoober's research on how people hold phones:
 ### Form Field Best Practices
 - **Top-aligned labels** outperform left-aligned on mobile (faster completion)
 - **Floating labels** (Material Design pattern) save vertical space while maintaining context
-- **One column only** — never use multi-column forms on mobile
+- **One column only** -- never use multi-column forms on mobile
 - **Appropriate keyboard types:** email -> email keyboard, phone -> numeric, URL -> URL keyboard
 - **Auto-advance** between fixed-length fields (verification codes, credit card segments)
 
 ### Input Optimization
-- **Autofill support:** name, email, address, credit card — use proper HTML autocomplete attributes
+- **Autofill support:** name, email, address, credit card -- use proper HTML autocomplete attributes
 - **Smart defaults:** pre-fill country from locale, suggest city from zip code
-- **Input masks** for phone numbers, dates, credit cards — show format as user types
+- **Input masks** for phone numbers, dates, credit cards -- show format as user types
 - **Inline validation:** validate on blur (not on every keystroke), show success states too
-- **Password visibility toggle** — default to hidden with easy toggle
+- **Password visibility toggle** -- default to hidden with easy toggle
 
 ### Form Reduction
 - Ask only what is absolutely necessary for the current step
@@ -123,7 +123,7 @@ Based on Steven Hoober's research on how people hold phones:
 ### Breakpoint Strategy
 - **Mobile-first CSS:** base styles for mobile, enhance with min-width media queries
 - **Common breakpoints:** 320px (small phone), 375px (standard phone), 428px (large phone), 768px (tablet), 1024px (small desktop), 1440px (desktop)
-- **Content-driven breakpoints** are superior to device-driven — break when the layout breaks
+- **Content-driven breakpoints** are superior to device-driven -- break when the layout breaks
 - **Container queries** (2025 standard) enable component-level responsiveness
 
 ### Responsive Patterns
@@ -142,16 +142,16 @@ Based on Steven Hoober's research on how people hold phones:
 ## Performance-Conscious Mobile UX
 
 ### Critical Performance Metrics
-- **LCP (Largest Contentful Paint):** < 2.5s — the primary content must load fast
-- **FID (First Input Delay):** < 100ms — the interface must respond immediately to touch
-- **CLS (Cumulative Layout Shift):** < 0.1 — nothing should jump after rendering
-- **INP (Interaction to Next Paint):** < 200ms — every interaction must feel responsive
+- **LCP (Largest Contentful Paint):** < 2.5s -- the primary content must load fast
+- **FID (First Input Delay):** < 100ms -- the interface must respond immediately to touch
+- **CLS (Cumulative Layout Shift):** < 0.1 -- nothing should jump after rendering
+- **INP (Interaction to Next Paint):** < 200ms -- every interaction must feel responsive
 
 ### Performance UX Patterns
-- **Skeleton screens** over spinners — show content shape before data arrives
+- **Skeleton screens** over spinners -- show content shape before data arrives
 - **Optimistic UI:** show the expected result immediately, roll back on failure
 - **Lazy loading** for below-fold content and images
-- **Offline-first architecture** for unreliable mobile networks — cache aggressively
+- **Offline-first architecture** for unreliable mobile networks -- cache aggressively
 - **Image optimization:** WebP/AVIF format, responsive srcset, lazy loading
 
 ## Cross-Referencing
@@ -165,7 +165,7 @@ Based on Steven Hoober's research on how people hold phones:
 
 The v3.0 upgrade introduces platform-specific references and production component patterns that extend mobile UX design into the latest 2025-2026 platform capabilities.
 
-### Platform Updates — `references/ios26-liquid-glass-material3-expressive.md`
+### Platform Updates -- `references/ios26-liquid-glass-material3-expressive.md`
 
 The new `references/ios26-liquid-glass-material3-expressive.md` reference covers the major 2025 platform evolutions:
 
@@ -174,11 +174,11 @@ The new `references/ios26-liquid-glass-material3-expressive.md` reference covers
 
 These platform shifts affect the Platform Conventions section above. Reference this file for updated iOS and Android design patterns.
 
-### Production Component Patterns — `component-patterns-code`
+### Production Component Patterns -- `component-patterns-code`
 
 The `component-patterns-code` skill provides production-ready React Native and SwiftUI component cookbooks directly applicable to mobile UX. Includes bottom sheet implementations, gesture-driven navigation components, haptic feedback integration patterns, and platform-adaptive component variants that render native patterns on each OS. Each component includes full state matrices (loading, error, empty, populated, disabled) aligned with the mobile UX principles in this skill.
 
-### Haptic Feedback Design — `interaction-motion-design/references/haptic-feedback-design-system.md`
+### Haptic Feedback Design -- `interaction-motion-design/references/haptic-feedback-design-system.md`
 
 The `interaction-motion-design/references/haptic-feedback-design-system.md` reference provides a comprehensive haptic design system covering iOS Taptic Engine patterns (UIImpactFeedbackGenerator, UISelectionFeedbackGenerator, UINotificationFeedbackGenerator), Android haptic APIs, and design guidelines for when and how to apply haptic feedback. Maps haptic patterns to interaction types: selection confirmation, error notification, success feedback, drag thresholds, and long-press activation. Essential companion to the Touch Interaction Design section above.
 

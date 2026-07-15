@@ -1,9 +1,9 @@
 **REQUIRED BACKGROUND:**
-- `references/start.md` — `boost.Start()` first.
-- `references/factory/echo.md` — endpoints typically attach to the Echo server.
-- `references/model-restresponse.md` — `restresponse.NewHealth(ctx)` is what actually turns registered checks into an HTTP response.
+- `references/start.md` -- `boost.Start()` first.
+- `references/factory/echo.md` -- endpoints typically attach to the Echo server.
+- `references/model-restresponse.md` -- `restresponse.NewHealth(ctx)` is what actually turns registered checks into an HTTP response.
 
-## Liveness vs readiness — keep them separate
+## Liveness vs readiness -- keep them separate
 
 | Endpoint | Answers | Fails when |
 |---|---|---|
@@ -22,7 +22,7 @@ type Checker interface {
 }
 ```
 
-A checker is any type implementing `Check(ctx context.Context) error` — nil means healthy. Register it once at boot via `health.Add`, which appends to the package-level check list:
+A checker is any type implementing `Check(ctx context.Context) error` -- nil means healthy. Register it once at boot via `health.Add`, which appends to the package-level check list:
 
 ```go
 func Add(checker *HealthChecker)
@@ -58,7 +58,7 @@ health.Add(health.NewHealthChecker(
 
 ## Wiring the endpoint
 
-Registration alone doesn't serve anything — attach `restresponse.NewHealth` to a route:
+Registration alone doesn't serve anything -- attach `restresponse.NewHealth` to a route:
 
 ```go
 srv.GET("/readyz", func(c echo.Context) error {
@@ -72,8 +72,8 @@ srv.GET("/readyz", func(c echo.Context) error {
 ## Implementation tips
 
 - **Bound the timeout** on each `Check` (`context.WithTimeout`) so a hung downstream doesn't hang the readiness response.
-- **Don't include the publisher** in liveness — publishing to a downed Pub/Sub topic should not kill the pod.
-- **Liveness stays static** — `/livez` should not call `health.CheckAll`; return a fixed 200.
+- **Don't include the publisher** in liveness -- publishing to a downed Pub/Sub topic should not kill the pod.
+- **Liveness stays static** -- `/livez` should not call `health.CheckAll`; return a fixed 200.
 
 ## Red flags
 
@@ -82,5 +82,5 @@ srv.GET("/readyz", func(c echo.Context) error {
 | Liveness probe runs downstream checks (DB, Redis, Pub/Sub) | Move downstream checks to readiness; liveness stays static |
 | Single `/health` endpoint serving both probes | Split into `/livez` (static) and `/readyz` (`health.CheckAll` via `restresponse.NewHealth`) |
 | Checker without a context timeout | Wrap with `context.WithTimeout(ctx, 2*time.Second)` inside `Check` |
-| Calling `health.CheckAll` directly and hand-rolling the status code | Use `restresponse.NewHealth(ctx)` — it already derives 200/207/503 |
-| Inventing `NewDBChecker`/`NewRedisChecker`/`NewPubSubChecker` helpers | They don't exist — implement `Checker` yourself and wrap with `health.NewHealthChecker(...)` |
+| Calling `health.CheckAll` directly and hand-rolling the status code | Use `restresponse.NewHealth(ctx)` -- it already derives 200/207/503 |
+| Inventing `NewDBChecker`/`NewRedisChecker`/`NewPubSubChecker` helpers | They don't exist -- implement `Checker` yourself and wrap with `health.NewHealthChecker(...)` |

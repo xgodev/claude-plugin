@@ -22,4 +22,4 @@ The publisher driver `wrapper/publisher/driver/contrib/lovoo/goka/v1` (see `refe
 |---|---|
 | `goka.NewEmitter(...)` directly | `gokafact.NewEmitter(ctx)` |
 | Brokers via `os.Getenv` | `BOOST_FACTORY_GOKA_*` |
-| Forgetting `emitter.Finish()` on shutdown | Add it — flushes pending writes |
+| Forgetting `emitter.Finish()` on shutdown | Add it -- flushes pending writes |

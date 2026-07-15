@@ -14,7 +14,7 @@ if err != nil { log.Fatalf("publisher driver: %v", err) }
 pub := publisher.New(drv)
 ```
 
-`publisher.New(driver)` returns a `Publisher` that consumers — including the function publisher middleware — depend on. Driver swaps don't require call-site changes.
+`publisher.New(driver)` returns a `Publisher` that consumers -- including the function publisher middleware -- depend on. Driver swaps don't require call-site changes.
 
 ## Available drivers (out of the box)
 
@@ -33,7 +33,7 @@ Wire `pub` into the function publisher middleware (see `references/bootstrap/mid
 pmi, _ := pm.NewAnyErrorMiddleware[*cloudevents.Event](pub)
 ```
 
-The middleware fires on a handler's successful return — the returned `*cloudevents.Event` gets published via the wrapped driver. The handler does NOT call `pub.Publish` manually; that bypasses middleware bookkeeping (deadletter, ordering, instrumentation).
+The middleware fires on a handler's successful return -- the returned `*cloudevents.Event` gets published via the wrapped driver. The handler does NOT call `pub.Publish` manually; that bypasses middleware bookkeeping (deadletter, ordering, instrumentation).
 
 ## Topic selection
 
@@ -44,7 +44,7 @@ The driver typically uses the event's `Subject()` to route:
 | GCP Pub/Sub | Topic ID |
 | Kafka | Topic |
 | NATS | Subject |
-| SNS (if added) | Full ARN — see `references/CONTRIBUTING.md` for the extrapolation discipline |
+| SNS (if added) | Full ARN -- see `references/CONTRIBUTING.md` for the extrapolation discipline |
 
 Set the destination via `out.SetSubject("topic-name")` before returning from the handler.
 

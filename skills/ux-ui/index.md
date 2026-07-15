@@ -8,7 +8,7 @@ Paths are relative to this directory (`skills/ux-ui/`). Catalog data is
 ## Catalog -- concrete data (via the engine)
 
 ```bash
-python3 skills/ux-ui/scripts/search.py "<query>" <flag>
+python3 scripts/search.py "<query>" <flag>   # from this directory (skills/ux-ui/)
 ```
 
 | I need... | Flag |
@@ -20,8 +20,9 @@ python3 skills/ux-ui/scripts/search.py "<query>" <flag>
 | UX do/don't | `--domain ux` |
 | icons | `--domain icons` |
 | landing / product | `--domain landing` · `--domain product` |
+| app interfaces / react performance / font pairing | `--domain web` · `--domain react` · `--domain google-fonts` |
 | patterns for a **framework** | `--stack <s>` |
-| coherent **design system** from scratch | `--design-system -p "Project"` (`--persist` writes to `design-system/`) |
+| coherent **design system** from scratch | `--design-system -p "Project"` (`--persist` writes to `design-system/<project-slug>/`) |
 
 Stacks: `react`, `nextjs`, `vue`, `svelte`, `astro`, `swiftui`, `react-native`, `flutter`, `nuxtjs`, `nuxt-ui`, `html-tailwind`, `shadcn`, `jetpack-compose`, `threejs`, `angular`, `laravel`, `javafx`.
 

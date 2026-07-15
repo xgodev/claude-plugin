@@ -1,8 +1,8 @@
 **REQUIRED BACKGROUND:**
-- `references/bootstrap/function.md` — handler typing rule.
-- `references/factory/pubsub.md` — `*pubsub.Client` construction.
-- `references/bootstrap/middleware.md` — recovery/logger/publisher chain.
-- `references/extra/middleware.md` — `NewAnyErrorWrapper` for the workaround path.
+- `references/bootstrap/function.md` -- handler typing rule.
+- `references/factory/pubsub.md` -- `*pubsub.Client` construction.
+- `references/bootstrap/middleware.md` -- recovery/logger/publisher chain.
+- `references/extra/middleware.md` -- `NewAnyErrorWrapper` for the workaround path.
 
 ## Canonical (prototype / dev)
 
@@ -16,9 +16,9 @@ fn, _ := function.New[*cloudevents.Event](rec, lmi, pmi)
 fn.Run(ctx, handle, apubsub.New[*cloudevents.Event](pb))
 ```
 
-Fine for prototypes. **Not safe for production graceful shutdown** — see next section.
+Fine for prototypes. **Not safe for production graceful shutdown** -- see next section.
 
-## Production caveat — known ctx-loss
+## Production caveat -- known ctx-loss
 
 `bootstrap/function/adapter/contrib/cloud.google.com/pubsub/v1/helper.go:51` hard-codes:
 
@@ -74,7 +74,7 @@ wg.Wait()
 
 ## The TODO comment is mandatory
 
-The `// TODO(boost-upstream):` block is not optional documentation — it's the marker that says "this is a workaround for a known upstream issue, not a stylistic choice". Without it:
+The `// TODO(boost-upstream):` block is not optional documentation -- it's the marker that says "this is a workaround for a known upstream issue, not a stylistic choice". Without it:
 - The next maintainer can't tell whether it's a deliberate divergence or sloppy code.
 - When upstream fixes the helper, nobody knows this code can collapse back to `fn.Run`.
 - Reviewers can't grep for `boost-upstream` to inventory all such workarounds across the codebase.

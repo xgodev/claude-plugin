@@ -1,4 +1,4 @@
-## Iron Law — `boost.Start()` is the first line of `main`
+## Iron Law -- `boost.Start()` is the first line of `main`
 
 ```go
 package main
@@ -23,7 +23,7 @@ func main() {
 |---|---|---|
 | Factory constructor (`echo.NewServer`, `fpubsub.NewClient`, etc.) before `boost.Start()` | Constructor reads config that isn't loaded yet | Reorder: `boost.Start()` first |
 | `log.FromContext(ctx)` returns silent / no-op logger | `Start` never ran | Add `boost.Start()` as the first statement of `main` |
-| `config.String("foo")` returns `""` even though env var is set | Same — registry empty | Same — `boost.Start()` first |
+| `config.String("foo")` returns `""` even though env var is set | Same -- registry empty | Same -- `boost.Start()` first |
 
 ## Cross-references
 

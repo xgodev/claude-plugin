@@ -4,7 +4,7 @@
 
 | Service shape | Recommendation |
 |---|---|
-| 1 main.go with handlers + dependencies wired by hand | Don't use fx — manual wiring is clearer |
+| 1 main.go with handlers + dependencies wired by hand | Don't use fx -- manual wiring is clearer |
 | Multiple binaries sharing the same DB / pubsub / cache wiring | Extract those into fx modules; reuse across binaries |
 | 5+ services in a monorepo with the same boost-startup boilerplate | Use fx modules; standardize the boilerplate |
 
@@ -55,7 +55,7 @@ func main() {
 
 `app.Run()` blocks until SIGTERM, then runs every `OnStop` hook in reverse-of-start order.
 
-## Group annotations — for middleware contributions
+## Group annotations -- for middleware contributions
 
 When multiple modules each contribute a piece to a chain (e.g., function middlewares), use group tags:
 
@@ -77,7 +77,7 @@ func RecoveryModule() fx.Option {
 
 Anyone consuming `Middlewares.Items` gets the full set without knowing which modules contributed.
 
-## Optional deps — `optional:"true"`
+## Optional deps -- `optional:"true"`
 
 When a module's behavior changes based on whether something is provided:
 

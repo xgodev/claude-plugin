@@ -479,7 +479,7 @@ def add(a, b):
     return a + b
 EOF
   # build/ + dist/ GENERATED: Python junk with an unused import (F401),
-  # formatacao ruim e funcao de alta complexidade.
+  # bad formatting and a high-complexity function.
   mkdir -p "$tmp/build/lib" "$tmp/dist"
   cat > "$tmp/build/lib/generated.py" <<'EOF'
 import os,sys

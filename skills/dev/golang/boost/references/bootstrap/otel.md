@@ -1,4 +1,4 @@
-**REQUIRED BACKGROUND:** `references/bootstrap/function.md`, `references/bootstrap/middleware.md` (canonical `recovery → logger → publisher` chain — this slots in anywhere, no ordering constraint).
+**REQUIRED BACKGROUND:** `references/bootstrap/function.md`, `references/bootstrap/middleware.md` (canonical `recovery → logger → publisher` chain -- this slots in anywhere, no ordering constraint).
 
 ```go
 import om "github.com/xgodev/boost/bootstrap/function/middleware/go.opentelemetry.io/otel/v1"
@@ -18,7 +18,7 @@ fn, _ := function.New[*cloudevents.Event](rec, lmi, otel, pmi)
 
 | Red flag | Fix |
 |---|---|
-| Manually opening spans/counters per handler for the same signal | Use `om.NewOpenTelemetry[T]()` in the chain instead — consistent span/metric names across every function |
-| Assuming this middleware must be innermost or outermost like `recovery`/`publisher` | It has no ordering constraint — place it anywhere in the chain |
-| Running this alongside `prometheus.md`'s middleware expecting deduplicated metrics | They're independent exporters emitting similarly-named but separate metrics — pick one, or accept both are wired |
-| Assuming this covers CloudEvents HTTP transport tracing too | It doesn't — this middleware instruments the function execution pipeline (recovery/logging/metrics scope). The CloudEvents HTTP adapter has its own, narrower-scoped OTel plugin at `bootstrap/function/adapter/contrib/cloudevents/sdk-go/v2/core/http/plugins/contrib/go.opentelemetry.io/contrib/v0` (`(*Otel).Register(ctx, opts) []cehttp.Option`), which instruments only the HTTP send/receive mechanics, not the whole handler chain. Wire both if you need both layers traced. |
+| Manually opening spans/counters per handler for the same signal | Use `om.NewOpenTelemetry[T]()` in the chain instead -- consistent span/metric names across every function |
+| Assuming this middleware must be innermost or outermost like `recovery`/`publisher` | It has no ordering constraint -- place it anywhere in the chain |
+| Running this alongside `prometheus.md`'s middleware expecting deduplicated metrics | They're independent exporters emitting similarly-named but separate metrics -- pick one, or accept both are wired |
+| Assuming this covers CloudEvents HTTP transport tracing too | It doesn't -- this middleware instruments the function execution pipeline (recovery/logging/metrics scope). The CloudEvents HTTP adapter has its own, narrower-scoped OTel plugin at `bootstrap/function/adapter/contrib/cloudevents/sdk-go/v2/core/http/plugins/contrib/go.opentelemetry.io/contrib/v0` (`(*Otel).Register(ctx, opts) []cehttp.Option`), which instruments only the HTTP send/receive mechanics, not the whole handler chain. Wire both if you need both layers traced. |

@@ -23,7 +23,7 @@ Configure agent host/port, service name, env, version, sampling under `boost.fac
 | `references/factory/datadog.md` | Stack already in Datadog; full APM features (continuous profiler, trace search, RUM) |
 | `references/factory/otel.md` | Vendor-neutral pipeline (OTLP collector → Tempo/Jaeger/Honeycomb/...) |
 
-Don't mix — one tracing pipeline per service.
+Don't mix -- one tracing pipeline per service.
 
 ## Red flags
 

@@ -1,6 +1,6 @@
 **REQUIRED BACKGROUND:**
-- `references/wrapper/log.md` — the wrapper API your code calls (`log.FromContext`).
-- `references/wrapper/config.md` — backend selection is config-driven.
+- `references/wrapper/log.md` -- the wrapper API your code calls (`log.FromContext`).
+- `references/wrapper/config.md` -- backend selection is config-driven.
 
 ## Backend selection at boot
 
@@ -26,7 +26,7 @@ import zerolog "github.com/xgodev/boost/factory/contrib/rs/zerolog/v1"
 log.Set(zerolog.NewLogger())
 ```
 
-Handler code does not change — it still calls `log.FromContext(ctx).WithField(...)` etc.
+Handler code does not change -- it still calls `log.FromContext(ctx).WithField(...)` etc.
 
 ## Available backends
 
@@ -54,7 +54,7 @@ Pick **JSON** in production (log aggregators index it) and **CONSOLE** locally (
 | Red flag | Fix |
 |---|---|
 | `log.Set(...)` called more than once in the same process | Call once, in `main`, right after `boost.Start()` |
-| Calling `log.Set` inside an `init()` — before `boost.Start` configured anything | Move to `main` after `boost.Start()` |
+| Calling `log.Set` inside an `init()` -- before `boost.Start` configured anything | Move to `main` after `boost.Start()` |
 | Importing two backend factories simultaneously and switching at runtime | Pick one per binary; switching is a config / deploy decision, not a runtime one |
 | Production binary running with `formatter=CONSOLE` | Set `BOOST_FACTORY_<BACKEND>_CONSOLE_FORMATTER=JSON` in the deployment |
-| Mixing the wrapper (`log.FromContext`) and direct backend calls (`zap.L().Info(...)`) | Use the wrapper exclusively — direct calls bypass per-context enrichment |
+| Mixing the wrapper (`log.FromContext`) and direct backend calls (`zap.L().Info(...)`) | Use the wrapper exclusively -- direct calls bypass per-context enrichment |

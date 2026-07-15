@@ -21,4 +21,4 @@ Out-of-cluster (dev / one-off jobs): set `boost.factory.k8s.kubeconfig=~/.kube/c
 |---|---|
 | `kubernetes.NewForConfig(restCfg)` directly with hand-built rest config | `k8sfact.NewClientset(ctx)` |
 | Hardcoded kubeconfig path | `BOOST_FACTORY_K8S_KUBECONFIG` |
-| Watch loops without `context.Context` cancellation | Pass the lifecycle context — leaked watches consume API server quota |
+| Watch loops without `context.Context` cancellation | Pass the lifecycle context -- leaked watches consume API server quota |

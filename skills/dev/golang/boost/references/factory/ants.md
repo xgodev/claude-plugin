@@ -21,7 +21,7 @@ w.Submit(func() {
 
 Use ants when fan-out is unbounded by default (consuming a Pub/Sub topic with many messages, processing rows from a large query, calling N external APIs). Without a pool, peak concurrency = number of goroutines spawned, which can saturate the runtime, exhaust file descriptors, or thunder downstream services.
 
-For event-handler functions, the pool fits BETWEEN the handler returning and the publisher middleware writing — useful when republishing fan-out is large.
+For event-handler functions, the pool fits BETWEEN the handler returning and the publisher middleware writing -- useful when republishing fan-out is large.
 
 ## Red flags
 
@@ -29,4 +29,4 @@ For event-handler functions, the pool fits BETWEEN the handler returning and the
 |---|---|
 | `go func() { ... }()` in a hot path with no upper bound | Wrap with `pool.Submit` |
 | Pool size = `runtime.NumCPU()` for IO-bound work | IO-bound wants more goroutines than CPUs; size based on downstream concurrency budget |
-| Forgetting `defer pool.Release()` | Add it — leaked pool blocks shutdown |
+| Forgetting `defer pool.Release()` | Add it -- leaked pool blocks shutdown |

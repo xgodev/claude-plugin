@@ -1,4 +1,4 @@
-Factory (`factory/contrib/*`) domains — one per integration category. Read the linked domain file, then its leaf, for detail.
+Factory (`factory/contrib/*`) domains -- one per integration category. Read the linked domain file, then its leaf, for detail.
 
 | Domain | Reference |
 |---|---|

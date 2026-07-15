@@ -50,7 +50,7 @@ idioms live here, not there.
   `JoinHandle::join`/`.await`, a `Condvar`, a channel, `Notify`, or a
   bounded readiness poll with a deadline.
 
-## clippy suppression (LAW: the threshold belongs to the config)
+## clippy suppression (the threshold belongs to the repo config)
 
 - Suppression is per-item (`#[allow(...)]` on the fn/impl) and carries a
   `// reason:`. A module/crate-wide `#![allow(...)]` erases today's

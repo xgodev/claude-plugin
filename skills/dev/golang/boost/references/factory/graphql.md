@@ -1,7 +1,7 @@
 **REQUIRED BACKGROUND:** `references/start.md`, `references/factory/echo.md` (typical mount point).
 
 > This factory wraps **`graphql-go/graphql`** (code-first). If your service uses
-> **gqlgen** (schema-first + Federation 2) instead, this factory does not apply —
+> **gqlgen** (schema-first + Federation 2) instead, this factory does not apply --
 > gqlgen is a different code-generation library with its own resolver / model-binding
 > / DataLoader patterns, not covered by this plugin.
 

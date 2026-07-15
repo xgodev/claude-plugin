@@ -1,5 +1,5 @@
 
-# UX Metrics & Measurement — Quantifying User Experience
+# UX Metrics & Measurement -- Quantifying User Experience
 
 ## Measurement Philosophy
 
@@ -18,27 +18,27 @@ The HEART framework provides a structured approach to selecting user-centered me
 
 ### Five Dimensions
 
-**Happiness** — Subjective user satisfaction and sentiment
+**Happiness** -- Subjective user satisfaction and sentiment
 - Signals: survey responses, ratings, sentiment in feedback
 - Example metrics: satisfaction score (CSAT), NPS, SUS score, ease-of-use rating
 - Measurement: post-task surveys, in-app ratings, periodic satisfaction surveys
 
-**Engagement** — Depth and frequency of user interaction
+**Engagement** -- Depth and frequency of user interaction
 - Signals: session frequency, feature usage, content consumption
 - Example metrics: DAU/MAU ratio, actions per session, feature adoption rate, session depth
 - Measurement: product analytics, event tracking
 
-**Adoption** — New users successfully onboarding
+**Adoption** -- New users successfully onboarding
 - Signals: signups, onboarding completion, first key action
 - Example metrics: signup-to-activation rate, onboarding completion rate, time to first value
 - Measurement: funnel analytics, cohort analysis
 
-**Retention** — Users continuing to derive value over time
+**Retention** -- Users continuing to derive value over time
 - Signals: return visits, subscription renewals, continued usage
 - Example metrics: D1/D7/D30 retention, churn rate, renewal rate, feature retention
 - Measurement: cohort retention curves, survival analysis
 
-**Task Success** — Ability to complete intended goals effectively and efficiently
+**Task Success** -- Ability to complete intended goals effectively and efficiently
 - Signals: task completion, errors, time spent, help requests
 - Example metrics: task success rate, time on task, error rate, lostness score
 - Measurement: usability testing, analytics funnels, error logging
@@ -76,8 +76,8 @@ The most widely used standardized usability questionnaire. Ten questions on a fi
 ### Limitations
 
 - SUS measures perceived usability, not actual usability. A user may rate a system highly despite making errors.
-- The 10-item format is not ideal for quick pulse checks — use UMUX-Lite (2 items) for lightweight measurement.
-- SUS does not diagnose specific issues — it is a thermometer, not a diagnostic tool.
+- The 10-item format is not ideal for quick pulse checks -- use UMUX-Lite (2 items) for lightweight measurement.
+- SUS does not diagnose specific issues -- it is a thermometer, not a diagnostic tool.
 
 ## UEQ (User Experience Questionnaire)
 
@@ -112,7 +112,7 @@ The most fundamental UX metric. Percentage of users who successfully complete a 
 
 ### Time on Task
 
-How long users take to complete a task. Lower is generally better, but context matters — rushed completion may indicate skipped steps.
+How long users take to complete a task. Lower is generally better, but context matters -- rushed completion may indicate skipped steps.
 
 - Measure from task start to task completion.
 - Use geometric mean (not arithmetic mean) because time data is typically right-skewed.
@@ -152,15 +152,15 @@ Group users by shared characteristic (signup date, acquisition channel, plan tie
 
 - Retention cohorts: What percentage of users who signed up in Week 1 are still active in Week 4, 8, 12?
 - Feature cohorts: How does behavior differ between users who adopted Feature X versus those who did not?
-- Identify the "aha moment" — the action most correlated with long-term retention.
+- Identify the "aha moment" -- the action most correlated with long-term retention.
 
 ### Retention Curves
 
 Plot the percentage of active users over time since signup.
 
-- **Flattening curve:** Healthy product — a stable base of users finds lasting value.
-- **Declining curve:** Problem — users are not finding enough value to stay.
-- **Smiling curve:** Recovery — initial drop-off followed by increasing engagement (often from re-engagement campaigns).
+- **Flattening curve:** Healthy product -- a stable base of users finds lasting value.
+- **Declining curve:** Problem -- users are not finding enough value to stay.
+- **Smiling curve:** Recovery -- initial drop-off followed by increasing engagement (often from re-engagement campaigns).
 
 ## Experimentation
 
@@ -191,7 +191,7 @@ Alternative to fixed-horizon A/B testing. Allows checking results continuously w
 
 - Track key metrics across every release. Plot trendlines.
 - Set regression thresholds: alert when a metric drops more than 5% from baseline.
-- Celebrate improvements with the team — measurement should drive positive reinforcement.
+- Celebrate improvements with the team -- measurement should drive positive reinforcement.
 
 ## AI-Specific UX Metrics
 
@@ -224,20 +224,20 @@ Alternative to fixed-horizon A/B testing. Allows checking results continuously w
 The v3.0 upgrade adds reference materials that extend measurement into design system maturity, AI-specific quality metrics, and notification effectiveness.
 
 **Design System Maturity Metrics**
-See `design-systems-architecture/references/maturity-model-multi-brand.md` for the 5-level design system maturity assessment rubric with quantifiable metrics at each level — including adoption rate thresholds (Level 3 requires 60%+ component coverage), contribution velocity benchmarks, token coverage ratios, cross-platform parity scores, and governance process maturity indicators. This reference provides the structured assessment framework that complements the Design System Metrics section above, enabling teams to measure where they stand and define concrete advancement targets.
+See `design-systems-architecture/references/maturity-model-multi-brand.md` for the 5-level design system maturity assessment rubric with quantifiable metrics at each level -- including adoption rate thresholds (Level 3 requires 60%+ component coverage), contribution velocity benchmarks, token coverage ratios, cross-platform parity scores, and governance process maturity indicators. This reference provides the structured assessment framework that complements the Design System Metrics section above, enabling teams to measure where they stand and define concrete advancement targets.
 
 **AI-Specific Quality and Trust Metrics**
-See `agentic-ai-generative-ux/references/llm-hallucination-design-guardrails.md` for expanded AI-specific metrics beyond the AI-Specific UX Metrics section above — including hallucination rate measurement methodology (per-claim factual accuracy scoring), confidence calibration metrics (Expected Calibration Error measuring alignment between stated confidence and actual correctness), trust calibration accuracy (user trust vs. system reliability correlation), verification engagement rate (how often users check AI citations), and AI quality gate pass/fail rates for production deployment monitoring. These metrics are essential for any team shipping LLM-powered features.
+See `agentic-ai-generative-ux/references/llm-hallucination-design-guardrails.md` for expanded AI-specific metrics beyond the AI-Specific UX Metrics section above -- including hallucination rate measurement methodology (per-claim factual accuracy scoring), confidence calibration metrics (Expected Calibration Error measuring alignment between stated confidence and actual correctness), trust calibration accuracy (user trust vs. system reliability correlation), verification engagement rate (how often users check AI citations), and AI quality gate pass/fail rates for production deployment monitoring. These metrics are essential for any team shipping LLM-powered features.
 
 **Notification Effectiveness Metrics**
-See `performance-states-patterns/references/notification-system-design.md` for metrics specific to notification system evaluation — including notification-to-action rate (percentage of notifications that lead to meaningful user action), dismissal rate by notification type, opt-out rate trending, notification fatigue indicators (declining engagement over time), time-to-action measurement, and notification channel effectiveness comparison (push vs. in-app vs. email). These metrics connect directly to the HEART framework's Engagement dimension for notification-driven features.
+See `performance-states-patterns/references/notification-system-design.md` for metrics specific to notification system evaluation -- including notification-to-action rate (percentage of notifications that lead to meaningful user action), dismissal rate by notification type, opt-out rate trending, notification fatigue indicators (declining engagement over time), time-to-action measurement, and notification channel effectiveness comparison (push vs. in-app vs. email). These metrics connect directly to the HEART framework's Engagement dimension for notification-driven features.
 
 ## Key Sources
 
 - Google HEART Framework (Rodden, Hutchinson, Fu)
 - Sauro, J. & Lewis, J.: "Quantifying the User Experience"
 - MeasuringU: 48 UX Metrics (2025)
-- Brooke, J.: SUS — A Quick and Dirty Usability Scale
+- Brooke, J.: SUS -- A Quick and Dirty Usability Scale
 - Schrepp, M.: User Experience Questionnaire (UEQ)
 - Frontiers in Computer Science: UX Measurement Frameworks
 - Sparkbox: Design System ROI Research

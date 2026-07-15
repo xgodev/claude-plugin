@@ -91,7 +91,8 @@ simply disable the gates:
 | `"enabled": false` | the project | in `.dev-rules.json` |
 
 They disable the RED-first guard (read and edit), the main-folder guard, and
-the line-cap guard together.
+the line-cap guard together, and silence the mode-prompt and issue-comment
+reminders.
 
 ### main-folder guard (opt-in)
 

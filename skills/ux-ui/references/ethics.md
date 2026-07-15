@@ -1,19 +1,19 @@
 
-# UX Ethics & Content Strategy — Designing with Integrity
+# UX Ethics & Content Strategy -- Designing with Integrity
 
 ## Ethics in Design Philosophy
 
-"Design is a political act. Every thing we design goes on to design us back." — Anne-Marie Willis
+"Design is a political act. Every thing we design goes on to design us back." -- Anne-Marie Willis
 
-Design decisions shape human behavior at massive scale. A dark pattern deployed to millions of users does millions of units of harm. Ethical design is not a constraint on creativity — it is the foundation that makes design trustworthy and sustainable. Users who feel respected become loyal; users who feel manipulated become adversaries.
+Design decisions shape human behavior at massive scale. A dark pattern deployed to millions of users does millions of units of harm. Ethical design is not a constraint on creativity -- it is the foundation that makes design trustworthy and sustainable. Users who feel respected become loyal; users who feel manipulated become adversaries.
 
 ### Core Ethical Principles
 
-1. **Respect autonomy** — users must make informed, uncoerced decisions
-2. **Transparent by default** — never hide information that affects user decisions
-3. **Benefit over extraction** — design for user value, not just engagement metrics
-4. **Inclusive representation** — content, imagery, and language must reflect human diversity
-5. **Privacy as a right** — treat user data as if it were your own; collect minimum, protect maximum
+1. **Respect autonomy** -- users must make informed, uncoerced decisions
+2. **Transparent by default** -- never hide information that affects user decisions
+3. **Benefit over extraction** -- design for user value, not just engagement metrics
+4. **Inclusive representation** -- content, imagery, and language must reflect human diversity
+5. **Privacy as a right** -- treat user data as if it were your own; collect minimum, protect maximum
 
 ## Dark Pattern Identification and Avoidance
 
@@ -84,13 +84,13 @@ When reviewing any interface, verify:
 
 ### Privacy by Design Principles (Ann Cavoukian)
 
-1. **Proactive, not reactive** — prevent privacy issues, do not wait for breaches
-2. **Privacy as default** — maximum privacy without user action required
-3. **Embedded in design** — privacy is not a bolt-on feature
-4. **Full functionality** — privacy and functionality are not zero-sum
-5. **End-to-end security** — protect data throughout its lifecycle
-6. **Transparency** — be open about data practices
-7. **User-centric** — respect user autonomy and preferences
+1. **Proactive, not reactive** -- prevent privacy issues, do not wait for breaches
+2. **Privacy as default** -- maximum privacy without user action required
+3. **Embedded in design** -- privacy is not a bolt-on feature
+4. **Full functionality** -- privacy and functionality are not zero-sum
+5. **End-to-end security** -- protect data throughout its lifecycle
+6. **Transparency** -- be open about data practices
+7. **User-centric** -- respect user autonomy and preferences
 
 ### Privacy UX Patterns
 
@@ -121,32 +121,32 @@ When reviewing any interface, verify:
 Every piece of content must answer: What is the user trying to do, and how does this content help?
 
 **Content Hierarchy:**
-1. **Essential:** Information needed to complete the current task — always visible
-2. **Supporting:** Context that aids decision-making — visible on demand
-3. **Reference:** Detailed information for edge cases — accessible but not prominent
+1. **Essential:** Information needed to complete the current task -- always visible
+2. **Supporting:** Context that aids decision-making -- visible on demand
+3. **Reference:** Detailed information for edge cases -- accessible but not prominent
 
 ### Information Architecture Principles
 - Organize content by user mental models, not organizational structure
 - Use card sorting and tree testing to validate IA (see ux-research-methods)
-- Apply the "three-click rule" loosely — it is less about clicks and more about confidence at each step
+- Apply the "three-click rule" loosely -- it is less about clicks and more about confidence at each step
 - Consistent navigation labels across the entire application
 
 ## UX Writing and Microcopy
 
 ### UX Writing Principles
 
-1. **Clear over clever** — functional text must be immediately understood
-2. **Concise** — use the minimum words needed; every word must earn its place
-3. **Conversational** — write like a knowledgeable friend, not a legal document
-4. **Consistent** — same terms for same concepts across the entire product
-5. **Actionable** — tell users what to do, not just what happened
+1. **Clear over clever** -- functional text must be immediately understood
+2. **Concise** -- use the minimum words needed; every word must earn its place
+3. **Conversational** -- write like a knowledgeable friend, not a legal document
+4. **Consistent** -- same terms for same concepts across the entire product
+5. **Actionable** -- tell users what to do, not just what happened
 
 ### Microcopy Patterns
 
 **Button Labels:**
-- Use specific verbs: "Save draft", "Send message", "Create account" — not "Submit" or "OK"
-- Destructive actions: "Delete project" not "Delete" — specificity prevents mistakes
-- Loading state: "Saving..." / "Sending..." — reflect the action in progress
+- Use specific verbs: "Save draft", "Send message", "Create account" -- not "Submit" or "OK"
+- Destructive actions: "Delete project" not "Delete" -- specificity prevents mistakes
+- Loading state: "Saving..." / "Sending..." -- reflect the action in progress
 
 **Error Messages:**
 - Structure: What happened + Why + How to fix
@@ -156,7 +156,7 @@ Every piece of content must answer: What is the user trying to do, and how does 
 **Empty States:**
 - Explain what the empty area will contain
 - Provide a clear action to populate it: "No projects yet. Create your first project."
-- Use illustration sparingly — it should clarify, not decorate
+- Use illustration sparingly -- it should clarify, not decorate
 
 **Confirmation Dialogs:**
 - Title: State the action about to happen
@@ -166,7 +166,7 @@ Every piece of content must answer: What is the user trying to do, and how does 
 
 **Placeholder Text:**
 - Show format or example, not instructions: "jane@example.com" not "Enter your email"
-- Never use placeholder as the only label — it disappears on input
+- Never use placeholder as the only label -- it disappears on input
 
 **Success Messages:**
 - Confirm what happened: "Message sent to 3 recipients"
@@ -180,7 +180,7 @@ Every piece of content must answer: What is the user trying to do, and how does 
 - Use Hemingway Editor or similar tools to test readability
 
 **Formatting for Scannability:**
-- Front-load key information — put the conclusion first, then supporting detail
+- Front-load key information -- put the conclusion first, then supporting detail
 - Use bullet points and numbered lists for 3+ related items
 - Bold key terms within paragraphs for scanning
 - Break content into short paragraphs (2-4 sentences max)
@@ -199,7 +199,7 @@ Every piece of content must answer: What is the user trying to do, and how does 
 - Avoid ableist metaphors: "check" not "sanity check"; "placeholder" not "dummy"
 - Culturally neutral: avoid idioms that do not translate across cultures
 - Age-neutral: avoid "elderly" (use "older adults"); avoid "digital native" assumptions
-- Use people-first language for disability: "person with a disability" not "disabled person" (though identity-first is preferred by some communities — respect stated preferences)
+- Use people-first language for disability: "person with a disability" not "disabled person" (though identity-first is preferred by some communities -- respect stated preferences)
 
 ### Content Accessibility
 - Provide alt text for all meaningful images
@@ -223,10 +223,10 @@ The v3.0 upgrade adds dedicated references for microcopy patterns, cross-cultura
 See `references/microcopy-pattern-library.md` for the component-level microcopy pattern library containing 30+ action verbs organized by context (creation, modification, deletion, navigation, communication), 20+ error message templates following the What-Why-Fix structure, and ready-to-use copy patterns for empty states, loading states, confirmation dialogs, success messages, permission requests, and onboarding flows. This reference transforms the UX Writing and Microcopy section above into a practical, copy-paste-ready resource for product teams.
 
 **Cross-Cultural and Localization Ethics**
-See the `cross-cultural-i18n-ux` skill for ethical considerations specific to cross-cultural design and localization — including cultural sensitivity in content strategy (avoiding Western-centric defaults), right-to-left and bidirectional text implications for UX writing, culturally variable privacy expectations (differing norms around data collection across regions), honorific and formality systems that affect microcopy tone, and legal compliance variations (GDPR, LGPD, PIPL) that shape ethical consent patterns. This skill complements the Inclusive Language section above with global, culturally-aware perspectives.
+See the `cross-cultural-i18n-ux` skill for ethical considerations specific to cross-cultural design and localization -- including cultural sensitivity in content strategy (avoiding Western-centric defaults), right-to-left and bidirectional text implications for UX writing, culturally variable privacy expectations (differing norms around data collection across regions), honorific and formality systems that affect microcopy tone, and legal compliance variations (GDPR, LGPD, PIPL) that shape ethical consent patterns. This skill complements the Inclusive Language section above with global, culturally-aware perspectives.
 
 **Cognitive Biases that Dark Patterns Exploit**
-See `cognitive-psychology-ux/references/cognitive-biases-design-patterns.md` for the comprehensive catalog of cognitive biases most relevant to dark pattern identification and avoidance — including anchoring bias (manipulated reference prices), default effect (pre-selected options exploiting status quo bias), scarcity bias (fake urgency timers), social proof manipulation (fabricated reviews or inflated user counts), and sunk cost fallacy exploitation (making cancellation feel like wasting prior investment). Understanding these biases strengthens the Dark Pattern Detection Checklist above by revealing the psychological mechanisms being exploited.
+See `cognitive-psychology-ux/references/cognitive-biases-design-patterns.md` for the comprehensive catalog of cognitive biases most relevant to dark pattern identification and avoidance -- including anchoring bias (manipulated reference prices), default effect (pre-selected options exploiting status quo bias), scarcity bias (fake urgency timers), social proof manipulation (fabricated reviews or inflated user counts), and sunk cost fallacy exploitation (making cancellation feel like wasting prior investment). Understanding these biases strengthens the Dark Pattern Detection Checklist above by revealing the psychological mechanisms being exploited.
 
 ## Key Sources
 

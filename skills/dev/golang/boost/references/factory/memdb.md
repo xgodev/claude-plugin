@@ -17,7 +17,7 @@ memdb is schema-first: define tables and indexes upfront, then run transactions.
 - Service that holds a derived view of upstream data and wants indexed query semantics without a database round-trip.
 - Read-mostly cache where multiple indexes matter (lookup by ID + by status + by owner).
 
-For shared state across replicas, **don't use memdb** — it's per-process.
+For shared state across replicas, **don't use memdb** -- it's per-process.
 
 ## Red flags
 

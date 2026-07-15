@@ -1,8 +1,8 @@
 **REQUIRED BACKGROUND:**
-- `references/start.md` — `boost.Start()` first.
-- `references/wrapper/config.md` — config namespacing semantics.
+- `references/start.md` -- `boost.Start()` first.
+- `references/wrapper/config.md` -- config namespacing semantics.
 
-## Construction — one client per upstream
+## Construction -- one client per upstream
 
 ```go
 import "github.com/xgodev/boost/factory/contrib/go-resty/resty/v2"
@@ -39,11 +39,11 @@ Standard knobs registered automatically:
 | `.retryCount` | Retry budget |
 | `.retryWaitTime` | Base backoff between retries |
 
-Application-specific extras (auth header, client ID, etc.) typically live in your own service config, not `boost.factory.resty.*` — pass them explicitly to your client constructor.
+Application-specific extras (auth header, client ID, etc.) typically live in your own service config, not `boost.factory.resty.*` -- pass them explicitly to your client constructor.
 
 ## Observability plugins
 
-The constructors also accept `plugins ...Plugin` — if the service uses one of these vendors, add the matching plugin here instead of hand-instrumenting each call site:
+The constructors also accept `plugins ...Plugin` -- if the service uses one of these vendors, add the matching plugin here instead of hand-instrumenting each call site:
 
 | Vendor | Import | Usage |
 |---|---|---|

@@ -1,26 +1,26 @@
 
-# Design Systems Architecture — Systematic Design at Scale
+# Design Systems Architecture -- Systematic Design at Scale
 
 ## Design System Philosophy
 
-"A design system is not a project. It is a product serving products." — Nathan Curtis
+"A design system is not a project. It is a product serving products." -- Nathan Curtis
 
 A design system is the single source of truth for how a product family looks, behaves, and communicates. It exists to multiply design and development efficiency while ensuring consistency across teams, platforms, and time. The system must be opinionated enough to ensure coherence yet flexible enough to serve diverse product needs.
 
 ### Core Principles
 
-1. **Systematic over stylistic** — define rules and relationships, not just visual recipes
-2. **Tokens are the foundation** — design decisions encoded as data, not hardcoded values
-3. **Composition over inheritance** — build complex components from simple, composable primitives
-4. **Document the why** — every decision needs rationale to prevent future erosion
-5. **Adopt, then adapt** — products adopt the system by default, request exceptions with justification
+1. **Systematic over stylistic** -- define rules and relationships, not just visual recipes
+2. **Tokens are the foundation** -- design decisions encoded as data, not hardcoded values
+3. **Composition over inheritance** -- build complex components from simple, composable primitives
+4. **Document the why** -- every decision needs rationale to prevent future erosion
+5. **Adopt, then adapt** -- products adopt the system by default, request exceptions with justification
 
 ## Design Token Architecture (W3C Design Tokens Standard)
 
 ### Token Hierarchy
 
 **Tier 1: Global/Primitive Tokens (Raw Values)**
-Define the complete value palette — all available options.
+Define the complete value palette -- all available options.
 
 ```json
 {
@@ -47,7 +47,7 @@ Define the complete value palette — all available options.
 ```
 
 **Tier 2: Semantic/Alias Tokens (Contextual Meaning)**
-Map raw values to design intent — what the value means.
+Map raw values to design intent -- what the value means.
 
 ```json
 {
@@ -71,7 +71,7 @@ Map raw values to design intent — what the value means.
 ```
 
 **Tier 3: Component Tokens (Specific Application)**
-Map semantic tokens to component properties — where the value is used.
+Map semantic tokens to component properties -- where the value is used.
 
 ```json
 {
@@ -131,11 +131,11 @@ Component
 
 ### Component Maturity Model
 
-**Level 1 — Defined:** Designed in Figma, documented in guidelines
-**Level 2 — Implemented:** Coded in component library, props API defined
-**Level 3 — Tested:** Unit tests, visual regression tests, accessibility tests pass
-**Level 4 — Documented:** Usage guidelines, API docs, examples, do/don't
-**Level 5 — Governed:** Change process established, versioning, deprecation path
+**Level 1 -- Defined:** Designed in Figma, documented in guidelines
+**Level 2 -- Implemented:** Coded in component library, props API defined
+**Level 3 -- Tested:** Unit tests, visual regression tests, accessibility tests pass
+**Level 4 -- Documented:** Usage guidelines, API docs, examples, do/don't
+**Level 5 -- Governed:** Change process established, versioning, deprecation path
 
 ### Component API Design Principles
 
@@ -253,13 +253,13 @@ For organizations with multiple brands sharing a system:
 The v3.0 upgrade introduces references that extend design system architecture into Figma MCP pipelines, maturity modeling, and modern CSS integration.
 
 **Figma MCP Design-to-Code Pipeline**
-See `figma-design-tool-workflows/references/figma-mcp-ai-flywheel.md` for the Figma Model Context Protocol (MCP) server integration that enables AI-driven design-to-code workflows. This reference covers the MCP-powered flywheel where AI agents read Figma components, extract design tokens, generate production code, and validate output against the source design — creating a continuous synchronization loop between design and development that supersedes manual handoff processes.
+See `figma-design-tool-workflows/references/figma-mcp-ai-flywheel.md` for the Figma Model Context Protocol (MCP) server integration that enables AI-driven design-to-code workflows. This reference covers the MCP-powered flywheel where AI agents read Figma components, extract design tokens, generate production code, and validate output against the source design -- creating a continuous synchronization loop between design and development that supersedes manual handoff processes.
 
 **Design System Maturity Model and Multi-Brand Token Architecture**
 See `references/maturity-model-multi-brand.md` for the comprehensive 5-level design system maturity model (from Ad Hoc through Optimized), multi-brand token architecture patterns for organizations operating multiple product brands from a shared foundation, and the W3C Design Tokens 2025.10 `$extensions` specification. The `$extensions` property enables vendor-specific metadata (Figma constraints, platform overrides, deprecation flags) within standard token files, which is critical for tooling interoperability in mature multi-brand systems. This reference expands significantly on the Multi-Brand Architecture and Component Maturity Model sections above.
 
 **CSS @layer Integration with Token Architecture**
-See `component-patterns-code/references/css-modern-patterns.md` for modern CSS `@layer` usage in design system token architecture. Cascade layers (`@layer reset, tokens, components, utilities, overrides`) provide deterministic specificity management for design systems at scale — eliminating the specificity wars that plague large component libraries. This reference covers how design tokens map to CSS custom properties within a layered cascade, enabling clean component-level theming without `!important` hacks or excessive nesting.
+See `component-patterns-code/references/css-modern-patterns.md` for modern CSS `@layer` usage in design system token architecture. Cascade layers (`@layer reset, tokens, components, utilities, overrides`) provide deterministic specificity management for design systems at scale -- eliminating the specificity wars that plague large component libraries. This reference covers how design tokens map to CSS custom properties within a layered cascade, enabling clean component-level theming without `!important` hacks or excessive nesting.
 
 ## Key Sources
 

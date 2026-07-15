@@ -1,5 +1,48 @@
 # Changelog
 
+## [1.14.0]
+
+### Added
+
+- **Go language leaf** (`skills/dev/golang/index.md`): Go-concrete shapes
+  of the LAWs (errors/%w, t.TempDir fixtures, time.Sleep-is-not-sync,
+  //nolint discipline, -race/errgroup) plus the route to `golang/boost/`.
+  Chain: dev door -> golang/index.md -> golang/boost/index.md. Authored
+  through the writing-skills flow: baseline subagents documented the gap
+  (no Go leaf; boost factory depth unannounced), the leaf + routing fixes
+  closed it, and re-run scenarios verified both paths.
+
+### Fixed (full-plugin review, 4 parallel reviewers)
+
+- **Dispatcher: aggregate JSON corrupted by a silent tool-error gate.** A
+  gate exiting 2 before rendering emits no JSON; the N-language envelope
+  concatenated the empty string and produced invalid JSON. Such gates now
+  get a valid stub result. Covered by a new dispatcher.bats case.
+- **Dispatcher: hygiene now also runs when NO language is detected** (a
+  violation turns exit 3 into exit 1), matching the documented "every
+  run". Covered by a new dispatcher.bats case.
+- **Docs telling lies**: docs/golang-boost.md showed a nonexistent tree
+  (skills/boost/SKILL.md) and a nonexistent fx/pluggable-datastore.md;
+  docs/hooks.md + plugin.json called the PR gate "opt-in" (it is on by
+  default, fails open, bypassed only via QG_BYPASS_REASON); README had a
+  duplicate ux-ui bullet and a stale hook list; ux-ui/index.md pointed
+  search.py at the wrong path base, omitted 3 live search domains
+  (web/react/google-fonts), and misstated the --persist output dir;
+  search.py's docstring invented a "prompt" domain and hid 3 real ones;
+  gate.md rendered "bypassed" as plain green in one table and as a
+  warning in another; rust/rules.md cited an unnumbered LAW.
+- **ASCII sweep**: em-dash/ellipsis normalized to ASCII across all skill
+  markdown (73 files) and design_system.py output.
+- **Dead payload removed**: orphan ux-ui/data/{design,draft}.csv;
+  orphan docs/skills/quality-gate.md and the stale relocation spec.
+- **Regression guard**: hooks_json_test now fails if plugin.json ever
+  declares a "hooks" key (double registration breaks the whole plugin).
+- **Gaps**: web gate got its missing README; contract documents
+  HACK(#N), exit-code authority over per-gate JSON, and the no-language
+  hygiene path; kill-switch doc names the reminders it silences;
+  remaining Portuguese comments in nodejs/python bats translated;
+  plugin.json description now counts all three skills and Rust.
+
 ## [1.13.0]
 
 ### Changed

@@ -27,8 +27,6 @@ capability:
   plus UX methodology references. Catalog data is queried by a bundled
   engine, never loaded into context. See
   [`docs/ux-catalog.md`](docs/ux-catalog.md).
-- **`ux-ui` (design skill)** -- owns the design catalog, references, and
-  search engine; the `dev` door cross-references it for design mid-feature.
 - **Dependency: [`superpowers`](https://github.com/obra/superpowers)** --
   core skills library by Jesse Vincent (TDD, debugging, collaboration
   patterns), resolved from the official `claude-plugins-official`
@@ -117,7 +115,7 @@ pay-per-use:
 | `ux-ui` description (design) | ~85 tokens | every session |
 | `skill-rules` description | ~40 tokens | every session |
 | `dev` router SKILL.md + the leaf it routes to | 0 | only when the skill fires |
-| Hooks (PR gate, RED-first, main-folder, line-cap, issue reminder) | 0 | never (run as processes) |
+| Hooks (PR gate, RED-first, main-folder, line-cap, issue reminder, mode prompt) | 0 | never (run as processes) |
 | MCP servers | 0 | none bundled |
 
 ## Repository layout
@@ -155,4 +153,4 @@ See [`docs/quality-gate.md`](docs/quality-gate.md) and
 
 MIT -- see [LICENSE](LICENSE).
 
-- Version: 1.13.0
+- Version: 1.14.0

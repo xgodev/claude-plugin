@@ -25,7 +25,7 @@ Configure region, credentials provider, retry policy under `boost.factory.aws.*`
 
 ## Per-service wrapper clients
 
-Instead of `<service>.NewFromConfig(cfg)` (native SDK), boost also ships thin per-service wrappers that take an already-constructed native client — use these when you want the wrapped client's boost-standard error handling on the SNS/SQS/Kinesis calls themselves:
+Instead of `<service>.NewFromConfig(cfg)` (native SDK), boost also ships thin per-service wrappers that take an already-constructed native client -- use these when you want the wrapped client's boost-standard error handling on the SNS/SQS/Kinesis calls themselves:
 
 ```go
 import (
@@ -39,7 +39,7 @@ sqsClient := sqs.NewClient(nativeSQS.NewFromConfig(cfg))
 kinesisClient := kinesis.NewClient(nativeKinesis.NewFromConfig(cfg))
 ```
 
-Each `NewClient` wraps the native `*<service>.Client` from `NewFromConfig` — build the native client first, then wrap it.
+Each `NewClient` wraps the native `*<service>.Client` from `NewFromConfig` -- build the native client first, then wrap it.
 
 ## Observability plugin
 
@@ -51,7 +51,7 @@ Only Datadog has a plugin here (no OTel, no Prometheus):
 
 ## Umbrella SDK layout (factory side only)
 
-`factory/contrib/aws/aws-sdk-go-v2/v1/client/<service>/` is where per-service convenience clients live. This grouping is **exclusive to `factory/contrib/`** because factories ship clients that share an SDK version pin. For wrapper drivers, the layout is **different** — split per service: `wrapper/publisher/driver/contrib/aws/sns/v1/`, NOT `wrapper/publisher/driver/contrib/aws/aws-sdk-go-v2/v1/sns/`. See `references/CONTRIBUTING.md`.
+`factory/contrib/aws/aws-sdk-go-v2/v1/client/<service>/` is where per-service convenience clients live. This grouping is **exclusive to `factory/contrib/`** because factories ship clients that share an SDK version pin. For wrapper drivers, the layout is **different** -- split per service: `wrapper/publisher/driver/contrib/aws/sns/v1/`, NOT `wrapper/publisher/driver/contrib/aws/aws-sdk-go-v2/v1/sns/`. See `references/CONTRIBUTING.md`.
 
 ## Red flags
 
@@ -59,5 +59,5 @@ Only Datadog has a plugin here (no OTel, no Prometheus):
 |---|---|
 | `config.LoadDefaultConfig(ctx)` from `aws/config` directly | `awsfact.NewConfig(ctx)` |
 | One aws.Config per service client | Build once, share |
-| AWS credentials in code or `os.Getenv` reads | Use the credentials chain (env, IAM role, profile) — boost picks it up |
+| AWS credentials in code or `os.Getenv` reads | Use the credentials chain (env, IAM role, profile) -- boost picks it up |
 | Wrapper driver placed under `wrapper/.../aws/aws-sdk-go-v2/v1/sns/` | Should be `wrapper/.../aws/sns/v1/` |

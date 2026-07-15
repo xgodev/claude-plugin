@@ -1,6 +1,6 @@
 **REQUIRED BACKGROUND:**
-- `references/start.md` — `boost.Start()` first.
-- `references/wrapper/config.md` — project ID is read from config, not `os.Getenv`.
+- `references/start.md` -- `boost.Start()` first.
+- `references/wrapper/config.md` -- project ID is read from config, not `os.Getenv`.
 
 ## Construction
 
@@ -28,5 +28,5 @@ Construct once, share, and `defer pb.Close()` so the gRPC connection drains on s
 |---|---|
 | `pubsub.NewClient(ctx, projectID)` directly from the upstream SDK | Use `fpubsub.NewClient(ctx)` so config + observability instrumentation are wired |
 | Reading `GOOGLE_CLOUD_PROJECT` via `os.Getenv` | Use `BOOST_FACTORY_GCP_PUBSUB_APIOPTIONS_PROJECTID` (or override the koanf key) |
-| Forgetting `defer pb.Close()` | Add it — graceful gRPC shutdown |
+| Forgetting `defer pb.Close()` | Add it -- graceful gRPC shutdown |
 | Constructing two clients (one for publish, one for subscribe) | Construct one, share it |

@@ -130,7 +130,7 @@ GATE_EXIT=$?
 
 | Exit | Meaning | What the skill does |
 |------|-------------|-------------------|
-| `0`  | `passed` / `bypassed` / fast-path / absolute mode with no violation | Render green. Do NOT open a PR. |
+| `0`  | `passed` / fast-path / absolute mode with no violation | Render green. Do NOT open a PR. (`bypassed` also exits 0 but renders the WARNING of section 6, never plain green.) |
 | `1`  | `regressed` (comparative) or `failed` (absolute threshold violated) | Render table + analysis of the logs. Do NOT open a PR. Do NOT suggest a bypass. |
 | `2`  | Tool error / missing prerequisite / invalid `.qg.yaml` | Relay the `stderr.log` message literally. Do NOT interpret the JSON. Do NOT install the prereq. STOP. |
 | `3`  | **No supported language detected** (dispatcher-exclusive) | Report: "no supported language -- open an issue in `quality-gate` or run the `add-quality-gate` skill in the gate repo". Do NOT improvise an ad-hoc gate. |

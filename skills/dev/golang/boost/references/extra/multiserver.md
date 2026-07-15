@@ -1,10 +1,10 @@
 **REQUIRED BACKGROUND:**
-- `references/start.md` — `boost.Start()` first.
-- `references/factory/echo.md` — the typical primary listener.
+- `references/start.md` -- `boost.Start()` first.
+- `references/factory/echo.md` -- the typical primary listener.
 
 ## When you need it
 
-A single binary listening on multiple ports — for example:
+A single binary listening on multiple ports -- for example:
 - Main API on `:8080` (Echo HTTP).
 - Prometheus scraper on `:9090` (`/metrics`).
 - Internal gRPC on `:9000`.
@@ -22,7 +22,7 @@ type Server interface {
 }
 ```
 
-`Serve` is the blocking server loop; `Shutdown` is the graceful drain. Adapt whatever framework you're using (Echo, gRPC, …) to this interface — it does not ship built-in adapters.
+`Serve` is the blocking server loop; `Shutdown` is the graceful drain. Adapt whatever framework you're using (Echo, gRPC, ...) to this interface -- it does not ship built-in adapters.
 
 ## Wiring
 
@@ -68,5 +68,5 @@ func Shutdown(ctx context.Context)        // calls Shutdown(ctx) on every regist
 |---|---|
 | Hand-rolled `sync.WaitGroup` + N `go server.Serve` calls | Use `multiserver.Serve(ctx, srvs...)` so failure semantics are uniform |
 | A server type that doesn't implement both `Serve(context.Context)` and `Shutdown(context.Context)` | Add an adapter type wrapping the underlying server/framework |
-| Calling `multiserver.New()` / `.WithServer()` / `ms.Run(ctx)` | That builder API doesn't exist — the real entry points are the package-level `Serve`, `Check`, `Shutdown` functions |
+| Calling `multiserver.New()` / `.WithServer()` / `ms.Run(ctx)` | That builder API doesn't exist -- the real entry points are the package-level `Serve`, `Check`, `Shutdown` functions |
 | Forgetting to wire `Shutdown` to the process signal context | Pass a `signal.NotifyContext` into `Serve` so SIGTERM drains every listener |

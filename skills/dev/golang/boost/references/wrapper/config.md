@@ -1,4 +1,4 @@
-**REQUIRED BACKGROUND:** `references/start.md` — the registry is empty until `boost.Start()` loads env+files.
+**REQUIRED BACKGROUND:** `references/start.md` -- the registry is empty until `boost.Start()` loads env+files.
 
 ## Register every tunable up front
 
@@ -12,7 +12,7 @@ import (
 const root = "myapp.outbound"
 
 func init() {
-    // Pass the default in its NATIVE type — koanf infers the type from the
+    // Pass the default in its NATIVE type -- koanf infers the type from the
     // value. Env overrides still arrive as strings and are parsed on read,
     // so a Duration registered as 10*time.Second still accepts MYAPP_..="2h".
     config.Add(root+".subject", "default-topic", "downstream subject")       // string
@@ -25,7 +25,7 @@ func init() {
     config.Add(root+".labels", map[string]string{"team": "cart"}, "tags")    // map[string]string
 }
 
-// later, after boost.Start ran — read with the matching typed getter:
+// later, after boost.Start ran -- read with the matching typed getter:
 subj := config.String(root + ".subject")
 to   := config.Duration(root + ".timeout")
 n    := config.Int(root + ".maxAttempts")
@@ -34,7 +34,7 @@ regs := config.Strings(root + ".regions")
 
 Every `config.Add` call shows up in the boot banner and in `boost-config dump`. `os.Getenv` is invisible to both, so operators can't discover what's tunable.
 
-**Register the default in its native type** (`10*time.Second`, `0.01`, `true`, `[]string{...}`) — not a stringified form (`"10s"`, `"0.01"`). The native literal self-documents the type and matches the getter; the env override still accepts a readable string because env values are always parsed on read.
+**Register the default in its native type** (`10*time.Second`, `0.01`, `true`, `[]string{...}`) -- not a stringified form (`"10s"`, `"0.01"`). The native literal self-documents the type and matches the getter; the env override still accepts a readable string because env values are always parsed on read.
 
 ## API surface
 
@@ -63,7 +63,7 @@ Pick the getter that matches the registered default's type.
 | `config.Unmarshal(&v)` / `config.UnmarshalWithPath(key, &v)` | decode a subtree into a struct |
 | `config.Exists(key)` / `config.Get(key)` / `config.All()` | presence check / raw value / full dump |
 
-The slice getter is `config.Strings` (plural) — there is no `StringSlice`. For a config subtree that maps onto a struct (nested objects, lists of objects), register the shape in a file/env and read it with `config.UnmarshalWithPath(key, &out)` instead of hand-parsing a JSON string.
+The slice getter is `config.Strings` (plural) -- there is no `StringSlice`. For a config subtree that maps onto a struct (nested objects, lists of objects), register the shape in a file/env and read it with `config.UnmarshalWithPath(key, &out)` instead of hand-parsing a JSON string.
 
 ## Env override is automatic
 
@@ -71,7 +71,7 @@ A key registered as `myapp.outbound.subject` is overridden at deploy time by env
 
 ## See every config at boot, hide the secrets
 
-Enable the startup config table (`key | default | resolved value`) — invaluable for spotting a bad override (a wrong `myapp.brand` shows up immediately instead of a silent boot fail-fast):
+Enable the startup config table (`key | default | resolved value`) -- invaluable for spotting a bad override (a wrong `myapp.brand` shows up immediately instead of a silent boot fail-fast):
 
 ```
 boost.print.config.enabled   = true   # env: BOOST_PRINT_CONFIG_ENABLED=true   (dev / .env only)
@@ -85,18 +85,18 @@ config.Add("myapp.vtex.apptoken", "", "VTEX X-VTEX-API-AppToken", config.WithHid
 config.Add("myapp.dolphin.apikey", "", "Dolphin x-api-key",        config.WithHide())
 ```
 
-`WithHide` only masks the *printed* value — `config.String(key)` still returns the real secret. Leave `boost.print.config.enabled` off (the default) in production.
+`WithHide` only masks the *printed* value -- `config.String(key)` still returns the real secret. Leave `boost.print.config.enabled` off (the default) in production.
 
 ## Red flags
 
 | Red flag | Fix |
 |---|---|
 | `os.Getenv("FOO_BAR")` outside a `config.Add` registration | `config.Add("myapp.foo.bar", default, desc)` then `config.String(...)` |
-| A secret key (token / apikey / password) registered without `config.WithHide()` | Add `config.WithHide()` — otherwise `boost.print.config.enabled=true` prints the secret into the boot log |
+| A secret key (token / apikey / password) registered without `config.WithHide()` | Add `config.WithHide()` -- otherwise `boost.print.config.enabled=true` prints the secret into the boot log |
 | Reading config inside `init()` (before `boost.Start` runs) | Read at call time, not init time |
 | Mutating env vars in tests (`os.Setenv`) | Use `config.Add(...)` with the test default; if you must override at runtime, use a koanf provider in the test setup |
 | Hard-coding what should be tunable (timeouts, URLs, retry budgets) | Register with `config.Add` and a sensible default |
 | Stringified default for a typed value (`"10s"`, `"0.01"`, `"[]"`) | Pass the native type (`10*time.Second`, `0.01`, `[]string{}`) so it self-documents and matches the getter |
 | Reaching for a non-existent `config.StringSlice` | Use `config.Strings` (plural); see the API table for the full set |
-| Hand-parsing a JSON string for a struct/map config | `config.UnmarshalWithPath(key, &out)`, or a typed map getter (`config.StringMap`, …) |
-| "Just one operator override, harmless" rationalization | Same fix — discoverability and test reproducibility don't allow exceptions |
+| Hand-parsing a JSON string for a struct/map config | `config.UnmarshalWithPath(key, &out)`, or a typed map getter (`config.StringMap`, ...) |
+| "Just one operator override, harmless" rationalization | Same fix -- discoverability and test reproducibility don't allow exceptions |

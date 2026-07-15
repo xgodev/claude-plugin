@@ -1,5 +1,5 @@
 
-# Desktop App Design — Professional & Enterprise Excellence
+# Desktop App Design -- Professional & Enterprise Excellence
 
 ## Desktop Design Philosophy
 
@@ -7,11 +7,11 @@ Desktop applications serve users who invest hours of focused attention in profes
 
 ### Core Principles (Edward Tufte + Jony Ive)
 
-1. **Information density with clarity** — show more data without increasing cognitive load (Tufte: "maximize data-ink ratio")
-2. **Invisible design** — the interface should disappear, leaving only the work (Ive: "true simplicity is derived from so much more than just the absence of clutter")
-3. **Keyboard-first, mouse-enhanced** — power users live on the keyboard; mouse interaction is the fallback
-4. **Progressive complexity** — simple surface, deep capability accessible through exploration
-5. **Spatial memory** — consistent layouts allow users to develop muscle memory over months of use
+1. **Information density with clarity** -- show more data without increasing cognitive load (Tufte: "maximize data-ink ratio")
+2. **Invisible design** -- the interface should disappear, leaving only the work (Ive: "true simplicity is derived from so much more than just the absence of clutter")
+3. **Keyboard-first, mouse-enhanced** -- power users live on the keyboard; mouse interaction is the fallback
+4. **Progressive complexity** -- simple surface, deep capability accessible through exploration
+5. **Spatial memory** -- consistent layouts allow users to develop muscle memory over months of use
 
 ## Dashboard Design
 
@@ -21,7 +21,7 @@ Desktop applications serve users who invest hours of focused attention in profes
 - Real-time monitoring with auto-refresh (5-30 second intervals)
 - Status-at-a-glance with clear normal/warning/critical states
 - Anomaly detection with visual emphasis on outliers
-- Minimize decoration — every pixel serves monitoring goals
+- Minimize decoration -- every pixel serves monitoring goals
 
 **Analytical Dashboards**
 - Interactive exploration with filter, drill-down, and cross-filtering
@@ -31,14 +31,14 @@ Desktop applications serve users who invest hours of focused attention in profes
 
 **Strategic Dashboards**
 - KPI-focused with trend indicators and goal tracking
-- Executive summary level — 5-7 key metrics maximum
+- Executive summary level -- 5-7 key metrics maximum
 - Contextual benchmarks (vs. target, vs. last period, vs. industry)
-- Minimal interaction needed — the story should be immediately clear
+- Minimal interaction needed -- the story should be immediately clear
 
 ### Dashboard Layout Principles
 
 - **F-pattern reading:** Place the most critical metric top-left, summary row at top
-- **Card-based layout:** Each card is one complete thought — metric + context + trend
+- **Card-based layout:** Each card is one complete thought -- metric + context + trend
 - **Consistent grid:** 12-column grid with standardized card sizes (1/4, 1/3, 1/2, full)
 - **Information hierarchy:** Primary numbers large (24-48px), secondary context small (12-14px)
 - **Color as data:** Use color to encode meaning (red=bad, green=good), not decoration
@@ -62,7 +62,7 @@ Desktop applications serve users who invest hours of focused attention in profes
 - **Row height:** 40-52px standard, 32px compact mode for data-heavy views
 - **Column resizing** by dragging column borders
 - **Column reordering** by drag-and-drop headers
-- **Row striping** (subtle alternating background) for wide tables — optional for narrow ones
+- **Row striping** (subtle alternating background) for wide tables -- optional for narrow ones
 
 ### Table Functionality
 
@@ -76,9 +76,9 @@ Desktop applications serve users who invest hours of focused attention in profes
 
 ### Table Density Modes
 
-- **Comfortable:** 52px rows, generous padding — default for general audiences
-- **Standard:** 40px rows — default for data-oriented users
-- **Compact:** 32px rows, smaller text — for power users managing large datasets
+- **Comfortable:** 52px rows, generous padding -- default for general audiences
+- **Standard:** 40px rows -- default for data-oriented users
+- **Compact:** 32px rows, smaller text -- for power users managing large datasets
 - Allow users to toggle density preference with persistent setting
 
 ## Complex Workflow Design
@@ -86,19 +86,19 @@ Desktop applications serve users who invest hours of focused attention in profes
 ### Multi-Step Workflows
 - **Progress indicator:** Show current step, total steps, and completion state
 - **Non-linear navigation:** Allow jumping to completed steps for editing
-- **Save draft at every step** — never lose user work on navigation
+- **Save draft at every step** -- never lose user work on navigation
 - **Summary/review step** before final submission
 - **Clear step labels** that describe the content, not just "Step 1, Step 2"
 
 ### Form-Heavy Interfaces
 - **Section grouping** with clear headings and optional collapse
-- **Contextual help** near complex fields — info icons with tooltips or inline descriptions
+- **Contextual help** near complex fields -- info icons with tooltips or inline descriptions
 - **Dependent fields:** Show/hide fields based on previous selections
 - **Auto-save with visual confirmation** (subtle "Saved" indicator)
 - **Validation summary** at top of form linking to each error field
 
 ### Master-Detail Pattern
-- **List/grid on left, detail panel on right** — the dominant desktop productivity pattern
+- **List/grid on left, detail panel on right** -- the dominant desktop productivity pattern
 - Support resizable split panes
 - Detail panel updates without full page reload
 - Keyboard navigation: arrow keys traverse list, Enter opens detail, Escape returns to list
@@ -108,7 +108,7 @@ Desktop applications serve users who invest hours of focused attention in profes
 
 ### Essential Keyboard Patterns
 - **Global shortcuts:** Document common shortcuts in an overlay (? or Ctrl+/)
-- **Command palette:** Cmd/Ctrl+K for quick action access — the most important desktop UX innovation of the 2020s
+- **Command palette:** Cmd/Ctrl+K for quick action access -- the most important desktop UX innovation of the 2020s
 - **Tab order:** Logical focus progression through interactive elements
 - **Focus indicators:** Always visible, high-contrast focus rings (never remove outline without replacement)
 - **Escape key:** Consistently closes modals, dropdowns, and cancels operations
@@ -124,14 +124,14 @@ Desktop applications serve users who invest hours of focused attention in profes
 ### Panel Patterns
 - **Sidebar navigation:** Collapsible, persistent across views, icon+label or icon-only modes
 - **Inspector panels:** Right-side contextual properties panel (design tool pattern)
-- **Bottom panels:** Console, log, terminal outputs — resizable with collapse
+- **Bottom panels:** Console, log, terminal outputs -- resizable with collapse
 - **Floating panels:** Detachable for multi-monitor workflows
 
 ### State Management
 - Persist panel states (open/closed, sizes) across sessions
 - Remember user's last-used view and filters
 - Support workspace presets ("Developer layout", "Review layout")
-- Handle window resize gracefully — responsive desktop is essential for varied monitor sizes
+- Handle window resize gracefully -- responsive desktop is essential for varied monitor sizes
 
 ## Enterprise-Specific Patterns
 
@@ -164,15 +164,15 @@ Desktop applications serve users who invest hours of focused attention in profes
 
 The v3.0 upgrade introduces comprehensive data visualization references, production component patterns, and design tool workflows that extend desktop application design capabilities.
 
-### Data Visualization Patterns — `references/data-visualization-patterns.md`
+### Data Visualization Patterns -- `references/data-visualization-patterns.md`
 
 The new `references/data-visualization-patterns.md` reference expands significantly on the Data Visualization Best Practices section above. It covers: comprehensive chart type selection guides with decision trees (when to use bar vs. column, line vs. area, scatter vs. bubble, treemap vs. sunburst); accessible data visualization patterns including screen reader-compatible chart descriptions, sonification approaches, and tactile-friendly data encoding; and dashboard composition frameworks for arranging multiple visualizations into coherent analytical narratives. Includes real-world examples of dashboard redesigns with before/after performance metrics.
 
-### Production Component Patterns — `component-patterns-code`
+### Production Component Patterns -- `component-patterns-code`
 
-The `component-patterns-code` skill provides production-ready React component patterns directly applicable to desktop application design. Includes data table components with full state matrices (loading, empty, error, paginated, filtered, sorted, bulk-selected), command palette implementations, master-detail layout components, resizable panel systems, and keyboard-navigable tree views. Each component cookbook entry includes TypeScript types, accessibility annotations, and Storybook configurations — bridging the gap between the design patterns in this skill and production code.
+The `component-patterns-code` skill provides production-ready React component patterns directly applicable to desktop application design. Includes data table components with full state matrices (loading, empty, error, paginated, filtered, sorted, bulk-selected), command palette implementations, master-detail layout components, resizable panel systems, and keyboard-navigable tree views. Each component cookbook entry includes TypeScript types, accessibility annotations, and Storybook configurations -- bridging the gap between the design patterns in this skill and production code.
 
-### Design Tool Workflows — `figma-design-tool-workflows`
+### Design Tool Workflows -- `figma-design-tool-workflows`
 
 The `figma-design-tool-workflows` skill covers the Figma-to-code pipeline applicable to desktop design systems. Relevant capabilities include: Figma variable modes for light/dark/high-contrast theme switching; auto-layout configurations that map to CSS Grid and Flexbox; component property definitions that generate developer handoff specifications; and the MCP-powered design-to-code flywheel that enables continuous synchronization between Figma design system files and production component libraries. Particularly valuable for desktop apps with complex theming requirements and dense component libraries.
 

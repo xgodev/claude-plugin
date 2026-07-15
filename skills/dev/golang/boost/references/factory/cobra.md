@@ -16,7 +16,7 @@ cmd.Execute()
 
 ## When to use vs when to skip
 
-Use cobra when the binary genuinely has multiple modes (sync, backfill, migrate, dev tools). For single-purpose binaries (a function or an HTTP API), skip cobra — `boost.Start()` + a plain `main` is simpler.
+Use cobra when the binary genuinely has multiple modes (sync, backfill, migrate, dev tools). For single-purpose binaries (a function or an HTTP API), skip cobra -- `boost.Start()` + a plain `main` is simpler.
 
 ## Red flags
 

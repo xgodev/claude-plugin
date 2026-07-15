@@ -1,9 +1,9 @@
 
-# UX Research Methods — Comprehensive Methodology Guide
+# UX Research Methods -- Comprehensive Methodology Guide
 
 ## Research Philosophy
 
-Great design is grounded in evidence, not assumption. UX research exists to reduce the risk of building the wrong thing and to illuminate the gap between designer intent and user reality. Every design decision should trace back to user evidence — whether from direct observation, behavioral data, or validated heuristics.
+Great design is grounded in evidence, not assumption. UX research exists to reduce the risk of building the wrong thing and to illuminate the gap between designer intent and user reality. Every design decision should trace back to user evidence -- whether from direct observation, behavioral data, or validated heuristics.
 
 ### The Research Hierarchy (adapted from NNG Group)
 
@@ -18,7 +18,7 @@ Great design is grounded in evidence, not assumption. UX research exists to redu
 
 **Contextual Inquiry**
 - Observe users in their natural environment while they perform real tasks
-- Combine observation with in-situ interviewing — the "master-apprentice" model
+- Combine observation with in-situ interviewing -- the "master-apprentice" model
 - Ideal for understanding workflows, workarounds, and unarticulated needs
 - Sample size: 4-8 participants for pattern identification
 - Duration: 1-2 hours per session
@@ -26,7 +26,7 @@ Great design is grounded in evidence, not assumption. UX research exists to redu
 **User Interviews (Semi-Structured)**
 - Prepare 8-12 open-ended questions organized by research theme
 - Follow the "funnel" structure: broad context → specific behaviors → future needs
-- Never ask "Would you use X?" — instead ask "Tell me about the last time you..."
+- Never ask "Would you use X?" -- instead ask "Tell me about the last time you..."
 - Use the Critical Incident Technique for rich behavioral data
 - Sample size: 5-8 participants per segment (saturation typically at 5-6)
 - Remote interviews are acceptable; enable video for nonverbal cues
@@ -39,8 +39,8 @@ Great design is grounded in evidence, not assumption. UX research exists to redu
 - Sample size: 10-15 participants to account for dropout
 
 **Card Sorting**
-- Open sort: users create their own category structure — reveals mental models
-- Closed sort: users organize items into predefined categories — validates IA
+- Open sort: users create their own category structure -- reveals mental models
+- Closed sort: users organize items into predefined categories -- validates IA
 - Hybrid sort: predefined categories with option to create new ones
 - Use tools like Optimal Workshop or Maze for remote card sorts
 - Sample size: 15-30 participants for statistical reliability
@@ -76,7 +76,7 @@ Great design is grounded in evidence, not assumption. UX research exists to redu
 
 **Heuristic Evaluation**
 - Expert review against established usability principles (see nng-ux-heuristics skill)
-- Fast and cost-effective — complements but does not replace user testing
+- Fast and cost-effective -- complements but does not replace user testing
 - 3-5 evaluators find ~75% of usability problems
 - Use severity ratings to prioritize findings
 
@@ -110,14 +110,14 @@ Great design is grounded in evidence, not assumption. UX research exists to redu
 ## Research Synthesis Frameworks
 
 ### Affinity Diagramming
-1. Capture individual observations on sticky notes (physical or digital — Miro, FigJam)
+1. Capture individual observations on sticky notes (physical or digital -- Miro, FigJam)
 2. Silently group related observations into clusters
 3. Name each cluster with a descriptive theme
 4. Identify patterns, contradictions, and surprises across clusters
 5. Prioritize themes by frequency, severity, and strategic importance
 
 ### Jobs-to-Be-Done (JTBD) Framework
-- "People don't want a quarter-inch drill — they want a quarter-inch hole" (Theodore Levitt)
+- "People don't want a quarter-inch drill -- they want a quarter-inch hole" (Theodore Levitt)
 - Structure: When [situation], I want to [motivation], so I can [expected outcome]
 - Identify functional, emotional, and social jobs
 - Map current solutions and satisfaction gaps
@@ -126,14 +126,14 @@ Great design is grounded in evidence, not assumption. UX research exists to redu
 1. Define the persona and scenario scope
 2. Map phases from awareness through post-use
 3. For each phase: actions, thoughts, emotions, touchpoints, pain points, opportunities
-4. Identify moments of truth — high-emotion points where experience is won or lost
+4. Identify moments of truth -- high-emotion points where experience is won or lost
 5. Prioritize opportunities by user impact × business value × feasibility
 
 ### Research Repository
 - Maintain a living research repository (Dovetail, Notion, or similar)
 - Tag findings by theme, product area, persona, and severity
 - Enable cross-study pattern recognition
-- Share insights proactively — research unseen is research wasted
+- Share insights proactively -- research unseen is research wasted
 
 ## Research Operations
 
@@ -141,7 +141,7 @@ Great design is grounded in evidence, not assumption. UX research exists to redu
 1. Define research questions (3-5 focused questions per study)
 2. Select appropriate method(s) based on questions and constraints
 3. Write a 1-page research plan: goals, method, participants, timeline, deliverables
-4. Recruit representative participants — screen rigorously for target criteria
+4. Recruit representative participants -- screen rigorously for target criteria
 5. Prepare materials: discussion guide, task scenarios, consent forms
 6. Pilot test the protocol with 1-2 internal participants
 
@@ -150,7 +150,7 @@ Great design is grounded in evidence, not assumption. UX research exists to redu
 - Include users with disabilities (minimum 1 per study for inclusive insights)
 - Offer fair compensation respecting participants' time and expertise
 - Maintain a participant panel for longitudinal research
-- Avoid "professional testers" — seek real target users
+- Avoid "professional testers" -- seek real target users
 
 ### Ethical Research Practice
 - Obtain informed consent with clear explanation of data usage
@@ -166,7 +166,7 @@ Generative AI is transforming UX research operations. Use AI as an accelerator f
 ### AI-Assisted Synthesis and Analysis
 
 - **Theme extraction:** Use LLMs to identify initial themes from interview transcripts and open-ended survey responses. Treat AI-generated themes as a starting point for researcher refinement, never as final output.
-- **Interview coding:** AI can perform first-pass coding of qualitative data against an established codebook, reducing coding time by 40-60%. Researchers must validate every AI-assigned code — expect 70-85% accuracy on well-defined codes.
+- **Interview coding:** AI can perform first-pass coding of qualitative data against an established codebook, reducing coding time by 40-60%. Researchers must validate every AI-assigned code -- expect 70-85% accuracy on well-defined codes.
 - **Survey analysis:** LLMs can summarize open-ended survey responses, identify sentiment patterns, and flag outlier responses for manual review.
 - **Research hypothesis generation:** After providing AI with research findings, use it to generate hypotheses for future studies. This combats researcher tunnel vision by surfacing unexpected connections.
 
@@ -208,11 +208,11 @@ Use specific, structured prompts for research tasks:
 
 The v3.0 upgrade introduces skills and references that extend research methodology into structured critique, AI-augmented synthesis, and advanced feedback frameworks.
 
-### Structured Critique Frameworks — `design-critique-case-studies`
+### Structured Critique Frameworks -- `design-critique-case-studies`
 
-The `design-critique-case-studies/references/critique-methodology.md` reference provides structured feedback frameworks that complement research findings. When research surfaces usability issues, critique methodology offers systematic approaches for translating raw findings into actionable design direction — including critique session structures, feedback taxonomy (functional, aesthetic, strategic), and stakeholder alignment techniques. Pair research readouts with structured critique sessions to accelerate the insight-to-action pipeline.
+The `design-critique-case-studies/references/critique-methodology.md` reference provides structured feedback frameworks that complement research findings. When research surfaces usability issues, critique methodology offers systematic approaches for translating raw findings into actionable design direction -- including critique session structures, feedback taxonomy (functional, aesthetic, strategic), and stakeholder alignment techniques. Pair research readouts with structured critique sessions to accelerate the insight-to-action pipeline.
 
-### AI-Augmented Research Synthesis — `agentic-ai-generative-ux`
+### AI-Augmented Research Synthesis -- `agentic-ai-generative-ux`
 
 The `agentic-ai-generative-ux` skill expands significantly on the AI-Augmented Research Methods section above with 2026 approaches to research synthesis. Key additions include: multi-agent research analysis pipelines where specialized AI agents handle transcription, coding, theme extraction, and cross-study pattern detection as coordinated stages; retrieval-augmented generation (RAG) patterns for querying research repositories with natural language; and generative participant recruiting using AI to screen and match participants to study criteria. The skill also covers emerging ethical frameworks for AI in research, including bias detection in AI-generated themes and participant data sovereignty considerations.
 
@@ -227,4 +227,4 @@ The AI-Augmented Research Methods section in this skill covers foundational prac
 - Krug, S. (2014). "Rocket Surgery Made Easy"
 - Sauro, J. & Lewis, J. (2016). "Quantifying the User Experience"
 - Arxiv: GenAI for UX Research (Dec 2025)
-- Arxiv: EvAlignUX — Evaluating AI Alignment in UX Research (Sep 2024)
+- Arxiv: EvAlignUX -- Evaluating AI Alignment in UX Research (Sep 2024)

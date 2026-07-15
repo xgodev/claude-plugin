@@ -18,7 +18,7 @@ Each `CommandConfigAdd("<name>")` registers `boost.factory.hystrix.<name>.*` key
 
 ## Per-upstream commands
 
-One command name per upstream (CustomerAPI, Janis, Pricing, ...). Sharing collapses their failure budgets — you can't isolate one bad upstream from the others.
+One command name per upstream (CustomerAPI, Janis, Pricing, ...). Sharing collapses their failure budgets -- you can't isolate one bad upstream from the others.
 
 ## Observability plugin
 
@@ -26,7 +26,7 @@ Only Prometheus has a plugin here (no Datadog, no OTel):
 
 | Vendor | Import | Usage |
 |---|---|---|
-| Prometheus | `.../factory/contrib/afex/hystrix-go/v0/plugins/extra/prometheus` | `prometheus.NewPrometheus().Register(ctx)` — registered directly, not passed as a factory constructor arg |
+| Prometheus | `.../factory/contrib/afex/hystrix-go/v0/plugins/extra/prometheus` | `prometheus.NewPrometheus().Register(ctx)` -- registered directly, not passed as a factory constructor arg |
 
 ## Red flags
 

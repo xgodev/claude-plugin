@@ -23,4 +23,4 @@ BOOST_FACTORY_GCP_BIGQUERY_GRPCOPTIONS_KEEPALIVE_TIME=30s
 |---|---|
 | `bigquery.NewClient(ctx, projectID)` from upstream SDK directly | `bq.NewClient(ctx)` |
 | `GOOGLE_CLOUD_PROJECT` via `os.Getenv` | `BOOST_FACTORY_GCP_BIGQUERY_APIOPTIONS_PROJECTID` |
-| Forgetting `defer client.Close()` | Add it — drains gRPC |
+| Forgetting `defer client.Close()` | Add it -- drains gRPC |

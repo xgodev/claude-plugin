@@ -1,6 +1,6 @@
 **REQUIRED BACKGROUND:** `references/start.md`. Mount typically via `references/factory/echo.md` or `references/extra/multiserver.md`.
 
-The factory provides the integration glue between boost and `prometheus/client_golang` — registries, default collectors, and the `promhttp.Handler` wrapper. Concrete API surface is mostly registration helpers; consult the source under `factory/contrib/prometheus/client_golang/v1/` for the symbols available in your boost version.
+The factory provides the integration glue between boost and `prometheus/client_golang` -- registries, default collectors, and the `promhttp.Handler` wrapper. Concrete API surface is mostly registration helpers; consult the source under `factory/contrib/prometheus/client_golang/v1/` for the symbols available in your boost version.
 
 ## Pattern: dedicated /metrics listener via multiserver
 
@@ -30,4 +30,4 @@ Splitting metrics from the API port means scraping doesn't compete with user tra
 |---|---|
 | Metrics on the same port as the public API exposed to the internet | Move to a dedicated listener (private port) via multiserver |
 | Custom registry built per request | One registry at startup; all metrics register against it |
-| Metrics with high-cardinality labels (per-user-id, per-trace-id) | Cardinality is a Prometheus killer — keep label values bounded |
+| Metrics with high-cardinality labels (per-user-id, per-trace-id) | Cardinality is a Prometheus killer -- keep label values bounded |

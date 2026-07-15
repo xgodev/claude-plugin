@@ -1,6 +1,6 @@
 **REQUIRED BACKGROUND:**
-- `references/start.md` — `boost.Start()` first.
-- `references/wrapper/config.md` — driver config keys.
+- `references/start.md` -- `boost.Start()` first.
+- `references/wrapper/config.md` -- driver config keys.
 
 ## Construct via the Manager + driver + codec
 
@@ -46,7 +46,7 @@ Each driver has its own config root under `boost.wrapper.cache.driver.<vendor>.<
 
 ## Plugin chain (cross-cutting concerns)
 
-Wrap the Manager with plugins for metrics, logging, TTL enforcement, etc. (see `wrapper/cache/plugins/`). Plugins compose like middleware — outer plugins see calls before the driver does.
+Wrap the Manager with plugins for metrics, logging, TTL enforcement, etc. (see `wrapper/cache/plugins/`). Plugins compose like middleware -- outer plugins see calls before the driver does.
 
 ## Red flags
 

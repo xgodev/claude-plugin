@@ -2,14 +2,14 @@
 
 ## What it provides
 
-Shared GCP API options (credentials JSON, endpoint URL, user-agent) registered under `boost.factory.gcp.api.*` and composed by every concrete GCP factory at `<root>.apiOptions.*`. You rarely import this skill's package directly — you configure its keys instead.
+Shared GCP API options (credentials JSON, endpoint URL, user-agent) registered under `boost.factory.gcp.api.*` and composed by every concrete GCP factory at `<root>.apiOptions.*`. You rarely import this skill's package directly -- you configure its keys instead.
 
 ## Tunables
 
-- `apiOptions.projectID` — GCP project
-- `apiOptions.credentialsJSON` / `apiOptions.credentialsFile` — service-account override
-- `apiOptions.endpoint` — emulator URL (e.g., `localhost:8085` for the Pub/Sub emulator) or private endpoint
-- `apiOptions.userAgent` — header used in API calls
+- `apiOptions.projectID` -- GCP project
+- `apiOptions.credentialsJSON` / `apiOptions.credentialsFile` -- service-account override
+- `apiOptions.endpoint` -- emulator URL (e.g., `localhost:8085` for the Pub/Sub emulator) or private endpoint
+- `apiOptions.userAgent` -- header used in API calls
 
 Override per-service: a dedicated emulator for the BigQuery factory only:
 

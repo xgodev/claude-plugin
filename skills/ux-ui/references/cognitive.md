@@ -5,25 +5,25 @@
 
 Every pixel on a screen is ultimately processed by a human brain. The visual cortex parses layout. Working memory juggles options. The prefrontal cortex weighs decisions. The amygdala registers frustration or delight. No amount of visual polish can rescue an interface that violates how human cognition actually works.
 
-Cognitive psychology is not a nice-to-have theoretical overlay on design practice. It is the bedrock discipline that explains why some interfaces feel effortless while others — despite beautiful aesthetics — leave users confused, exhausted, or angry. When a checkout flow loses 68% of users at the payment step, the answer is almost never "the button color was wrong." The answer is cognitive: too many form fields overloaded working memory, unclear labels forced recall instead of recognition, or choice paralysis froze decision-making entirely.
+Cognitive psychology is not a nice-to-have theoretical overlay on design practice. It is the bedrock discipline that explains why some interfaces feel effortless while others -- despite beautiful aesthetics -- leave users confused, exhausted, or angry. When a checkout flow loses 68% of users at the payment step, the answer is almost never "the button color was wrong." The answer is cognitive: too many form fields overloaded working memory, unclear labels forced recall instead of recognition, or choice paralysis froze decision-making entirely.
 
 Designers who internalize cognitive principles stop guessing and start predicting. They can look at a wireframe and identify the exact moment where cognitive load will spike, where attention will drift, where a bias will nudge behavior in an unintended direction. This skill transforms design from an opinion-driven craft into an evidence-based discipline.
 
-This module provides the scientific foundations — the laws, biases, and mental mechanisms — that underpin every other skill in this plugin. Whether you are evaluating heuristics, building design systems, crafting motion, or auditing accessibility, cognitive psychology is the common language that connects them all.
+This module provides the scientific foundations -- the laws, biases, and mental mechanisms -- that underpin every other skill in this plugin. Whether you are evaluating heuristics, building design systems, crafting motion, or auditing accessibility, cognitive psychology is the common language that connects them all.
 
 ## Core Laws of UX: A Working Overview
 
 The following laws represent decades of experimental psychology distilled into principles directly applicable to interface design. Each law is covered in depth in the **Laws of UX Encyclopedia** reference file; what follows here is a working summary designed for rapid application.
 
-**Hick's Law** states that the time to make a decision increases logarithmically with the number of choices. In practical terms: every option you add to a menu, every extra button on a toolbar, every additional plan on a pricing page increases decision time and the probability of abandonment. The design response is progressive disclosure — reveal complexity only when the user needs it.
+**Hick's Law** states that the time to make a decision increases logarithmically with the number of choices. In practical terms: every option you add to a menu, every extra button on a toolbar, every additional plan on a pricing page increases decision time and the probability of abandonment. The design response is progressive disclosure -- reveal complexity only when the user needs it.
 
 **Fitts's Law** quantifies the time required to move to a target as a function of the target's distance and size. Larger, closer targets are faster to acquire. This is why primary actions should be large and positioned near the user's current focus, and why mobile tap targets must be at least 44x44 points.
 
-**Miller's Law** establishes that working memory can hold roughly 7 plus or minus 2 chunks of information. This is not a design rule to "always group things in sevens" — it is a warning that interfaces presenting more than a handful of ungrouped items will overwhelm short-term retention. The design response is chunking: group related items visually and semantically.
+**Miller's Law** establishes that working memory can hold roughly 7 plus or minus 2 chunks of information. This is not a design rule to "always group things in sevens" -- it is a warning that interfaces presenting more than a handful of ungrouped items will overwhelm short-term retention. The design response is chunking: group related items visually and semantically.
 
 **Jakob's Law** observes that users spend most of their time on other sites and apps. They arrive at your product with expectations formed elsewhere. Deviating from established conventions imposes a learning cost. Innovation should be reserved for your core value proposition, not for reinventing the hamburger menu.
 
-**Gestalt Principles** — proximity, similarity, closure, continuity, common region, figure-ground, uniform connectedness, and Pragnanz (simplicity) — describe how the visual system automatically organizes elements into coherent groups. These principles are the grammar of visual layout. They determine what users perceive as related, separated, primary, or secondary without reading a single word.
+**Gestalt Principles** -- proximity, similarity, closure, continuity, common region, figure-ground, uniform connectedness, and Pragnanz (simplicity) -- describe how the visual system automatically organizes elements into coherent groups. These principles are the grammar of visual layout. They determine what users perceive as related, separated, primary, or secondary without reading a single word.
 
 **The Peak-End Rule** (Kahneman) demonstrates that people judge an experience not by its average quality but by its most intense moment (the peak) and its final moment (the end). A painful 20-minute process with a satisfying confirmation screen will be remembered more fondly than a smooth 5-minute process with an abrupt ending. Design your peaks and endings deliberately.
 
@@ -35,14 +35,14 @@ For the complete treatment of 25+ laws with formulas, code examples, and anti-pa
 
 A mental model is a user's internal representation of how a system works. Users do not read documentation or inspect source code; they build a mental model from the interface's affordances, labels, feedback, and their prior experience with similar systems.
 
-The **system model** is how the system actually works — its data structures, state machines, and business logic. The **user model** is what the user believes is happening. The **design model** (or represented model) is what the interface communicates.
+The **system model** is how the system actually works -- its data structures, state machines, and business logic. The **user model** is what the user believes is happening. The **design model** (or represented model) is what the interface communicates.
 
 Great design minimizes the gap between the user model and the system model by making the design model transparent and intuitive. When a user drags a file to the trash, the mental model is "I am throwing this away." If the system actually moves the file to a hidden `.Trash` directory and only deletes it on empty, the design model must communicate this (through the "Empty Trash" action and the recoverable state) or users will be confused when "deleted" files reappear.
 
 **Practical techniques for aligning mental models:**
 - Use familiar metaphors grounded in real-world experience (folders, shopping carts, bookmarks)
 - Provide immediate, visible feedback that confirms the user's expectation of what just happened
-- Use progressive disclosure to match the user's evolving understanding — do not front-load the full system model
+- Use progressive disclosure to match the user's evolving understanding -- do not front-load the full system model
 - Run first-click tests and think-aloud protocols to surface model mismatches early
 - Design error messages that correct the mental model, not just describe the system state
 
@@ -52,11 +52,11 @@ See `nng-ux-heuristics` (Heuristic 2: Match Between System and the Real World) f
 
 John Sweller's Cognitive Load Theory identifies three types of cognitive load, each with distinct design implications:
 
-**Intrinsic load** is the inherent difficulty of the task itself. Filing a tax return is intrinsically complex; toggling a light switch is intrinsically simple. Designers cannot eliminate intrinsic load, but they can manage it through task decomposition — breaking a complex task into a sequence of simpler steps (wizard patterns, progressive forms).
+**Intrinsic load** is the inherent difficulty of the task itself. Filing a tax return is intrinsically complex; toggling a light switch is intrinsically simple. Designers cannot eliminate intrinsic load, but they can manage it through task decomposition -- breaking a complex task into a sequence of simpler steps (wizard patterns, progressive forms).
 
 **Extraneous load** is unnecessary load imposed by poor design. Confusing navigation, inconsistent terminology, hidden controls, gratuitous animation, and unclear hierarchy all add extraneous load. This is the load designers should ruthlessly eliminate. Every unit of extraneous load steals cognitive capacity from the actual task.
 
-**Germane load** is the productive load involved in learning and schema formation. Well-designed onboarding, meaningful patterns, and consistent conventions help users build reusable mental schemas. Germane load is desirable — it represents the user's investment in becoming proficient.
+**Germane load** is the productive load involved in learning and schema formation. Well-designed onboarding, meaningful patterns, and consistent conventions help users build reusable mental schemas. Germane load is desirable -- it represents the user's investment in becoming proficient.
 
 **The design equation:** Minimize extraneous load. Manage intrinsic load through decomposition. Maximize germane load through consistency and meaningful patterns. The total cognitive load at any moment must stay within working memory capacity, or the user will experience confusion, errors, and frustration.
 
@@ -73,9 +73,9 @@ See `references/neurodesign-engagement-science.md` for Sweller's specific effect
 
 Attention is a finite cognitive resource, not an infinite channel. Three modes of attention are directly relevant to interface design:
 
-**Selective attention** is the ability to focus on one stimulus while filtering out others. Users engaged in a task will literally not see elements outside their focus area — a phenomenon called inattentional blindness (Simons & Chabris, 1999). This is why banner blindness exists: users learn to selectively ignore regions associated with advertising. Design implication: critical information must be placed within the user's task-focused visual flow, not relegated to "announcement" areas the brain has learned to filter.
+**Selective attention** is the ability to focus on one stimulus while filtering out others. Users engaged in a task will literally not see elements outside their focus area -- a phenomenon called inattentional blindness (Simons & Chabris, 1999). This is why banner blindness exists: users learn to selectively ignore regions associated with advertising. Design implication: critical information must be placed within the user's task-focused visual flow, not relegated to "announcement" areas the brain has learned to filter.
 
-**Divided attention** is the attempt to process multiple information streams simultaneously. Humans are poor at this. Every additional demand — a notification badge, a chatbot popup, an autoplaying video — steals capacity from the primary task. Gloria Mark's research at UC Irvine demonstrates that a single interruption costs an average of 23 minutes and 15 seconds to fully recover from. Design implication: protect the user's primary task flow. Defer non-critical notifications. Never autoplay competing content during task execution.
+**Divided attention** is the attempt to process multiple information streams simultaneously. Humans are poor at this. Every additional demand -- a notification badge, a chatbot popup, an autoplaying video -- steals capacity from the primary task. Gloria Mark's research at UC Irvine demonstrates that a single interruption costs an average of 23 minutes and 15 seconds to fully recover from. Design implication: protect the user's primary task flow. Defer non-critical notifications. Never autoplay competing content during task execution.
 
 **Sustained attention** is the ability to maintain focus over extended periods. It degrades predictably: after 10-15 minutes, vigilance drops measurably (the vigilance decrement). Long forms, lengthy onboarding sequences, and extended reading without visual breaks all suffer from this. Design implication: chunk long tasks with progress indicators, celebrate micro-completions, and vary visual rhythm to counteract the decrement.
 
@@ -83,9 +83,9 @@ See `interaction-motion-design` for techniques that direct attention through mot
 
 ## Memory: Working Memory, Recognition, and Chunking
 
-**Working memory** is the mental workspace where active processing occurs. Cowan's revised estimate places its capacity at roughly 4 chunks (plus or minus 1) for novel information — lower than Miller's original 7 plus or minus 2, which applied to well-practiced domains. This is the fundamental constraint behind every "keep it simple" design recommendation.
+**Working memory** is the mental workspace where active processing occurs. Cowan's revised estimate places its capacity at roughly 4 chunks (plus or minus 1) for novel information -- lower than Miller's original 7 plus or minus 2, which applied to well-practiced domains. This is the fundamental constraint behind every "keep it simple" design recommendation.
 
-**Recognition versus recall** is one of the most actionable distinctions in cognitive psychology. Recognition (identifying something from visible options) is dramatically easier than recall (retrieving something from memory with no cues). Dropdown menus leverage recognition. Blank text fields demand recall. Autocomplete transforms a recall task into a recognition task — this is why it is one of the highest-impact UI patterns ever developed.
+**Recognition versus recall** is one of the most actionable distinctions in cognitive psychology. Recognition (identifying something from visible options) is dramatically easier than recall (retrieving something from memory with no cues). Dropdown menus leverage recognition. Blank text fields demand recall. Autocomplete transforms a recall task into a recognition task -- this is why it is one of the highest-impact UI patterns ever developed.
 
 This distinction is so important that Nielsen and Norman formalized it as Heuristic 6: Recognition Rather Than Recall. See `nng-ux-heuristics` for the full treatment.
 
@@ -110,11 +110,11 @@ See `ux-ethics-content-strategy` for the ethical framework around choice archite
 Cognitive psychology is the connective tissue of this plugin. Every other skill draws from or applies these foundations:
 
 - **nng-ux-heuristics**: Nielsen's 10 heuristics are applied cognitive psychology. H6 (Recognition over Recall), H8 (Aesthetic and Minimalist Design reducing extraneous load), and H5 (Error Prevention through mental model alignment) all map directly to concepts in this module.
-- **accessibility-inclusive-design**: Cognitive accessibility — designing for ADHD, dyslexia, autism spectrum, and age-related cognitive decline — requires deep understanding of attention, memory, and processing speed variability.
+- **accessibility-inclusive-design**: Cognitive accessibility -- designing for ADHD, dyslexia, autism spectrum, and age-related cognitive decline -- requires deep understanding of attention, memory, and processing speed variability.
 - **interaction-motion-design**: Motion is an attention-direction tool. Easing curves map to expectation (mental models of physics). Animation duration thresholds relate to the Doherty Threshold and perceptual timing.
 - **design-systems-architecture**: Consistent design tokens and component APIs create the predictability that supports schema formation (germane load) and reduces learning cost (Jakob's Law).
 - **ux-ethics-content-strategy**: Dark patterns are cognitive bias exploits. Understanding the bias is the prerequisite for recognizing and refusing to implement its exploitation.
-- **ai-spatial-voice-ux**: Conversational and spatial interfaces introduce novel cognitive challenges — working memory demands of voice, spatial navigation mental models, and attention management in 3D environments.
+- **ai-spatial-voice-ux**: Conversational and spatial interfaces introduce novel cognitive challenges -- working memory demands of voice, spatial navigation mental models, and attention management in 3D environments.
 
 ## How to Use This Skill
 

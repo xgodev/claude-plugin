@@ -1,5 +1,5 @@
 
-# Figma Design Tool Workflows — From Canvas to Production Code
+# Figma Design Tool Workflows -- From Canvas to Production Code
 
 ## Figma as the Design System of Record
 
@@ -53,13 +53,13 @@ Figma variables replace static styles with dynamic, mode-switchable tokens. Vari
 
 Structure variable collections in three tiers:
 
-1. **Primitive collection** — raw values: `blue-500: #3b82f6`, `spacing-4: 16`, `radius-md: 8`. A single mode; these values never change.
-2. **Semantic collection** — contextual meaning with modes for light/dark/high-contrast: `color-bg-primary` resolves to `white` in light mode and `neutral-900` in dark mode. `color-text-primary` resolves to `neutral-900` in light mode and `neutral-50` in dark mode.
-3. **Component collection** — component-specific bindings: `button-primary-bg` references `color-action-primary`, which references `blue-500` in the primitive layer. Modes here handle density (compact/default/comfortable) or brand switching (brand-a/brand-b).
+1. **Primitive collection** -- raw values: `blue-500: #3b82f6`, `spacing-4: 16`, `radius-md: 8`. A single mode; these values never change.
+2. **Semantic collection** -- contextual meaning with modes for light/dark/high-contrast: `color-bg-primary` resolves to `white` in light mode and `neutral-900` in dark mode. `color-text-primary` resolves to `neutral-900` in light mode and `neutral-50` in dark mode.
+3. **Component collection** -- component-specific bindings: `button-primary-bg` references `color-action-primary`, which references `blue-500` in the primitive layer. Modes here handle density (compact/default/comfortable) or brand switching (brand-a/brand-b).
 
 ### Mode Switching
 
-Variable modes enable designers to preview every combination without duplicating frames. A single button component, bound to semantic variables, previews as light primary, dark primary, high-contrast primary, light compact, dark comfortable, and every other permutation — all by switching the mode on the enclosing frame.
+Variable modes enable designers to preview every combination without duplicating frames. A single button component, bound to semantic variables, previews as light primary, dark primary, high-contrast primary, light compact, dark comfortable, and every other permutation -- all by switching the mode on the enclosing frame.
 
 This is the design equivalent of CSS custom property theming. The structure must match: Figma variable names should correspond directly to CSS custom property names or token identifiers in the codebase.
 
@@ -88,7 +88,7 @@ Figma Dev Mode is the bridge between design and development. When a developer in
 
 Dev Mode effectiveness depends entirely on how well the designer structured the component. Proper naming, variable binding, and Auto Layout produce clean Dev Mode output. Poor structure produces noise.
 
-## Figma MCP — The AI-Assisted Game Changer
+## Figma MCP -- The AI-Assisted Game Changer
 
 The Figma Model Context Protocol (MCP) server allows AI assistants like Claude to read Figma design files programmatically. This is the single most impactful development in design-to-code workflow since component libraries.
 
@@ -101,28 +101,28 @@ With Figma MCP, Claude can:
 - Extract color, typography, and effect styles
 - Read prototype flows and interaction definitions
 
-This means a designer can build a component in Figma, and Claude can read that component's specification, generate production-quality code (React, SwiftUI, CSS), and produce accompanying tests — all without a human translating the design spec into a ticket.
+This means a designer can build a component in Figma, and Claude can read that component's specification, generate production-quality code (React, SwiftUI, CSS), and produce accompanying tests -- all without a human translating the design spec into a ticket.
 
 ## The Design-to-Code Flywheel
 
 The flywheel operates in six steps:
 
-1. **Design** — Designer builds a component in Figma with proper architecture: Auto Layout, variables, component properties, correct naming.
-2. **Read** — Claude reads the component specification via Figma MCP: layout structure, token bindings, property API, responsive behavior.
-3. **Generate** — Claude produces code: React component with TypeScript types, CSS Module with token references, Storybook story with all variants, unit test covering props and accessibility.
-4. **Validate** — Visual regression testing (Chromatic, Percy) compares the rendered component against the Figma source. Accessibility testing (axe-core) validates WCAG compliance.
-5. **Iterate** — Designer updates the component in Figma. The MCP read detects changes. Claude generates an incremental code update. Visual regression catches any drift.
-6. **Ship** — CI/CD pipeline deploys validated components. Token pipeline syncs updated variables. Consuming applications pull the latest version.
+1. **Design** -- Designer builds a component in Figma with proper architecture: Auto Layout, variables, component properties, correct naming.
+2. **Read** -- Claude reads the component specification via Figma MCP: layout structure, token bindings, property API, responsive behavior.
+3. **Generate** -- Claude produces code: React component with TypeScript types, CSS Module with token references, Storybook story with all variants, unit test covering props and accessibility.
+4. **Validate** -- Visual regression testing (Chromatic, Percy) compares the rendered component against the Figma source. Accessibility testing (axe-core) validates WCAG compliance.
+5. **Iterate** -- Designer updates the component in Figma. The MCP read detects changes. Claude generates an incremental code update. Visual regression catches any drift.
+6. **Ship** -- CI/CD pipeline deploys validated components. Token pipeline syncs updated variables. Consuming applications pull the latest version.
 
 Each cycle gets faster. The first pass through the flywheel for a new component might save 50% of development time compared to manual implementation. Subsequent iterations on existing components save 70-80% because the structure, tests, and stories already exist and only need updating.
 
 ## Cross-References
 
-- **Component code output and patterns** — reference `component-patterns-code` for React, SwiftUI, and CSS component architecture, compound components, render props, and polymorphic patterns that Figma MCP-generated code should follow.
-- **Design system governance** — reference `design-systems-architecture` for token hierarchy (primitive, semantic, component), versioning strategy, contribution models, and change management processes that govern the Figma library.
-- **Visual design tokens** — reference `ui-visual-design-system` for color theory, typography scale, spacing system, and elevation definitions that underpin Figma variable collections.
-- **Accessibility in Figma** — reference `accessibility-inclusive-design` for Figma accessibility plugins (Stark, A11y Annotation Kit), color contrast checking, focus order annotation, and screen reader text specification within design files.
-- **Interaction and motion** — reference `interaction-motion-design` for Figma prototyping best practices, smart animate specifications, and motion token definitions that map to CSS transitions and animations.
+- **Component code output and patterns** -- reference `component-patterns-code` for React, SwiftUI, and CSS component architecture, compound components, render props, and polymorphic patterns that Figma MCP-generated code should follow.
+- **Design system governance** -- reference `design-systems-architecture` for token hierarchy (primitive, semantic, component), versioning strategy, contribution models, and change management processes that govern the Figma library.
+- **Visual design tokens** -- reference `ui-visual-design-system` for color theory, typography scale, spacing system, and elevation definitions that underpin Figma variable collections.
+- **Accessibility in Figma** -- reference `accessibility-inclusive-design` for Figma accessibility plugins (Stark, A11y Annotation Kit), color contrast checking, focus order annotation, and screen reader text specification within design files.
+- **Interaction and motion** -- reference `interaction-motion-design` for Figma prototyping best practices, smart animate specifications, and motion token definitions that map to CSS transitions and animations.
 
 ## Key Sources
 

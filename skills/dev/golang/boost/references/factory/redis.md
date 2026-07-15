@@ -2,8 +2,8 @@
 
 ## Canonical examples (ship with boost)
 
-- `factory/contrib/redis/go-redis/v9/examples/client/main.go` — single instance
-- `factory/contrib/redis/go-redis/v9/examples/cluster/main.go` — cluster mode
+- `factory/contrib/redis/go-redis/v9/examples/client/main.go` -- single instance
+- `factory/contrib/redis/go-redis/v9/examples/cluster/main.go` -- cluster mode
 
 Pick whichever matches your deployment topology.
 
@@ -25,7 +25,7 @@ rdb, err := redisfact.NewClusterClient(ctx)
 
 Configure under `boost.factory.redis.*` (override `BOOST_FACTORY_REDIS_*`).
 
-## Config keys (single vs cluster differ — don't mix them up)
+## Config keys (single vs cluster differ -- don't mix them up)
 
 | Topology | Endpoint key | Env override |
 |---|---|---|
@@ -39,7 +39,7 @@ Common knobs (same prefix): `...dialTimeout`, `...readTimeout`,
 The endpoint must be a **resolvable** address from inside the runtime.
 In Kubernetes that's the **Service FQDN**
 (`<svc>.<ns>.svc.cluster.local:6379`), never a node/master DNS or a
-hardcoded IP — the latter fails intermittently with
+hardcoded IP -- the latter fails intermittently with
 `dial tcp: lookup ... no such host`. A single-instance service that sets
 `...cluster.addrs` (or vice versa) silently connects to nothing.
 
@@ -60,7 +60,7 @@ hardcoded IP — the latter fails intermittently with
 | Prometheus | `.../factory/contrib/redis/go-redis/v9/plugins/contrib/prometheus/client_golang/v1` | `redisfact.NewClient(ctx, prometheus.ClientRegister)` |
 | OpenTelemetry | `.../factory/contrib/redis/go-redis/v9/plugins/native/otel/v9` | `redisfact.NewClient(ctx, otel.ClientRegister)` |
 
-The OTel one lives under `plugins/native/`, not `plugins/contrib/`, because it delegates to go-redis's own built-in instrumentation (`redisotel.InstrumentTracing`/`InstrumentMetrics`) instead of wrapping the client — same `Register` call shape either way, just note it's not a third-party contrib wrapper like the other two.
+The OTel one lives under `plugins/native/`, not `plugins/contrib/`, because it delegates to go-redis's own built-in instrumentation (`redisotel.InstrumentTracing`/`InstrumentMetrics`) instead of wrapping the client -- same `Register` call shape either way, just note it's not a third-party contrib wrapper like the other two.
 
 ## Red flags
 

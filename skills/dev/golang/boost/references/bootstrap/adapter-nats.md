@@ -1,8 +1,8 @@
 **REQUIRED BACKGROUND:**
-- `references/bootstrap/function.md` — handler typing rule.
-- `references/bootstrap/middleware.md` — recovery/logger/publisher chain.
-- `references/extra/middleware.md` — `NewAnyErrorWrapper` for the workaround.
-- `references/bootstrap/adapter-pubsub.md` — same shape, full workaround pattern documented there.
+- `references/bootstrap/function.md` -- handler typing rule.
+- `references/bootstrap/middleware.md` -- recovery/logger/publisher chain.
+- `references/extra/middleware.md` -- `NewAnyErrorWrapper` for the workaround.
+- `references/bootstrap/adapter-pubsub.md` -- same shape, full workaround pattern documented there.
 
 ## Canonical (prototype / dev)
 
@@ -18,7 +18,7 @@ fn.Run(ctx, handle, anats.New[*cloudevents.Event](conn))
 
 Subscriptions are configured via `boost.bootstrap.function.adapter.nats.subjects` (comma-separated) and `boost.bootstrap.function.adapter.nats.queueGroup`. Override at deploy via `BOOST_BOOTSTRAP_FUNCTION_ADAPTER_NATS_*`.
 
-## Production caveat — same ctx-loss as Pub/Sub
+## Production caveat -- same ctx-loss as Pub/Sub
 
 `bootstrap/function/adapter/contrib/nats-io/nats.go/v1/helper.go:44/46` and `subscriber.go:62` hard-code `context.Background()`. SIGTERM does not gracefully drain.
 

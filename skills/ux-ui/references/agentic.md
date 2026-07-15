@@ -1,9 +1,9 @@
 
-# Agentic AI & Generative UX — The Agent Interface Paradigm
+# Agentic AI & Generative UX -- The Agent Interface Paradigm
 
 ## The Paradigm Shift: Tools to Agents
 
-The interface paradigm has fundamentally shifted. Traditional software treats users as operators — clicking buttons, filling forms, navigating menus. Agentic AI inverts this relationship. The system becomes an autonomous agent that acts on behalf of the user, infers goals, executes multi-step plans, and reports results. The user's role shifts from operator to supervisor, delegator, and collaborator.
+The interface paradigm has fundamentally shifted. Traditional software treats users as operators -- clicking buttons, filling forms, navigating menus. Agentic AI inverts this relationship. The system becomes an autonomous agent that acts on behalf of the user, infers goals, executes multi-step plans, and reports results. The user's role shifts from operator to supervisor, delegator, and collaborator.
 
 Gartner identified agentic AI as the number-one strategic technology trend for 2025. This is not incremental. It is a category-level change in how humans interact with software, equivalent to the shift from command-line to graphical UI, or from desktop to mobile-first.
 
@@ -29,7 +29,7 @@ Agentic systems must infer user goals rather than waiting for explicit commands.
 
 - Always confirm inferred intent before acting on high-stakes tasks. "It looks like you're planning a trip to Tokyo. Want me to find flights?" is safer than silently booking.
 - Display the interpreted intent visibly so users can correct misunderstanding. Show "I understood: round-trip flight, Tokyo, March 15-22, under $800" before execution.
-- Provide progressive autonomy — start with confirmation-required mode, let users opt into higher autonomy as trust builds.
+- Provide progressive autonomy -- start with confirmation-required mode, let users opt into higher autonomy as trust builds.
 - Support intent refinement through conversation. The first statement rarely captures the full goal. Design for iterative clarification without friction.
 
 ## Constraint and Policy Design
@@ -51,7 +51,7 @@ What an agent cannot do is as important as what it can do. Constraint design is 
 
 ## Background Agent Orchestration
 
-Agents running asynchronously — while users do other work — require entirely new UX patterns for monitoring, attention management, and result delivery.
+Agents running asynchronously -- while users do other work -- require entirely new UX patterns for monitoring, attention management, and result delivery.
 
 ### Background Task Patterns
 
@@ -64,7 +64,7 @@ Agents running asynchronously — while users do other work — require entirely
 
 - Show all active agents, their current status, and recent outputs in a unified view.
 - Allow users to pause, reprioritize, or cancel agent tasks.
-- Provide execution logs for transparency — let users see what the agent did and why.
+- Provide execution logs for transparency -- let users see what the agent did and why.
 - Surface agent resource consumption (tokens used, API calls made, time elapsed) for cost-aware users.
 
 ## Multi-Agent Coordination
@@ -73,7 +73,7 @@ Systems with multiple specialized agents require coordination patterns that are 
 
 ### Agent Identity and Specialization
 
-- Give each agent a clear name, role description, and capability scope. "Research Agent," "Writing Agent," "Code Review Agent" — not "Agent 1, Agent 2, Agent 3."
+- Give each agent a clear name, role description, and capability scope. "Research Agent," "Writing Agent," "Code Review Agent" -- not "Agent 1, Agent 2, Agent 3."
 - Show which agent is active at any moment and why. "Research Agent is gathering sources for your report."
 - Visualize handoffs between agents explicitly. "Research Agent found 12 sources. Handing off to Writing Agent to draft the summary."
 
@@ -99,7 +99,7 @@ Design for outcomes, not layouts. Instead of designing a fixed screen for "fligh
 
 ### Design System Integration
 
-Generative UI must produce interfaces that are on-brand and consistent. Constrain generation to your design system's components, tokens, and patterns. The AI composes from your component library — it does not invent new visual elements from scratch. This ensures accessibility, brand consistency, and production quality.
+Generative UI must produce interfaces that are on-brand and consistent. Constrain generation to your design system's components, tokens, and patterns. The AI composes from your component library -- it does not invent new visual elements from scratch. This ensures accessibility, brand consistency, and production quality.
 
 ## RAG and Knowledge Interface Patterns
 
@@ -122,13 +122,13 @@ Retrieval-Augmented Generation (RAG) interfaces surface AI-generated content gro
 
 ### Trust Calibration
 
-Trust is the central design challenge for AI interfaces. The goal is calibrated trust — users trust the AI exactly as much as its actual reliability warrants. Over-trust leads to unverified acceptance of errors. Under-trust leads to wasted verification effort and eventual abandonment.
+Trust is the central design challenge for AI interfaces. The goal is calibrated trust -- users trust the AI exactly as much as its actual reliability warrants. Over-trust leads to unverified acceptance of errors. Under-trust leads to wasted verification effort and eventual abandonment.
 
 ### Guardrail Tiers
 
-- **Tier 1 — Informational:** Agent acts autonomously, logs actions for optional review. For low-risk, reversible actions.
-- **Tier 2 — Advisory:** Agent proposes action and explains reasoning, user approves or modifies. For medium-risk actions.
-- **Tier 3 — Mandatory:** Agent cannot proceed without explicit user approval. For high-risk, irreversible, or financially significant actions.
+- **Tier 1 -- Informational:** Agent acts autonomously, logs actions for optional review. For low-risk, reversible actions.
+- **Tier 2 -- Advisory:** Agent proposes action and explains reasoning, user approves or modifies. For medium-risk actions.
+- **Tier 3 -- Mandatory:** Agent cannot proceed without explicit user approval. For high-risk, irreversible, or financially significant actions.
 
 Map every agent capability to a guardrail tier based on risk and reversibility.
 
@@ -184,13 +184,13 @@ Six augmentation patterns from UX research for helping users write better prompt
 The v3.0 upgrade introduces dedicated reference materials for conversational AI patterns, hallucination guardrails, and ambient AI contexts.
 
 **Conversational AI Dialogue Patterns**
-See `references/conversational-ai-dialogue-patterns.md` for comprehensive conversation UI patterns covering dialogue state machines, turn-taking design, multi-turn context management, streaming UX for token-by-token LLM output, error recovery in conversational flows, AI persona consistency frameworks, and memory/context transparency. This reference also covers the Smashing Magazine (Feb 2026) agentic control/consent/accountability triad — a three-pillar ethical framework for agentic interfaces that ensures users maintain meaningful control over agent actions, provide informed consent for autonomous operations, and can hold the system accountable through audit trails and explainable decisions.
+See `references/conversational-ai-dialogue-patterns.md` for comprehensive conversation UI patterns covering dialogue state machines, turn-taking design, multi-turn context management, streaming UX for token-by-token LLM output, error recovery in conversational flows, AI persona consistency frameworks, and memory/context transparency. This reference also covers the Smashing Magazine (Feb 2026) agentic control/consent/accountability triad -- a three-pillar ethical framework for agentic interfaces that ensures users maintain meaningful control over agent actions, provide informed consent for autonomous operations, and can hold the system accountable through audit trails and explainable decisions.
 
 **LLM Hallucination Design Guardrails**
 See `references/llm-hallucination-design-guardrails.md` for the hallucination-specific design reference covering hallucination taxonomy (intrinsic vs. extrinsic, factual vs. faithfulness), confidence indicator design patterns (calibrated uncertainty visualization, hedge language in AI responses), verification UX (inline fact-check affordances, source-grounding UI, user-initiated verification flows), and AI quality gates for production deployment (automated hallucination detection thresholds, human-in-the-loop review triggers, regression monitoring dashboards). This reference extends the Trust Calibration and AI Safety UX sections above with hallucination-specific depth.
 
 **Proactive AI in Ambient Computing**
-See the `ambient-calm-zero-ui` skill for design patterns at the intersection of agentic AI and ambient computing — where AI agents operate proactively in the background without screen-based interfaces. This skill covers notification philosophy for agent-initiated ambient actions, peripheral awareness displays for background agent status, calm technology principles for non-intrusive AI suggestions, and the tension between proactive AI helpfulness and user attention respect.
+See the `ambient-calm-zero-ui` skill for design patterns at the intersection of agentic AI and ambient computing -- where AI agents operate proactively in the background without screen-based interfaces. This skill covers notification philosophy for agent-initiated ambient actions, peripheral awareness displays for background agent status, calm technology principles for non-intrusive AI suggestions, and the tension between proactive AI helpfulness and user attention respect.
 
 ## Key Sources
 

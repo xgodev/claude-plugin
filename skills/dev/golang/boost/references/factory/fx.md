@@ -27,7 +27,7 @@ Use the factory when you want fx events (provider registration, lifecycle transi
 
 ## Fail loud at boot
 
-A constructor in `fx.Provide` or an `fx.Invoke` that returns an error makes fx fail the app build and `app.Run()` exit non-zero — and the surfaced reason can be **terse**: a config-validation error returned from a provider can read as a bare `exit 1` with little context after the logger banner. So **validate loudly**: in the provider, log the specific failure (which key, which value) *before* returning the error, and prefer `errors.NewInternal(err, "config: <key>=<value>")` over a bare error. A silent `exit 1` once the logger is up almost always means a provider rejected its config — make sure the provider says which one. (dev-rules LAW 4: fail loud, fail specific.)
+A constructor in `fx.Provide` or an `fx.Invoke` that returns an error makes fx fail the app build and `app.Run()` exit non-zero -- and the surfaced reason can be **terse**: a config-validation error returned from a provider can read as a bare `exit 1` with little context after the logger banner. So **validate loudly**: in the provider, log the specific failure (which key, which value) *before* returning the error, and prefer `errors.NewInternal(err, "config: <key>=<value>")` over a bare error. A silent `exit 1` once the logger is up almost always means a provider rejected its config -- make sure the provider says which one. (dev-rules LAW 4: fail loud, fail specific.)
 
 ## Red flags
 

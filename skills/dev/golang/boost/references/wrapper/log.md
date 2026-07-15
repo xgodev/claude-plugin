@@ -1,4 +1,4 @@
-**REQUIRED BACKGROUND:** `references/start.md` — `log.FromContext` returns a no-op until `boost.Start()` runs.
+**REQUIRED BACKGROUND:** `references/start.md` -- `log.FromContext` returns a no-op until `boost.Start()` runs.
 
 ## Always pull the logger from context
 
@@ -19,12 +19,12 @@ The request- or call-scoped context carries enrichment that previous middlewares
 
 | API | When |
 |---|---|
-| `log.FromContext(ctx)` | Always — request- or call-scoped |
+| `log.FromContext(ctx)` | Always -- request- or call-scoped |
 | `log.WithField(k, v)` / `WithError(err)` | Enrich the logger with structured fields |
 | `log.WithTypeOf(*p)` | Inside library/driver code to stamp the type name |
-| `log.Fatal/Fatalf` | Process-fatal init failures only — never inside a handler |
+| `log.Fatal/Fatalf` | Process-fatal init failures only -- never inside a handler |
 
-The configured backend (zap, zerolog, logrus) is picked at `boost.Start` based on `boost.factory.<backend>.console.level` config. Switching backends doesn't require code changes — the wrapper is the abstraction.
+The configured backend (zap, zerolog, logrus) is picked at `boost.Start` based on `boost.factory.<backend>.console.level` config. Switching backends doesn't require code changes -- the wrapper is the abstraction.
 
 ## Red flags
 
@@ -32,5 +32,5 @@ The configured backend (zap, zerolog, logrus) is picked at `boost.Start` based o
 |---|---|
 | `log.New(...)`, `zap.NewProduction()`, `zerolog.New(os.Stdout)`, `slog.New(...)` | Replace with `log.FromContext(ctx)` |
 | Constructing a logger as a struct field, holding across requests | Use `log.FromContext` per call so per-request enrichment flows through |
-| Calling `log.Fatal` inside a request handler or worker callback | Return an error instead — fatal kills the whole process |
+| Calling `log.Fatal` inside a request handler or worker callback | Return an error instead -- fatal kills the whole process |
 | Logging without structured fields (`logger.Infof("user %s logged in", id)`) | Use `WithField("user_id", id).Info("user logged in")` so log aggregators index it |

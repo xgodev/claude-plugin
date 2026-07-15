@@ -1,9 +1,9 @@
 **REQUIRED BACKGROUND:**
-- `references/start.md` — `boost.Start()` calls `log.Set(zerolog.NewLogger())` for you; this is the default.
-- `references/wrapper/log.md` — the abstraction you log through; switching backends never changes call sites.
-- `references/wrapper/config.md` — `boost.factory.zerolog.*` namespacing / env override semantics.
+- `references/start.md` -- `boost.Start()` calls `log.Set(zerolog.NewLogger())` for you; this is the default.
+- `references/wrapper/log.md` -- the abstraction you log through; switching backends never changes call sites.
+- `references/wrapper/config.md` -- `boost.factory.zerolog.*` namespacing / env override semantics.
 
-## zerolog is the default — usually you write no logger code
+## zerolog is the default -- usually you write no logger code
 
 ```go
 import (
@@ -17,9 +17,9 @@ func main() {
 }
 ```
 
-`boost.Start()` (see `start.go`) imports `factory/contrib/rs/zerolog/v1` and runs `log.Set(zerolog.NewLogger())` after `config.Load()`. An explicit `log.Set(zerolog.NewLogger())` in your `main` is **redundant** — only re-set if a previous line swapped the backend and you need to swap back. `zerolog.NewLogger()` returns a `log.Logger` and `panic`s if options fail to load.
+`boost.Start()` (see `start.go`) imports `factory/contrib/rs/zerolog/v1` and runs `log.Set(zerolog.NewLogger())` after `config.Load()`. An explicit `log.Set(zerolog.NewLogger())` in your `main` is **redundant** -- only re-set if a previous line swapped the backend and you need to swap back. `zerolog.NewLogger()` returns a `log.Logger` and `panic`s if options fail to load.
 
-## Config tree — `boost.factory.zerolog` (cited from `factory/contrib/rs/zerolog/v1/config.go`)
+## Config tree -- `boost.factory.zerolog` (cited from `factory/contrib/rs/zerolog/v1/config.go`)
 
 | Key | Default | What |
 |---|---|---|
@@ -40,7 +40,7 @@ Operators override via env, e.g. `BOOST_FACTORY_ZEROLOG_LEVEL=DEBUG`, `BOOST_FAC
 | Red flag | Fix |
 |---|---|
 | `zerolog.New(os.Stderr)` / `zerolog.Logger` constructed in app code | Backend is already set by `boost.Start()`; log via `references/wrapper/log.md` |
-| Redundant `log.Set(zerolog.NewLogger())` right after `boost.Start()` | Delete it — `Start()` already did it |
+| Redundant `log.Set(zerolog.NewLogger())` right after `boost.Start()` | Delete it -- `Start()` already did it |
 | Setting `boost.factory.zerolog.console.level` to change level | The level key is flat: `boost.factory.zerolog.level` (env `BOOST_FACTORY_ZEROLOG_LEVEL`) |
 | Switching to JSON by wrapping the writer | Set `boost.factory.zerolog.formatter=JSON` (or `AWS_CLOUD_WATCH`) |
 | Constructing your own logger per request | Pull request-scoped loggers via `log.FromContext(ctx)` |

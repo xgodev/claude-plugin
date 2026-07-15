@@ -35,5 +35,5 @@ Tune flush size + interval via `boost.factory.elasticsearch.bulk.*`.
 | Red flag | Fix |
 |---|---|
 | `elasticsearch.NewClient(esCfg)` directly | `esfact.NewClient(ctx)` |
-| Per-document `es.Index` calls in a hot path | Use `BulkIndexer` — orders of magnitude faster |
-| Forgetting `defer bi.Close(ctx)` | Add it — flushes pending batches |
+| Per-document `es.Index` calls in a hot path | Use `BulkIndexer` -- orders of magnitude faster |
+| Forgetting `defer bi.Close(ctx)` | Add it -- flushes pending batches |

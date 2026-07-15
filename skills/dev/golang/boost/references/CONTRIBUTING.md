@@ -1,7 +1,7 @@
 **REQUIRED BACKGROUND:**
-- `references/wrapper/config.md` — config.Add semantics; new code registers its keys.
-- `references/wrapper/log.md` — logger access pattern in driver code.
-- `references/model-errors.md` — error verbs to mirror.
+- `references/wrapper/config.md` -- config.Add semantics; new code registers its keys.
+- `references/wrapper/log.md` -- logger access pattern in driver code.
+- `references/model-errors.md` -- error verbs to mirror.
 
 ## Layout convention
 
@@ -24,7 +24,7 @@ import asns "github.com/aws/aws-sdk-go-v2/service/sns"
 
 ## Multi-service SDKs (AWS SDK v2, Azure SDK, GCP SDK)
 
-For `wrapper/`, `bootstrap/`, and `extra/` — split per service:
+For `wrapper/`, `bootstrap/`, and `extra/` -- split per service:
 
 ```
 wrapper/publisher/driver/contrib/aws/sns/v1/
@@ -59,7 +59,7 @@ func init() {
     config.Add(root+".publishTimeout", "10s", "per-event publish timeout")
 }
 
-// ConfigAdd — exported so multi-instance consumers can register at a non-default path.
+// ConfigAdd -- exported so multi-instance consumers can register at a non-default path.
 func ConfigAdd(path string) {
     config.Add(path+".log.level", "INFO", "log level")
     // mirror the rest with `path` instead of `root`
@@ -82,7 +82,7 @@ return nil, errors.Wrap(err, errors.Internalf("publish failed"))
 
 Match the verbs in the closest existing driver. boost is consistent enough that diverging stands out in review.
 
-## Honest extrapolation — `// TODO(maintainer-review):`
+## Honest extrapolation -- `// TODO(maintainer-review):`
 
 When the new driver has no direct precedent, mark every guess inline:
 
@@ -100,15 +100,15 @@ Then call out the marked decisions in the PR description so reviewers know where
 - ❌ Code under `bootstrap/` for a wrapper-layer concern (or vice versa). Layering is enforced by directory.
 - ❌ A new top-level interface alongside an existing one (`Driver2` is a better `Driver`). Extend the existing one or open an RFC issue first.
 - ❌ A direct dependency on a third-party DI / config / log library. Use `wrapper/config`, `wrapper/log`, and `fx` modules.
-- ❌ Tests that `os.Setenv` to inject config — use `config.Add` with explicit defaults.
+- ❌ Tests that `os.Setenv` to inject config -- use `config.Add` with explicit defaults.
 - ❌ A driver that exposes its concrete type as the public return value of `New(...)`. Return the interface.
 - ❌ A `Close()` method on the `Driver` interface itself unless ALL existing implementations need it. Optional close = separate optional interface + feature-detect.
 
 ## When to escalate to a human
 
-- New top-level layer (peer to `bootstrap/`, `factory/`, `wrapper/`) — architectural change, not a contrib.
-- Boost-internal bug that blocks the canonical path (like the ctx-loss in adapter helpers, see `references/bootstrap/adapter-pubsub.md`) — open an issue and propose a PR; don't unilaterally redesign the public API.
-- Consumer asks for direct dependency on a non-boost framework (gin, fiber, zap-direct) — suggest the boost-equivalent first; only deviate with explicit user sign-off.
+- New top-level layer (peer to `bootstrap/`, `factory/`, `wrapper/`) -- architectural change, not a contrib.
+- Boost-internal bug that blocks the canonical path (like the ctx-loss in adapter helpers, see `references/bootstrap/adapter-pubsub.md`) -- open an issue and propose a PR; don't unilaterally redesign the public API.
+- Consumer asks for direct dependency on a non-boost framework (gin, fiber, zap-direct) -- suggest the boost-equivalent first; only deviate with explicit user sign-off.
 
 ## Self-test before opening the PR
 

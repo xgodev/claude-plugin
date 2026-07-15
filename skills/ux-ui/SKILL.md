@@ -1,6 +1,6 @@
 ---
 name: ux-ui
-description: "Use for ANY UI/UX design task: design or redesign a screen, page, or component; fix a layout, navbar, table, or spacing; choose colors, palettes, typography, fonts, styles, charts, or icons; review or polish a UI; accessibility, design systems, motion, UX heuristics, research, metrics -- on any web or mobile stack. Routes to the bundled searchable design catalog + methodology references."
+description: "Use for ANY UI/UX design task: design or redesign a screen, page, or component; fix a layout, navbar, table, or spacing; choose colors, palettes, typography, fonts, styles, charts, or icons; review or polish a UI; accessibility, design systems, motion, UX heuristics, research, metrics -- on any web or mobile stack."
 license: MIT
 metadata:
   author: jpfaria

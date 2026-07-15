@@ -1,19 +1,19 @@
 
-# UI Visual Design System — Visual Excellence Framework
+# UI Visual Design System -- Visual Excellence Framework
 
 ## Visual Design Philosophy
 
-"Good design is as little design as possible. Less, but better — because it concentrates on the essential aspects, and the products are not burdened with non-essentials." — Dieter Rams
+"Good design is as little design as possible. Less, but better -- because it concentrates on the essential aspects, and the products are not burdened with non-essentials." -- Dieter Rams
 
-Visual design is the language through which interfaces communicate hierarchy, meaning, and emotional tone. Every visual decision — typeface, color, spacing, elevation — either clarifies or obscures the user's path. Pursue clarity ruthlessly.
+Visual design is the language through which interfaces communicate hierarchy, meaning, and emotional tone. Every visual decision -- typeface, color, spacing, elevation -- either clarifies or obscures the user's path. Pursue clarity ruthlessly.
 
 ### Core Principles
 
-1. **Hierarchy is communication** — visual weight directs attention and reveals structure
-2. **Consistency breeds trust** — systematic visual rules create predictable, professional interfaces
-3. **White space is not empty space** — it is the most powerful tool for grouping, separating, and emphasizing
-4. **Restraint over decoration** — every visual element must serve function; remove those that do not
-5. **Accessibility is non-negotiable** — visual choices that exclude users are design failures
+1. **Hierarchy is communication** -- visual weight directs attention and reveals structure
+2. **Consistency breeds trust** -- systematic visual rules create predictable, professional interfaces
+3. **White space is not empty space** -- it is the most powerful tool for grouping, separating, and emphasizing
+4. **Restraint over decoration** -- every visual element must serve function; remove those that do not
+5. **Accessibility is non-negotiable** -- visual choices that exclude users are design failures
 
 ## Typography System
 
@@ -21,10 +21,10 @@ Visual design is the language through which interfaces communicate hierarchy, me
 
 Build a modular type scale using a consistent ratio. The most common scales:
 
-- **Minor Third (1.200):** Subtle, elegant — suited for content-heavy apps
-- **Major Third (1.250):** Balanced — good default for most applications
-- **Perfect Fourth (1.333):** Strong contrast — suited for marketing and editorial
-- **Augmented Fourth (1.414):** Dramatic — suited for expressive, creative products
+- **Minor Third (1.200):** Subtle, elegant -- suited for content-heavy apps
+- **Major Third (1.250):** Balanced -- good default for most applications
+- **Perfect Fourth (1.333):** Strong contrast -- suited for marketing and editorial
+- **Augmented Fourth (1.414):** Dramatic -- suited for expressive, creative products
 
 **Example scale (Major Third, base 16px):**
 ```
@@ -64,13 +64,13 @@ xl:    25px (1.5625rem)
 ### Color Architecture
 
 **Semantic Color Categories:**
-- **Primary:** Brand identity color — used for key actions, active states, links
-- **Secondary:** Complementary accent — used for secondary actions, highlights
-- **Neutral:** Gray scale — used for text, borders, backgrounds, surfaces
-- **Success:** Green spectrum — confirmations, completed states
-- **Warning:** Amber/orange spectrum — caution, pending states
-- **Error:** Red spectrum — errors, destructive actions, required indicators
-- **Info:** Blue spectrum — informational messages, tips
+- **Primary:** Brand identity color -- used for key actions, active states, links
+- **Secondary:** Complementary accent -- used for secondary actions, highlights
+- **Neutral:** Gray scale -- used for text, borders, backgrounds, surfaces
+- **Success:** Green spectrum -- confirmations, completed states
+- **Warning:** Amber/orange spectrum -- caution, pending states
+- **Error:** Red spectrum -- errors, destructive actions, required indicators
+- **Info:** Blue spectrum -- informational messages, tips
 
 **Color Scale Generation:**
 - Generate 10-step scale per color (50-900) for systematic flexibility
@@ -87,15 +87,15 @@ xl:    25px (1.5625rem)
 - Enhanced (AAA): 7:1 for normal text, 4.5:1 for large text
 
 **Color Independence:**
-- Never use color as the sole indicator of meaning — pair with icons, text, or patterns
+- Never use color as the sole indicator of meaning -- pair with icons, text, or patterns
 - Error states: red color + error icon + descriptive text
 - Charts and graphs: use patterns, labels, and distinguishable hues (not just red/green)
 - Test with color blindness simulators (protanopia, deuteranopia, tritanopia)
 
 ### Dark Mode Design
 
-- Do not simply invert colors — redesign the elevation and emphasis model
-- Dark mode backgrounds: not pure black (#000) — use desaturated dark grays (#121212-#1E1E1E)
+- Do not simply invert colors -- redesign the elevation and emphasis model
+- Dark mode backgrounds: not pure black (#000) -- use desaturated dark grays (#121212-#1E1E1E)
 - Reduce color saturation by 10-20% for dark backgrounds to prevent vibration
 - Elevated surfaces get lighter in dark mode (opposite of light mode shadow approach)
 - Text contrast: use 87% white (not 100%) for primary text on dark backgrounds to reduce eye strain
@@ -119,7 +119,7 @@ Use a base-4 or base-8 scale for consistent spacing:
 ### Spacing Application Rules
 
 - **Component internal padding:** 8-16px (compact) or 12-24px (comfortable)
-- **Between related elements:** 8-12px (grouping by proximity — Gestalt law)
+- **Between related elements:** 8-12px (grouping by proximity -- Gestalt law)
 - **Between unrelated groups:** 24-32px (separation)
 - **Section spacing:** 48-80px
 - **Page margins:** 16px (mobile), 24-32px (tablet), 48-80px (desktop)
@@ -129,23 +129,23 @@ Use a base-4 or base-8 scale for consistent spacing:
 - **12-column grid** for maximum flexibility (divisible by 2, 3, 4, 6)
 - **Column gutter:** 16-24px (responsive, wider on larger screens)
 - **Max content width:** 1200-1440px for readability, centered with side padding
-- Use CSS Grid and Flexbox — avoid float-based layouts
+- Use CSS Grid and Flexbox -- avoid float-based layouts
 - **Subgrid** (CSS subgrid) for component-level alignment to parent grid
 
 ## Visual Hierarchy
 
 ### The Visual Hierarchy Toolkit (ordered by impact)
 
-1. **Size** — larger elements command attention first
-2. **Color/Contrast** — high-contrast and saturated colors draw the eye
-3. **Position** — top-left (LTR languages) and center-screen hold priority
-4. **Weight** — bolder elements stand out from regular weight
-5. **White space** — isolated elements surrounded by space demand attention
-6. **Motion** — animated elements capture attention (use sparingly)
+1. **Size** -- larger elements command attention first
+2. **Color/Contrast** -- high-contrast and saturated colors draw the eye
+3. **Position** -- top-left (LTR languages) and center-screen hold priority
+4. **Weight** -- bolder elements stand out from regular weight
+5. **White space** -- isolated elements surrounded by space demand attention
+6. **Motion** -- animated elements capture attention (use sparingly)
 
 ### Hierarchy Application
 
-- Every screen should have exactly one primary focal point — the main action or content
+- Every screen should have exactly one primary focal point -- the main action or content
 - Create clear layers: primary (what to notice), secondary (supporting context), tertiary (background/metadata)
 - Squint test: when blurred, the visual structure should remain distinguishable
 - Test hierarchy with grayscale rendering to verify it does not rely solely on color
@@ -155,11 +155,11 @@ Use a base-4 or base-8 scale for consistent spacing:
 ### Elevation System
 
 ```
-Level 0: Flat surface (0px shadow) — background, canvas
-Level 1: Low (0 1px 3px rgba(0,0,0,0.12)) — cards, tiles
-Level 2: Medium (0 4px 6px rgba(0,0,0,0.12)) — dropdowns, popovers
-Level 3: High (0 8px 16px rgba(0,0,0,0.12)) — modals, dialogs
-Level 4: Highest (0 16px 32px rgba(0,0,0,0.16)) — toasts, floating elements
+Level 0: Flat surface (0px shadow) -- background, canvas
+Level 1: Low (0 1px 3px rgba(0,0,0,0.12)) -- cards, tiles
+Level 2: Medium (0 4px 6px rgba(0,0,0,0.12)) -- dropdowns, popovers
+Level 3: High (0 8px 16px rgba(0,0,0,0.12)) -- modals, dialogs
+Level 4: Highest (0 16px 32px rgba(0,0,0,0.16)) -- toasts, floating elements
 ```
 
 - Higher elevation = closer to user = more important/temporary
@@ -172,7 +172,7 @@ Level 4: Highest (0 16px 32px rgba(0,0,0,0.16)) — toasts, floating elements
 
 - Consistent style: outline OR filled, not mixed (pick one system-wide)
 - Minimum touch target: 44x44pt even if icon is visually 24x24
-- Always pair icons with text labels in navigation — icons alone are ambiguous
+- Always pair icons with text labels in navigation -- icons alone are ambiguous
 - Standard sizes: 16px (inline), 20px (buttons), 24px (navigation), 32px (feature)
 - Consistent stroke width across all icons (typically 1.5-2px at 24px size)
 
@@ -187,15 +187,15 @@ Level 4: Highest (0 16px 32px rgba(0,0,0,0.16)) — toasts, floating elements
 
 The v3.0 upgrade introduces production CSS implementation references, Figma workflow integration, and multi-brand design system architecture that extend visual design systems into implementation and scale.
 
-### Modern CSS Implementation — `component-patterns-code/references/css-modern-patterns.md`
+### Modern CSS Implementation -- `component-patterns-code/references/css-modern-patterns.md`
 
 The `component-patterns-code/references/css-modern-patterns.md` reference provides production CSS patterns that implement the visual design system principles above. Key coverage includes: **container queries** for component-level responsive design (replacing media query dependence); **`:has()` selector** for parent-aware styling enabling contextual visual variations; **anchor positioning** for tooltip, popover, and dropdown placement without JavaScript; **view transitions API** for smooth page and state transitions; **OKLCH color space** for perceptually uniform color manipulation (superior to HSL for generating accessible color scales as described in the Color System section); and **`@layer`** for cascade management in multi-team design system environments. Essential for translating visual design specifications into maintainable, modern CSS.
 
-### Figma Design Tool Workflows — `figma-design-tool-workflows`
+### Figma Design Tool Workflows -- `figma-design-tool-workflows`
 
 The `figma-design-tool-workflows` skill covers Figma-specific workflows for visual design system implementation. Includes: Figma variable modes for encoding the spacing scales, type scales, and color systems defined in this skill as structured design tokens; design token extraction pipelines that export Figma variables to Style Dictionary or Tokens Studio formats; and the MCP-powered design-to-code flywheel that maintains synchronization between Figma design system files and production CSS/component libraries. Directly applicable to maintaining visual consistency across design and code.
 
-### Multi-Brand Theming Architecture — `design-systems-architecture/references/maturity-model-multi-brand.md`
+### Multi-Brand Theming Architecture -- `design-systems-architecture/references/maturity-model-multi-brand.md`
 
 The `design-systems-architecture/references/maturity-model-multi-brand.md` reference addresses scaling visual design systems across multiple brands, products, or white-label deployments. Covers multi-tier token architecture (global tokens, brand tokens, component tokens), theme switching strategies, and maturity model stages from single-product design systems through enterprise multi-brand platforms. Essential when the visual design system defined in this skill needs to support brand variants while maintaining structural consistency.
 

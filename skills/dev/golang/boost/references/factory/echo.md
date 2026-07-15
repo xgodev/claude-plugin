@@ -1,7 +1,7 @@
 **REQUIRED BACKGROUND:**
-- `references/start.md` — `boost.Start()` first.
-- `references/wrapper/log.md` — request logger via context.
-- `references/model-errors.md` — handler errors are typed and routed by `error_handler`.
+- `references/start.md` -- `boost.Start()` first.
+- `references/wrapper/log.md` -- request logger via context.
+- `references/model-errors.md` -- handler errors are typed and routed by `error_handler`.
 
 ## Canonical `main.go`
 
@@ -68,7 +68,7 @@ func main() {
 
 ## Plugin order constraint
 
-`restresponse.Register` MUST come before `error_handler.Register`. Reason: the error handler picks `ErrorHandlerJSON` only when the server has `Type=REST` set on it. Without `restresponse` first, you get `ErrorHandlerString` (text/plain) — production symptom: 4xx/5xx responses come back as `"some error"` text instead of the JSON envelope clients expect.
+`restresponse.Register` MUST come before `error_handler.Register`. Reason: the error handler picks `ErrorHandlerJSON` only when the server has `Type=REST` set on it. Without `restresponse` first, you get `ErrorHandlerString` (text/plain) -- production symptom: 4xx/5xx responses come back as `"some error"` text instead of the JSON envelope clients expect.
 
 ## Graceful shutdown
 
@@ -83,11 +83,11 @@ shutdownCtx, _ := context.WithTimeout(context.Background(), 15*time.Second)
 srv.Shutdown(shutdownCtx) // bounded drain with FRESH ctx
 ```
 
-Use a fresh context for `Shutdown` — passing the cancelled parent makes it return immediately.
+Use a fresh context for `Shutdown` -- passing the cancelled parent makes it return immediately.
 
 ## Observability plugins
 
-`echoserver.NewServer(ctx, plugins ...Plugin)` also accepts vendor plugins — if the service uses one of these vendors, add the matching plugin here, not a hand-rolled Echo middleware:
+`echoserver.NewServer(ctx, plugins ...Plugin)` also accepts vendor plugins -- if the service uses one of these vendors, add the matching plugin here, not a hand-rolled Echo middleware:
 
 | Vendor | Import | Usage |
 |---|---|---|
@@ -101,13 +101,13 @@ Every plugin below follows the same 3-constructor shape (`New<X>()`, `New<X>With
 
 | Plugin | Import | What it does |
 |---|---|---|
-| Body dump | `.../factory/contrib/labstack/echo/v4/plugins/native/bodydump` | Logs full request/response bodies — dev/debug only |
+| Body dump | `.../factory/contrib/labstack/echo/v4/plugins/native/bodydump` | Logs full request/response bodies -- dev/debug only |
 | Body limit | `.../factory/contrib/labstack/echo/v4/plugins/native/bodylimit` | Caps max request body size |
 | CORS | `.../factory/contrib/labstack/echo/v4/plugins/native/cors` | Cross-origin config for browser clients |
 | Gzip | `.../factory/contrib/labstack/echo/v4/plugins/native/gzip` | Compresses responses |
 | Sonic JSON | `.../factory/contrib/labstack/echo/v4/plugins/contrib/bytedance/sonic/v1` | Swaps the default JSON encoder/decoder for ByteDance Sonic (faster) |
-| goccy/go-json | `.../factory/contrib/labstack/echo/v4/plugins/contrib/goccy/go-json/v0` | Swaps the default JSON encoder/decoder for goccy/go-json (alternative to Sonic — don't wire both) |
-| pprof | `.../factory/contrib/labstack/echo/v4/plugins/contrib/hiko1129/echo-pprof/v1` | Exposes Go pprof profiling endpoints — not for production internet-facing servers |
+| goccy/go-json | `.../factory/contrib/labstack/echo/v4/plugins/contrib/goccy/go-json/v0` | Swaps the default JSON encoder/decoder for goccy/go-json (alternative to Sonic -- don't wire both) |
+| pprof | `.../factory/contrib/labstack/echo/v4/plugins/contrib/hiko1129/echo-pprof/v1` | Exposes Go pprof profiling endpoints -- not for production internet-facing servers |
 | Swagger UI | `.../factory/contrib/labstack/echo/v4/plugins/contrib/swaggo/echo-swagger/v1` | Serves interactive OpenAPI docs |
 | Semaphore | `.../factory/contrib/labstack/echo/v4/plugins/extra/semaphore` | Weighted concurrency limit on request processing |
 
@@ -124,7 +124,7 @@ srv, err := echoserver.NewServer(ctx,
 
 The handler resolves status via `model/errors.Classify`. To make a non-boost
 error return a specific status (or be ignored / treated as 200), register it at
-boot — it works for HTTP and gRPC at once. See `references/model-errors.md`
+boot -- it works for HTTP and gRPC at once. See `references/model-errors.md`
 (`Register`/`RegisterMatch`/`Ignore`); don't add cases to the handler by hand.
 
 ## Red flags

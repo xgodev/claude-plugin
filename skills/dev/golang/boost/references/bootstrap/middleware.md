@@ -1,7 +1,7 @@
 **REQUIRED BACKGROUND:**
-- `references/bootstrap/function.md` — generic typing rule (`T = *cloudevents.Event`).
-- `references/model-errors.md` — error types matched by deadletter mode.
-- `references/wrapper/publisher.md` — provides the publisher consumed by the publisher middleware.
+- `references/bootstrap/function.md` -- generic typing rule (`T = *cloudevents.Event`).
+- `references/model-errors.md` -- error types matched by deadletter mode.
+- `references/wrapper/publisher.md` -- provides the publisher consumed by the publisher middleware.
 
 ## Canonical chain
 
@@ -49,7 +49,7 @@ return nil, bootsterrors.Wrap(err, bootsterrors.NotValidf("invalid event data"))
 return nil, bootsterrors.Wrap(err, bootsterrors.Internalf("downstream call failed"))
 ```
 
-`fmt.Errorf("%w", err)` defeats this — the matcher cannot recover the type name. Always use `bootsterrors.Wrap` (see `references/model-errors.md`).
+`fmt.Errorf("%w", err)` defeats this -- the matcher cannot recover the type name. Always use `bootsterrors.Wrap` (see `references/model-errors.md`).
 
 ## `ignore_errors` middleware
 
@@ -69,6 +69,6 @@ fn, _ := function.New[*cloudevents.Event](rec, imi, lmi, pmi)
 | Red flag | Fix |
 |---|---|
 | Chain ordered `publisher → logger → recovery` (or any permutation that violates outermost=recovery) | Reorder to `recovery → logger → publisher` |
-| Forgetting `recovery` middleware | Always include it — production functions die otherwise |
+| Forgetting `recovery` middleware | Always include it -- production functions die otherwise |
 | `fmt.Errorf("%w", err)` from a handler returned through this chain | `bootsterrors.Wrap(err, bootsterrors.<Type>(...))` |
 | Mixing `T = cloudevents.Event` and `T = *cloudevents.Event` across middlewares | All on `*cloudevents.Event` |

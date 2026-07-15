@@ -11,7 +11,7 @@ if err != nil { log.Fatalf("language: %v", err) }
 ctx, err := language.ToContext(context.Background(), "pt-BR")
 if err != nil { log.Fatalf("language: %v", err) }
 
-// Read it back — falls back to the default if none was set
+// Read it back -- falls back to the default if none was set
 tag, err := language.FromContext(ctx)
 if err != nil { log.Fatalf("language: %v", err) }
 ```
@@ -32,7 +32,7 @@ Wraps `golang.org/x/text/language` to parse and validate BCP 47 language tags. D
 
 | Red flag | Fix |
 |---|---|
-| `language.Parse(lang)` from the upstream package directly in a handler, no error handling | `language.ToContext(ctx, lang)` — validates and stores in one call |
+| `language.Parse(lang)` from the upstream package directly in a handler, no error handling | `language.ToContext(ctx, lang)` -- validates and stores in one call |
 | Reading the user's language without a fallback path | `language.FromContext(ctx)` already falls back to the default |
 | Hardcoded language strings scattered through the codebase | Read from `boost.factory.language.default` config, not a literal |
 | Storing the language as a raw string on the context under an ad-hoc key | Use `ToContext`/`FromContext` so the key name stays centralized and configurable |

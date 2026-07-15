@@ -7,7 +7,7 @@ c, err := freecachefact.NewCache(ctx)
 if err != nil { log.Fatalf("freecache: %v", err) }
 ```
 
-Configure size (in bytes) under `boost.factory.freecache.size` (override `BOOST_FACTORY_FREECACHE_SIZE`). Once full, freecache evicts oldest entries — predictable memory ceiling.
+Configure size (in bytes) under `boost.factory.freecache.size` (override `BOOST_FACTORY_FREECACHE_SIZE`). Once full, freecache evicts oldest entries -- predictable memory ceiling.
 
 ## bigcache vs freecache
 

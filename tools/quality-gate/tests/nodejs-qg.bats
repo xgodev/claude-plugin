@@ -510,7 +510,7 @@ EOF
   cat > "$tmp/package.json" <<'EOF'
 { "name": "my-project", "version": "0.1.0", "private": true }
 EOF
-  # tsconfig do projeto existe (gatilho do branch tsc) mas e IGNORADO.
+  # the project tsconfig exists (tsc branch trigger) but is IGNORED.
   cat > "$tmp/tsconfig.json" <<'EOF'
 { "compilerOptions": { "jsx": "react-jsx", "strict": true } }
 EOF
@@ -573,7 +573,7 @@ EOF
   cat > "$tmp/tsconfig.json" <<'EOF'
 { "compilerOptions": { "strict": false, "noImplicitAny": false, "jsx": "preserve" } }
 EOF
-  # Erro que SO aparece sob strict/noImplicitAny: param implicito any.
+  # An error that ONLY appears under strict/noImplicitAny: implicit any param.
   cat > "$tmp/App.tsx" <<'EOF'
 export function handler(payload) {
   return <pre>{JSON.stringify(payload)}</pre>;

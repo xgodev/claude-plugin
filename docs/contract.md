@@ -94,7 +94,7 @@ If `--base` AND `QG_BASE_REF` are both absent -> **absolute mode** (not an error
 Fixed structure in 3 blocks:
 
 ```
-═══ Quality Gate — <lang> ═══
+═══ Quality Gate -- <lang> ═══
   branch:        <current branch>
   base ref:      <--base>
   baseline:      <path>
@@ -262,9 +262,9 @@ Hard violations (exit 1):
   or a test workflow with no automatic trigger (`workflow_dispatch` only).
 - A debt-allowlist entry (`*allowlist*`, `*xfail*`, `known_failures*`)
   pointing at a path that no longer exists.
-- A `TODO(#N)`/`FIXME(#N)` whose issue is CLOSED (resolved via `gh` when
-  available; unresolvable refs are warnings, and a missing `gh` degrades
-  to a warning).
+- A `TODO(#N)`/`FIXME(#N)`/`HACK(#N)` whose issue is CLOSED (resolved via
+  `gh` when available; unresolvable refs are warnings, and a missing `gh`
+  degrades to a warning).
 - A module/crate-wide suppression (`#![allow(lint)]`) of a lint whose
   threshold the repo's own clippy config sets, or a file-level
   `/* eslint-disable */` with no rule names in a repo with an eslint
@@ -273,6 +273,13 @@ Hard violations (exit 1):
 Warnings (never fail): bare `TODO`/`FIXME`/`HACK` without a tracker
 reference, blanket suppressions without a configured threshold or an
 adjacent reason, file-level `noqa`.
+
+The EXIT CODE is authoritative: a language gate's JSON report does not
+include hygiene, so a `passed` report with exit 1 means a hygiene
+violation (details on stderr). The N-language envelope's
+`aggregate_verdict` does fold hygiene in. The scan also runs when NO
+language is detected: a hygiene violation turns the usual exit 3 into
+exit 1.
 
 `QG_HYGIENE=0` disables the scan -- an env supplied by whoever RUNS the
 gate, never a project file (tamper-resistance law applies).
