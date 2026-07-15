@@ -109,3 +109,10 @@ cd /path/to/your/project
 ## Contributing
 
 See [`CONTRIBUTING.md`](../CONTRIBUTING.md). To add a new language with AI assistance, use the maintainer-only `add-quality-gate` skill (project-local, in this repo's `.claude/skills/`).
+
+## Hygiene scan
+
+Every `qg` run ends with a repo-level hygiene scan (neutered CI test
+steps, rotten debt allowlists, `TODO(#N)` pointing at closed issues,
+blanket lint suppression). Hard violations fail the gate; details in
+[the contract](contract.md). Disable per run with `QG_HYGIENE=0`.

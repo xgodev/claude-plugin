@@ -19,6 +19,7 @@ bats tools/quality-gate/tests/rust-qg.bats
 - `tests/<lang>-qg.bats` -- tests for each language's script.
 - `tests/dispatcher.bats` -- dispatcher (`qg`) routing tests.
 - `tests/hook-pr.bats` -- PR-gate hook tests.
+- `tests/hygiene.bats` -- repo-level hygiene scan tests.
 - `tests/helpers/setup.bash` -- shared helpers.
 
 ## Fixtures
@@ -37,6 +38,6 @@ assertions, or run bats with bash >= 4 first on `PATH`
 
 `.github/workflows/tests.yml` runs on every push and PR: the hook unit
 tests, manifest validation, and the bats suites whose toolchains are
-CI-installable (`dispatcher`, `hook-pr`, `python`, `nodejs`, `go`). The
+CI-installable (`dispatcher`, `hook-pr`, `hygiene`, `python`, `nodejs`, `go`). The
 `java`, `kotlin`, `rust`, `swift`, and `web` suites need heavier
 toolchains and run locally before a gate change ships.

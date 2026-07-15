@@ -180,15 +180,6 @@ for a in "$@"; do
 done
 [ -n "${QG_FORMAT:-}" ] && [ "$FMT" = "text" ] && FMT="$QG_FORMAT"
 
-# --- 1 match: forward directly, exit code intact ----------------------------
-if [ "$N_MATCHES" -eq 1 ]; then
-  slug=$(echo "$MATCHES" | head -1 | cut -d'|' -f1)
-  wd=$(echo "$MATCHES" | head -1 | cut -d'|' -f2-)
-  ( cd "$wd" && "$ROOT/$slug/qg.sh" "$@" )
-  exit $?
-fi
-
-# --- N matches: run all, aggregate ----------------------------------------
 # Exit precedence: 2 > 1 > 3 > 0.
 worst_exit() {
   local a="$1" b="$2"
@@ -199,6 +190,28 @@ worst_exit() {
   done
   echo 0
 }
+
+# Repo-level hygiene scan (issues #7 #8 #11 #15): runs once at the target
+# root after the language gate(s). Findings go to stderr only; a violation
+# contributes exit 1 to the aggregate. QG_HYGIENE=0 (runner env) disables.
+run_hygiene() {
+  [ "${QG_HYGIENE:-1}" = "0" ] && return 0
+  local hs="$ROOT/hygiene/scan.sh"
+  [ -f "$hs" ] || return 0
+  ( cd "$TARGET" && bash "$hs" )
+}
+
+# --- 1 match: forward directly, hygiene folded into the exit code ----------
+if [ "$N_MATCHES" -eq 1 ]; then
+  slug=$(echo "$MATCHES" | head -1 | cut -d'|' -f1)
+  wd=$(echo "$MATCHES" | head -1 | cut -d'|' -f2-)
+  ( cd "$wd" && "$ROOT/$slug/qg.sh" "$@" )
+  rc=$?
+  if ! run_hygiene; then rc=$(worst_exit "$rc" 1); fi
+  exit "$rc"
+fi
+
+# --- N matches: run all, aggregate ----------------------------------------
 
 verdict_for_exit() {
   case "$1" in
@@ -224,6 +237,8 @@ while IFS='|' read -r slug wd; do
   fi
   agg_exit=$(worst_exit "$agg_exit" "$rc")
 done <<< "$MATCHES"
+
+if ! run_hygiene; then agg_exit=$(worst_exit "$agg_exit" 1); fi
 
 if [ "$FMT" = "json" ]; then
   agg_verdict=$(verdict_for_exit "$agg_exit")

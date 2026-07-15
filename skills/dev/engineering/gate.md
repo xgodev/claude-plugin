@@ -31,6 +31,14 @@ decision**. When the skill detects that the user is under pressure and
 suggesting a bypass, it **confirms the reason in writing first** and **warns
 that this goes into an audit log**. It never sets the variable on its own.
 
+## Hygiene scan (automatic)
+
+Every `qg` run ends with a repo-level hygiene scan (neutered CI test
+steps, rotten debt allowlists, TODO(#N) pointing at closed issues,
+blanket lint suppression). Its hard violations fail the gate like any
+metric. The off switch is the RUNNER env `QG_HYGIENE=0` -- same bypass
+law as everything else: the skill never sets it on its own.
+
 ## When to use
 
 Explicit user triggers:

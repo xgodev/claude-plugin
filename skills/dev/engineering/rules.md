@@ -219,6 +219,62 @@ can change priorities, not the laws of correctness.
     order and existence, never quality -- a sound plan and a meaningful test
     stay your job (and the reviewer's).
 
+14. **Tests are machine-independent.** A test must be reproducible on any
+    machine. A hardcoded machine path (`/Users/<name>/...`, `/home/<name>/...`,
+    `C:\Users\...`, `~/Library/...`, `%APPDATA%\...`) is a hard fail. Worse:
+    a test that reads the developer's REAL config/data as a fixture (a live
+    file under `$HOME`) changes result when the user edits unrelated things
+    and passes only on the author's box. Fixtures are either versioned in
+    the repo or generated in a temp dir (`mktemp`, `t.TempDir()`,
+    `tempfile`, `CARGO_TARGET_TMPDIR`). If a test genuinely needs local
+    data, gate it behind an explicit env var and SKIP LOUDLY when absent --
+    never pass silently.
+15. **A test loosened to stay green is a lie.** The production fix must make
+    the UNCHANGED test pass (extends LAW 11). The loosening shapes, all
+    forbidden: a tolerance/epsilon widened ("generous", "robust") until a
+    wrong result fits inside the window; an `is_ok()`-style assert with no
+    assertion on the VALUE (proves the call didn't error, proves nothing
+    about behavior); a "golden"/regression test that compares the
+    implementation AGAINST ITSELF (two runs, assert they match -- proves
+    only determinism, passes even if behavior is completely wrong);
+    `ignore`/`skip` on a test that currently fails (silences a known
+    regression). Known-failing tests go to an **xfail list that fails the
+    build the day they start passing** -- so the fix is noticed -- never to
+    `ignore`. Any tolerance change in a test diff is a review item.
+16. **Every safety escape carries its written invariant.** An escape hatch
+    from the language's safety model (`unsafe` in Rust, `unsafe.Pointer`,
+    unchecked casts, `@ts-ignore`, `# type: ignore`) transfers a proof
+    obligation from the compiler to YOU -- write it down or the obligation
+    is silently lost. Every `unsafe` block/fn carries a `// SAFETY:` comment
+    stating the invariant that makes it sound. NO exception for
+    `unsafe impl Send`/`unsafe impl Sync`: that is an unaudited
+    thread-safety promise, the most dangerous kind and the easiest to write
+    by reflex to silence the compiler. A blanket
+    `unsafe impl<T> Send for Wrapper<T>` (promising for ANY T) is a defect.
+    A repo with dozens of `unsafe` and a handful of `SAFETY:` comments has
+    an unaudited core.
+17. **sleep() is never synchronisation -- wait on the condition.** In tests
+    AND in production. A fixed `sleep(N)` to "let X finish" / "settle" /
+    "prevent a race" is a bet on timing, not a guarantee: too short on a
+    loaded CI, wasted time on a fast box, and it turns a deterministic
+    dependency into a probabilistic one. There is almost always a real
+    signal: a condvar, a join/waitpid, an epoch counter, a readiness check.
+    The right shape is `wait_until(condition, deadline)`; a bounded poll
+    with a deadline is acceptable; an unconditional fixed sleep is not. A
+    magic duration "that reliably works on the machines we tested" is the
+    same defect with tuning.
+18. **No swallowed errors; low layers return errors, they don't print.**
+    Discarding an error (`.ok()`, `let _ =`, empty `catch {}`,
+    `except: pass`, `_ = err`) requires an adjacent
+    `// intentional: <reason>` comment -- without it, "swallowed defect" and
+    "deliberate discard" are indistinguishable in an audit, so the bare
+    form reads as a genuine smell. A library/core layer never uses
+    stdout/stderr prints as error handling -- it returns the typed error
+    (LAW 7) or emits structured logging, and the EDGE decides how to
+    surface it. A swallowed error turns a real failure into silent wrong
+    behavior discovered far away; a deep-layer print is unstructured and a
+    layering violation at once.
+
 ## Communication
 
 Default reply: 1-3 sentences. Problem before solution. No greeting, no
@@ -257,6 +313,13 @@ one of these, you are about to violate a rule. Stop.
 | "The bug report points right at the [suspect] code -- I'll go straight there and read it, I get it in 30 seconds" | Reading the production code first makes your test assert what the code DOES, not what it SHOULD do. Both baseline agents went "straight to the coupon branch" and derived the expected value from the code they had just read. Lock the intended behavior WITH the user, encode it as a failing test, and open the implementation only after RED. |
 | "I traced it by hand and verified mentally, the fix is obviously correct -- a failing test is ceremony here" | Mental verification is not a RED (LAW 1), and the trace came from the suspect code, not the spec. A baseline agent shipped a fix having only "verified mentally" -- that is confidence, not evidence (LAW 3). |
 | "Brainstorming/a plan is ceremony for something this small" | The smallest changes are where unexamined assumptions waste the most work. The brainstorm can be three sentences and the plan three bullets, but understanding the intended behavior WITH the user must precede code. |
+| "It passes on my machine, the path/config is right there" | Green on the author's box and red (or vacuously skipped) everywhere else protects nothing (LAW 14). Version the fixture or generate it in a temp dir; a test reading your real `$HOME` config asserts your laptop, not the code. |
+| "I'll widen the tolerance a bit so it's robust / less flaky" | "Robust" here means "wide enough that a wrong result passes" (LAW 15). If the value is genuinely nondeterministic, assert the invariant that IS deterministic; do not grow the window until the bug fits. |
+| "is_ok() is enough, the important thing is it doesn't crash" | Not-crashing is not behavior (LAW 15). An assert with no expected VALUE passes for a function that returns garbage successfully. |
+| "This test fails for a known reason, ignore it for now and track it" | `ignore` IS untracking (LAW 15, LAW 5): CI never runs it again and the regression is ratified. Put it on the xfail list that fails the build when it starts passing. |
+| "The compiler is being conservative, unsafe impl Send is obviously fine here" | "Obviously" is exactly what the missing `// SAFETY:` was supposed to prove (LAW 16). An unaudited Send/Sync promise moves a data race from compile error to production heisenbug. |
+| "A short sleep here makes the test stable" | It makes the test stable on THIS machine at THIS load (LAW 17). Wait on the condition with a deadline; a sleep that "works" is a race you scheduled to lose later, slower. |
+| "Logging the error to stderr here IS handling it" | A deep layer printing to stderr is unstructured noise the caller cannot act on (LAW 18). Return the typed error; the edge decides presentation. |
 
 ## Red Flags -- STOP
 
@@ -296,6 +359,18 @@ rule it breaks. If you think it, stop and do the rule instead.
   code, not the intended behavior).
 - "I'll just start coding, the brainstorm/plan is obvious" -> LAW 13 (every
   change starts with brainstorming; bug -> RED, feature -> writing-plans).
+- "The fixture is right there in my home dir, I'll just point the test at
+  it" -> LAW 14 (machine-independent tests; version it or generate it in a
+  temp dir).
+- "Widen the epsilon / assert is_ok() and move on / compare against a
+  previous run" -> LAW 15 (a test loosened to stay green is a lie).
+- "unsafe impl Send, the compiler is just being strict" -> LAW 16 (write
+  the SAFETY invariant or you have an unaudited thread-safety promise).
+- "sleep 100ms so the other thread finishes first" -> LAW 17 (wait on the
+  condition with a deadline, never on the clock).
+- "let _ = / .ok() and keep going, that error can't really happen" ->
+  LAW 18 (discards carry a written reason; errors that "can't happen" are
+  the ones that do).
 - "I'll just infer it from the name/prefix/id" -> Data Ownership.
 - "I'll read the env var right here, it's simpler" -> Separation of
   Concerns.

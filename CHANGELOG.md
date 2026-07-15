@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.12.0]
+
+### Added
+
+- **dev-rules LAWs 14-18** (issues #9 #10 #12 #13 #14): machine-independent
+  tests (no home-dir paths, never the dev's real config as a fixture); a
+  test loosened to stay green is a lie (tolerance widening, value-free
+  is_ok(), self-comparing goldens, ignore-on-failure -> xfail list);
+  every safety escape carries its written invariant (unsafe // SAFETY:,
+  especially unsafe impl Send/Sync); sleep() is never synchronisation
+  (wait on the condition with a deadline); no swallowed errors (discards
+  carry a reason; low layers return errors, they don't print). Each with
+  rationalization-table and red-flag entries.
+- **Quality-gate hygiene scan** (issues #7 #8 #11 #15):
+  `tools/quality-gate/hygiene/scan.sh`, run by the dispatcher at the
+  target root on every run. Hard violations (exit 1): neutered CI test
+  steps (|| true, continue-on-error, dispatch-only test workflows), dead
+  debt-allowlist entries, TODO(#N) referencing a CLOSED issue, blanket
+  suppression canceling a repo-configured lint threshold. Ubiquitous
+  legacy signals (bare TODOs, unreasoned blanket allows, file-level noqa)
+  are warnings. Findings on stderr only (JSON stays parseable);
+  QG_HYGIENE=0 (runner env) disables. Specified in docs/contract.md;
+  covered by tests/hygiene.bats (11 tests, in CI).
+
 ## [1.11.0]
 
 ### Fixed

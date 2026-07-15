@@ -247,6 +247,36 @@ Exit 3 is the **dispatcher's**, never an individual `<lang>/qg.sh`'s. Consumers
 map: 3 -> "language out of scope", 2 -> tool/setup error, 1 -> regression/
 threshold violated, 0 -> green.
 
+## Hygiene scan (repo-level, dispatcher-run)
+
+After the language gate(s), the dispatcher runs `hygiene/scan.sh` once at
+the target root. It catches repo-level defects no per-language metric
+sees; findings go to STDERR only (`::error`/`::warning` lines), so JSON
+reports stay parseable. A hard violation contributes exit 1 to the
+aggregate verdict.
+
+Hard violations (exit 1):
+
+- A CI test step whose exit code cannot fail the build (`|| true`,
+  `|| exit 0`), `continue-on-error: true` on a workflow that runs tests,
+  or a test workflow with no automatic trigger (`workflow_dispatch` only).
+- A debt-allowlist entry (`*allowlist*`, `*xfail*`, `known_failures*`)
+  pointing at a path that no longer exists.
+- A `TODO(#N)`/`FIXME(#N)` whose issue is CLOSED (resolved via `gh` when
+  available; unresolvable refs are warnings, and a missing `gh` degrades
+  to a warning).
+- A module/crate-wide suppression (`#![allow(lint)]`) of a lint whose
+  threshold the repo's own clippy config sets, or a file-level
+  `/* eslint-disable */` with no rule names in a repo with an eslint
+  config.
+
+Warnings (never fail): bare `TODO`/`FIXME`/`HACK` without a tracker
+reference, blanket suppressions without a configured threshold or an
+adjacent reason, file-level `noqa`.
+
+`QG_HYGIENE=0` disables the scan -- an env supplied by whoever RUNS the
+gate, never a project file (tamper-resistance law applies).
+
 ## React/Vue/etc. do NOT become their own gate
 
 A React, Vue, Svelte, Angular, etc. project = **nodejs project**, covered by

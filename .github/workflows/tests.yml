@@ -55,4 +55,4 @@ jobs:
           echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
       - name: Run bats suites
         working-directory: tools/quality-gate/tests
-        run: bats dispatcher.bats hook-pr.bats python-qg.bats nodejs-qg.bats go-qg.bats
+        run: bats dispatcher.bats hook-pr.bats hygiene.bats python-qg.bats nodejs-qg.bats go-qg.bats
