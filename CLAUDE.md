@@ -128,6 +128,17 @@ repos. Read them before changing anything.
   and doc in lockstep.
 - Hook changes require running `hooks/test/*.sh` (all green) before commit.
 
+### dev skill leaves (`skills/dev/`)
+
+- **`engineering/rules.md` is language-agnostic BY LAW.** It loads for
+  EVERY code session in every language -- a Rust idiom there is a token
+  tax on a Java session. Language-specific shapes (unsafe/SAFETY:, clippy
+  discipline, Go/boost, framework rules) live in their own leaf
+  (`golang/`, `rust/`, ...), routed by the `dev` door table, loaded ONLY
+  when that language is in play. Adding a language-specific rule to
+  rules.md is a defect (1.12.0 -> 1.12.1 incident: Rust idioms in LAWs
+  15/16/18 shipped to every session).
+
 ### skill-rules (`skills/skill-rules/`)
 
 - The discipline skill itself: keep the rationalizations table and red

@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.12.1]
+
+### Fixed
+
+- **Rust idioms leaked into the language-agnostic LAWs.** 1.12.0 put
+  `is_ok()`, `unsafe impl Send/Sync`, `.ok()`/`let _ =` and
+  `CARGO_TARGET_TMPDIR` inside `engineering/rules.md`, which every code
+  session loads regardless of language -- against that file's own law.
+  LAWs 14-18 are now fully language-neutral, and the Rust-specific
+  shapes moved to a new `skills/dev/rust/rules.md` leaf routed by the
+  `dev` door (loaded only for Rust work; zero always-on cost). Rule
+  persisted in CLAUDE.md.
+
 ## [1.12.0]
 
 ### Added
