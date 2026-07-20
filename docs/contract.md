@@ -433,6 +433,34 @@ If `git diff --name-only <base>...HEAD` (+ staged + worktree) matches nothing an
 
 `extra_fast_path_paths` from `.qg.yaml` is added to the regex.
 
+The three-way changed-file union (`committed <base>...HEAD` + staged + worktree)
+is computed once by the shared `lib/changed-files.sh` (`qg_changed_files`),
+sourced by every gate -- the block is no longer copied per gate.
+
+## Diff scoping (rust)
+
+The rust gate does not measure the whole workspace for every touched `.rs`.
+After the fast-path lets a Rust change through, it resolves the affected
+workspace packages -- the packages the changed files belong to (`cargo metadata`
+manifest roots, longest-prefix match) **plus their in-workspace
+reverse-dependents** (BFS over the resolve graph) -- and scopes every cargo
+metric to that set (`-p <pkg> ... --lib --bins --tests`; a separate `--examples`
+pass runs only for the packages the diff actually touched, so an untouched
+crate's platform-specific example never gates the run). Coverage instruments
+only the affected packages, avoiding whole-tree linker OOM.
+
+The baseline is measured on the same set intersected with the packages that
+exist on the base ref (a package the PR adds reads base = 0). The measured scope
+is part of the base-metrics cache key, so a cached full-workspace run is never
+reused for a narrowed run or vice versa.
+
+Full-workspace fallback (measure everything, both sides) triggers on a diff to a
+root-level file that can affect the whole graph -- `Cargo.lock`, root
+`Cargo.toml`, `rust-toolchain`/`rust-toolchain.toml`, `.cargo/config*`, root
+`build.rs` -- or on `--force-full` / `QG_FORCE_FULL=1`. The measured scope is
+reported in the text header and JSON output. Other gates do not scope by diff
+yet; the rust resolver (`rust/lib/scope.sh`) is the reference for adopting it.
+
 ## Baseline
 
 - Without `--baseline-dir`: `git archive <base>` into `/tmp/qg-baseline-<lang>` (cached). A successful extract writes a sentinel file `.qg-baseline-prepared`; the cache is reused only if the sentinel is present. A directory that exists without the sentinel (e.g. `/tmp` pruned, prior run died mid-extract) is treated as stale and re-extracted -- never reused. `--refresh-baseline` forces re-extraction regardless.

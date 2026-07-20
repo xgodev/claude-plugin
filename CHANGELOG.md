@@ -1,5 +1,30 @@
 # Changelog
 
+## [1.15.0]
+
+### Changed
+
+- **Rust quality gate is now diff-scoped (issue #17).** For a touched `.rs`
+  file the gate measured every metric over the entire workspace, twice (PR
+  head + baseline), with `--all-targets` -- tens of minutes on a large
+  native-heavy workspace, coverage OOMing the linker, and untouched crates'
+  platform-specific examples gating unrelated PRs. It now resolves the
+  affected workspace packages (changed packages + their in-workspace
+  reverse-dependents, via `cargo metadata`) and scopes every cargo metric to
+  that set (`-p <pkg> ... --lib --bins --tests`; examples built only for
+  touched packages; coverage instruments only affected packages). The
+  baseline is measured on the same set intersected with the packages that
+  exist on the base ref (an added package reads base = 0), and the measured
+  scope enters the base-metrics cache key so full and narrow runs never
+  contaminate each other. Full-workspace fallback on a root-level diff
+  (`Cargo.lock`, root `Cargo.toml`, `rust-toolchain*`, `.cargo/config*`, root
+  `build.rs`) or `--force-full` / `QG_FORCE_FULL=1`. New `rust/lib/scope.sh`;
+  scope reported in text and JSON output.
+- The three-way changed-file union was copied byte-for-byte into all eight
+  gates; it now lives in a shared `tools/quality-gate/lib/changed-files.sh`
+  (`qg_changed_files`) that every gate sources. No behavior change for the
+  seven non-rust gates.
+
 ## [1.14.1]
 
 ### Fixed
