@@ -13,6 +13,8 @@ set -uo pipefail
 export LC_ALL=C
 
 QG_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../lib/changed-files.sh
+source "$QG_SCRIPT_DIR/../lib/changed-files.sh"
 # shellcheck source=lib/measure.sh
 source "$QG_SCRIPT_DIR/lib/measure.sh"
 # shellcheck source=lib/output.sh
@@ -389,12 +391,7 @@ else
 fi
 
 if [ "$QG_FORCE_FULL_ARG" != "1" ]; then
-  git fetch origin --quiet 2>/dev/null || true
-  committed_files=$(git diff --name-only "$QG_BASE_REF_ARG...HEAD" 2>/dev/null || true)
-  staged_files=$(git diff --cached --name-only 2>/dev/null || true)
-  worktree_files=$(git diff --name-only 2>/dev/null || true)
-  changed_files=$(printf '%s\n%s\n%s\n' "$committed_files" "$staged_files" "$worktree_files" \
-                  | sort -u | sed '/^$/d')
+  changed_files=$(qg_changed_files "$QG_BASE_REF_ARG")
 
   if [ -n "$changed_files" ] && ! echo "$changed_files" | grep -qE "$GO_PATH_RE_EXTRA"; then
     branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "<detached>")
