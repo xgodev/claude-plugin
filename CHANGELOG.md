@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.14.1]
+
+### Fixed
+
+- LAWs 14-18 passed their missing pressure tests (5 subagent scenarios
+  with deadline+authority+sunk-cost pressure; 5/5 complied, no wording
+  change needed). CLAUDE.md gate widened: ANY file under skills/ requires
+  the writing-skills flow, not just SKILL.md (the 1.12.0 loophole).
+
 ## [1.14.0]
 
 ### Added

@@ -70,8 +70,9 @@ repos. Read them before changing anything.
   `hooks/hooks.json`; the SCRIPTS are grouped by area
   (`hooks/quality-gate/`, `hooks/dev-rules/` with its `lib/`), and
   `hooks/test/` covers all of them.
-- **Editing/authoring any `SKILL.md` is gated** on the writing-skills
-  workflow (subagent baseline BEFORE writing). The `skill-rules` skill in
+- **Editing/authoring ANY file under `skills/` is gated** on the writing-skills
+  workflow (subagent baseline BEFORE writing) -- leaves (`rules.md`,
+  `index.md`, references) included, not just `SKILL.md` (1.12.0 loophole). The `skill-rules` skill in
   this very repo defines the portability law every skill here must obey
   (no `/Users/<name>`, no absolute paths to other repos, no pinned
   versions) -- run its pre-publish grep against `skills/` before commit.
