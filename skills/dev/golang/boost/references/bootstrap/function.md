@@ -1,4 +1,4 @@
-**REQUIRED BACKGROUND:** `references/start.md`. For middleware → `references/bootstrap/middleware.md`. For Pub/Sub adapter specifics (incl. ctx-loss workaround) → `references/bootstrap/adapter-pubsub.md`.
+**REQUIRED BACKGROUND:** `references/start.md`. For middleware -> `references/bootstrap/middleware.md`. For Pub/Sub adapter specifics (incl. ctx-loss workaround) -> `references/bootstrap/adapter-pubsub.md`.
 
 ## Iron Law -- handler signature is forced by `function.Handler[T]`
 
@@ -8,13 +8,16 @@ The framework declares (`bootstrap/function/handler.go`):
 type Handler[T any] func(context.Context, cloudevents.Event) (T, error)
 ```
 
-Input is **always** `cloudevents.Event` by value. Instantiate `T = *cloudevents.Event` so the publisher / logger middlewares -- which type-switch on `*event.Event` -- fire correctly.
+Input is **always** `cloudevents.Event` by value. The return must be a pointer or a slice of pointers: `function.New[T]` type-switches on `case []*event.Event, *event.Event:` and returns `errors.New("unsupported handler type")` for anything else (`bootstrap/function/function.go:22-30`). Both legal forms are handled by the logger and publisher middlewares, which fan out the slice case (`middleware/logger/logger.go:51`, `middleware/publisher/publisher.go:29`).
 
 ```go
-// CORRECT
+// CORRECT -- single event
 func handle(ctx context.Context, in cloudevents.Event) (*cloudevents.Event, error)
 
-// WRONG -- return-by-value silently disables publisher middleware
+// CORRECT -- batch
+func handle(ctx context.Context, in cloudevents.Event) ([]*cloudevents.Event, error)
+
+// WRONG -- function.New returns errors.New("unsupported handler type")
 func handle(ctx context.Context, in cloudevents.Event) (cloudevents.Event, error)
 
 // WRONG -- does not compile against function.Handler[*cloudevents.Event]
@@ -46,15 +49,15 @@ func main() {
 }
 ```
 
-The whole chain must agree on `T = *cloudevents.Event`: `function.New[*cloudevents.Event](...)`, `lm.NewAnyErrorMiddleware[*cloudevents.Event]()`, `apubsub.New[*cloudevents.Event](pb)`. Mixing `T` types yields cryptic compile errors at the wiring call.
+The whole chain must agree on one `T` (here `*cloudevents.Event`): `function.New[*cloudevents.Event](...)`, `lm.NewAnyErrorMiddleware[*cloudevents.Event]()`, `apubsub.New[*cloudevents.Event](pb)`. Mixing `T` types yields cryptic compile errors at the wiring call.
 
 ## Red flags
 
 | Red flag | Fix |
 |---|---|
-| Handler returning `cloudevents.Event` (value) | Change return to `*cloudevents.Event` |
+| Handler returning `cloudevents.Event` (value) | Change return to `*cloudevents.Event` (or `[]*cloudevents.Event`) |
 | Handler with input `*cloudevents.Event` (pointer) | Change to value -- framework signature is forced |
-| `function.New[cloudevents.Event](...)` (T = value) | Change to `function.New[*cloudevents.Event](...)` |
-| One middleware in the chain parameterized differently from the rest | Pick `*cloudevents.Event` everywhere |
+| `function.New[cloudevents.Event](...)` (T = value) | Change to `*cloudevents.Event` or `[]*cloudevents.Event` -- anything else is a constructor error |
+| One middleware in the chain parameterized differently from the rest | Pick one `T` and use it everywhere |
 
 **Verification by example:** before claiming a handler signature is correct, grep `bootstrap/function/handler.go` and confirm the actual `Handler[T]` type signature. The framework is the source of truth; this skill can drift.

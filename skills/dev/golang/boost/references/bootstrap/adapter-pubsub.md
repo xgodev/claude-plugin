@@ -50,7 +50,7 @@ if err != nil { log.Fatalf("subscriber options: %v", err) }
 // TODO(boost-upstream): bootstrap/function/adapter/contrib/cloud.google.com/pubsub/v1/helper.go:51
 // hard-codes context.Background(), so fn.Run cannot drain SIGTERM. Bypassing
 // helper here and driving NewSubscriber with a signal-aware ctx + the same
-// recovery → logger → publisher chain. Collapse back to fn.Run once the
+// recovery -> logger -> publisher chain. Collapse back to fn.Run once the
 // helper accepts a ctx parameter (track upstream issue).
 wrp := middleware.NewAnyErrorWrapper[*cloudevents.Event](
     ctx, "bootstrap", rec, lmi, pmi,

@@ -24,7 +24,7 @@ reader, _ := otelfact.NewReader(opts, exp)
 
 `NewMeter(name, ...)` is a convenience over the global MeterProvider once it's set up.
 
-Configure endpoint, headers, compression, batch settings under `boost.factory.otel.*` (override `BOOST_FACTORY_OTEL_*`). Standard OTel env vars (`OTEL_EXPORTER_OTLP_ENDPOINT`, etc.) are honored too via koanf.
+Configure `.endpoint`, `.protocol` (`http`/`grpc`), `.insecure`, `.tls.cert`, `.trace.enabled` / `.metric.enabled` / `.console.enabled`, `.env`, `.version`, `.attributes` and `.export.interval` / `.export.timeout` under `boost.factory.otel.*` (override `BOOST_FACTORY_OTEL_*`). There are no headers or compression keys. Standard OTel env vars (`OTEL_EXPORTER_OTLP_ENDPOINT`, etc.) are honored too via koanf.
 
 ## Red flags
 

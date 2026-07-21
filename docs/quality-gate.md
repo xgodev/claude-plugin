@@ -21,7 +21,7 @@ quality before PR", it:
 1. Picks the per-language image by a root file-sentinel (`Cargo.toml` -> rust,
    `go.mod` -> go, ...).
 2. Runs it: `docker run --rm -v "$PWD:/src" -w /src
-   ghcr.io/xgodev/quality-gate/<lang>:v1 --base <ref> --format json`
+   ghcr.io/xgodev/quality-gate/<lang>:latest --base <ref> --format json`
    (logs bind-mounted to a separate host dir, never into your repo).
 3. Interprets the JSON verdict, reads the per-metric logs, and reports with
    file:line pointers -- and enforces the anti-bypass LAWs (never sets
@@ -38,7 +38,7 @@ is never gated (work-in-progress must stay cheap; CI is the hard gate).
   **fail open** (allow, with a warning) when docker or the image is
   unavailable -- a missing runtime never bricks your git. They never fall back
   to running tools directly.
-- **Pin** the image with `QG_TAG` (default `v1`). **Override** the whole image
+- Default tag `latest`, refreshed each run (`--pull=always`); set `QG_TAG` to a fixed version (e.g. `v1.2.0`) for reproducible verdicts, or override the whole image
   ref with `QG_IMAGE` (e.g. a locally built image while developing the gate).
 - The base ref must be resolvable inside the container; the mounted `.git`
   carries the refs (in CI, `actions/checkout` with `fetch-depth: 0`).

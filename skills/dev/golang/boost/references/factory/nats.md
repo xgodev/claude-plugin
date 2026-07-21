@@ -1,4 +1,4 @@
-**REQUIRED BACKGROUND:** `references/start.md`, `references/wrapper/config.md`. For event-handler integration → `references/bootstrap/adapter-nats.md`.
+**REQUIRED BACKGROUND:** `references/start.md`, `references/wrapper/config.md`. For event-handler integration -> `references/bootstrap/adapter-nats.md`.
 
 ```go
 import natsfact "github.com/xgodev/boost/factory/contrib/nats-io/nats.go/v1"

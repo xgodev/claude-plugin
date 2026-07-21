@@ -1,4 +1,4 @@
-**REQUIRED BACKGROUND:** `references/start.md`, `references/wrapper/config.md`. For typed cache abstraction over multiple backends → `references/wrapper/cache.md`.
+**REQUIRED BACKGROUND:** `references/start.md`, `references/wrapper/config.md`. For typed cache abstraction over multiple backends -> `references/wrapper/cache.md`.
 
 ```go
 import bigcachefact "github.com/xgodev/boost/factory/contrib/allegro/bigcache/v3"

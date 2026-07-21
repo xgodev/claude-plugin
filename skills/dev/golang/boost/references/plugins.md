@@ -17,14 +17,15 @@ This file is the narrower cross-cutting index specifically for observability ven
 | Function chain (whole handler: recovery/logger/publisher) | -- | ✓ | ✓ | `references/bootstrap/otel.md`, `references/bootstrap/prometheus.md` |
 | CloudEvents HTTP adapter (transport layer only, narrower scope than the function chain above) | -- | ✓ | -- | `references/bootstrap/otel.md` (see its "assuming this covers CloudEvents..." red flag) |
 | `extra/middleware` chain (circuit breaker + tracing on hand-built middleware, not `fn.Run`) | ✓ | -- | ✓ (also Hystrix here, a resilience plugin not an observability one) | `references/extra/middleware.md` |
+| `wrapper/publisher` chain (publish path, any driver) | -- | -- | ✓ (`wrapper/publisher/middleware/prometheus.NewAnyErrorMiddleware()`, fx module `fx/modules/wrapper/publisher/middleware/prometheus`) | `references/wrapper/publisher.md` |
 
-No plugin layer exists (verified against source) for: Cassandra, Elasticsearch, Kafka, NATS, Pub/Sub, gocloud.dev Pub/Sub, Goka, CloudEvents (factory-level), Cobra, K8s, FTP, net/http2, Vault, BigQuery, Firestore, BuntDB, MemDB, BigCache, FreeCache, Ants, GCP API/gRPC composition, GraphQL, Zap, Zerolog, Logrus, language(i18n). If the service uses one of these and needs tracing/metrics, instrument it directly at the call site -- there is no boost-provided plugin to activate.
+No **observability** plugin layer exists (verified against source) for: Cassandra, Elasticsearch, Kafka, NATS, Pub/Sub, gocloud.dev Pub/Sub, Goka, CloudEvents (factory-level), Cobra, K8s, FTP, net/http2, Vault, BigQuery, Firestore, BuntDB, MemDB, BigCache, FreeCache, Ants, GCP API/gRPC composition, GraphQL, Zap, Zerolog, Logrus, language(i18n). If the service uses one of these and needs tracing/metrics, instrument it directly at the call site -- there is no boost-provided plugin to activate. Some of them DO ship a non-observability `plugins/` layer (Cassandra and Elasticsearch a `plugins/local/extra/health`, NATS a `plugins/local/{health,log}`) -- that is a health/log plugin, not tracing or metrics.
 
 ## Red flags
 
 | Red flag | Fix |
 |---|---|
 | Wiring OTel for the function chain and assuming every factory (DB, HTTP client, cache) is now traced too | Check this table -- each component needs its own plugin activated separately |
-| Assuming a vendor plugin exists for every factory | Several components (Cassandra, Kafka, NATS, ...) have none -- check the "No plugin layer exists" list before promising instrumentation |
+| Assuming a vendor plugin exists for every factory | Several components (Cassandra, Kafka, NATS, ...) have no OBSERVABILITY plugin (some still ship a health/log one) -- check the "No observability plugin layer exists" list before promising instrumentation |
 | Treating gRPC client and server as having identical plugin coverage | Server has no OTel plugin; client does |
 | Confusing `extra/middleware`'s plugins with a factory's `plugins ...Plugin` | Different plugin systems, same vendor names -- `extra/middleware.md` plugins wrap `AnyErrorMiddleware`, not a factory constructor |

@@ -10,7 +10,7 @@
 | `/livez` (or `/health`) | "Is the process alive?" | Process should be killed and restarted |
 | `/readyz` | "Should I receive traffic right now?" | A downstream is unhealthy; don't pull this pod from rotation, just stop sending requests |
 
-Cascading failure mode to avoid: a transient downstream blip flips `/health` to 500, Kubernetes kills the pod, the new pod hits the same downstream, gets killed, replicas churn → total outage from a recoverable hiccup. Liveness probes must NOT depend on downstream state.
+Cascading failure mode to avoid: a transient downstream blip flips `/health` to 500, Kubernetes kills the pod, the new pod hits the same downstream, gets killed, replicas churn -> total outage from a recoverable hiccup. Liveness probes must NOT depend on downstream state.
 
 ## Registering a checker
 
@@ -58,7 +58,15 @@ health.Add(health.NewHealthChecker(
 
 ## Wiring the endpoint
 
-Registration alone doesn't serve anything -- attach `restresponse.NewHealth` to a route:
+**On Echo, boost already ships the route.** `factory/contrib/labstack/echo/v4/plugins/local/extra/health` registers it itself (`server.GET(healthRoute, handler)`, the handler calling `restresponse.NewHealth(ctx)`). Config keys are added by its `init()`: `<echo plugins root>.health.enabled` (default `true`) and `.route` (default `/health`). So with that plugin wired, registration alone DOES serve -- a single `/health` is boost's shipped default, and you get it without writing a route:
+
+```go
+import h "github.com/xgodev/boost/factory/contrib/labstack/echo/v4/plugins/local/extra/health"
+
+srv, _ := echo.NewServer(ctx, h.Register) // enabled/route come from config
+```
+
+Everywhere else (gRPC, a bare listener, or when you want split probes), attach `restresponse.NewHealth` to a route yourself:
 
 ```go
 srv.GET("/readyz", func(c echo.Context) error {
@@ -80,7 +88,7 @@ srv.GET("/readyz", func(c echo.Context) error {
 | Red flag | Fix |
 |---|---|
 | Liveness probe runs downstream checks (DB, Redis, Pub/Sub) | Move downstream checks to readiness; liveness stays static |
-| Single `/health` endpoint serving both probes | Split into `/livez` (static) and `/readyz` (`health.CheckAll` via `restresponse.NewHealth`) |
+| Single `/health` endpoint serving both probes -- note this is boost's shipped Echo DEFAULT (the `plugins/local/extra/health` route, `.enabled` true, `.route` `/health`), so it is what you inherit unless you act | If the deployment uses both a liveness and a readiness probe, add `/livez` (static) and point readiness at the `health.CheckAll`-backed route; keeping the single `/health` is only safe when nothing kills the pod on it |
 | Checker without a context timeout | Wrap with `context.WithTimeout(ctx, 2*time.Second)` inside `Check` |
 | Calling `health.CheckAll` directly and hand-rolling the status code | Use `restresponse.NewHealth(ctx)` -- it already derives 200/207/503 |
 | Inventing `NewDBChecker`/`NewRedisChecker`/`NewPubSubChecker` helpers | They don't exist -- implement `Checker` yourself and wrap with `health.NewHealthChecker(...)` |

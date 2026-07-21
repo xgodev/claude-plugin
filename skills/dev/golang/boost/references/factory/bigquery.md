@@ -8,7 +8,7 @@ if err != nil { log.Fatalf("bigquery: %v", err) }
 defer client.Close()
 ```
 
-Configure under `boost.factory.gcp.bigquery.*`. The factory composes nested `boost.factory.gcp.bigquery.apiOptions.*` (GCP credentials, endpoint) and `boost.factory.gcp.bigquery.grpcOptions.*` (keepalive, retries, message size). Override individually:
+Configure under `boost.factory.gcp.bigquery.*`. The factory composes nested `boost.factory.gcp.bigquery.apiOptions.*` (GCP credentials, endpoint) and `boost.factory.gcp.bigquery.grpcOptions.*` (`tls.*`, `initialWindowSize`, `initialConnWindowSize`, `hostOverwrite`, `connectParams.backoff.*`, `connectParams.minConnectTimeout`, `keepalive.*` -- no retry or message-size keys). Override individually:
 
 ```
 BOOST_FACTORY_GCP_BIGQUERY_APIOPTIONS_PROJECTID=my-project

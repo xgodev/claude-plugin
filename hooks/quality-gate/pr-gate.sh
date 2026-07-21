@@ -56,7 +56,7 @@ elif ls "$root"/*.html "$root"/*.css >/dev/null 2>&1; then lang=web
 fi
 [ -z "$lang" ] && exit 0   # no supported language -> allow
 
-image="${QG_IMAGE:-ghcr.io/xgodev/quality-gate/${lang}:${QG_TAG:-v1}}"
+image="${QG_IMAGE:-ghcr.io/xgodev/quality-gate/${lang}:${QG_TAG:-latest}}"
 
 # --- resolve base ref (upstream -> origin default -> absolute) ------------
 base="$(git -C "$proj" rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null || true)"
@@ -66,7 +66,12 @@ fi
 
 # --- run the gate in the container ----------------------------------------
 logs="$(mktemp -d "${TMPDIR:-/tmp}/qg-hook-XXXXXX")"
-run_gate() { docker run --rm -v "$root:/src" -w /src -v "$logs:/logs" "$image" --log-dir /logs "$@" 2>&1; }
+# QG_PULL (default always): the tag is moving (`latest`), so refresh it every
+# run -- a cached copy would silently gate against a stale gate. A pull failure
+# -> rc 125 -> fail open below. Gate developers testing a locally built image
+# set QG_PULL=never.
+pull="${QG_PULL:-always}"
+run_gate() { docker run --rm "--pull=$pull" -v "$root:/src" -w /src -v "$logs:/logs" "$image" --log-dir /logs "$@" 2>&1; }
 if [ -n "$base" ]; then
   out="$(run_gate --base "$base")"; rc=$?
 else

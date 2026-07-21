@@ -48,6 +48,21 @@ instead of loading a 39-row table every time any factory topic comes up.
 - `references/fx.md` -- fx modules.
 - `references/factory.md` -- database, messaging, HTTP/RPC, observability, cloud/infra domains, each expanding into its own leaves (Echo, Resty, Mongo, Cassandra, Redis, Kafka, AWS, gRPC, OTel, ...).
 
+Two checks guard this skill, and they catch different failures. Pointer
+resolution says nothing about whether a leaf's content is still true:
+
+```bash
+python3 scripts/verify_references.py                       # pointers resolve
+BOOST_SRC=~/src/boost python3 scripts/verify_config_roots.py   # namespaces exist
+```
+
+`verify_config_roots.py` extracts the literal `boost.factory.*` config roots
+from a boost checkout and fails when a leaf documents a namespace matching none
+of them -- the drift that is invisible at runtime, because wrong keys and their
+`BOOST_*` env vars are silently ignored and the service boots on defaults.
+`boost.bootstrap.*` and `boost.wrapper.*` roots are composed at runtime and are
+out of its scope.
+
 Run `python3 scripts/verify_references.py` after editing any reference file --
 it confirms every `references/....md` pointer in `skills/dev/golang/boost/` still
 resolves.

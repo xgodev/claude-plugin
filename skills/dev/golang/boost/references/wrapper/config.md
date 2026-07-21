@@ -17,10 +17,10 @@ func init() {
     // so a Duration registered as 10*time.Second still accepts MYAPP_..="2h".
     config.Add(root+".subject", "default-topic", "downstream subject")       // string
     config.Add(root+".timeout", 10*time.Second, "publish timeout")           // time.Duration
-    config.Add(root+".maxAttempts", 5, "retry budget")                       // int
-    config.Add(root+".sampleRate", 0.01, "trace sampling rate")              // float64
+    config.Add(root+".maxAttempts", 5, "retry budget")                       // int  (env: MYAPP_OUTBOUND_MAX__ATTEMPTS)
+    config.Add(root+".sampleRate", 0.01, "trace sampling rate")              // float64 (env: MYAPP_OUTBOUND_SAMPLE__RATE)
     config.Add(root+".enabled", true, "feature toggle")                      // bool
-    config.Add(root+".regions", []string{"sa-east-1"}, "allowed regions")    // []string (env: comma-separated)
+    config.Add(root+".regions", []string{"sa-east-1"}, "allowed regions")    // []string (NOT overridable by a single env var)
     config.Add(root+".ports", []int{8080, 9090}, "listen ports")             // []int
     config.Add(root+".labels", map[string]string{"team": "cart"}, "tags")    // map[string]string
 }
@@ -32,7 +32,7 @@ n    := config.Int(root + ".maxAttempts")
 regs := config.Strings(root + ".regions")
 ```
 
-Every `config.Add` call shows up in the boot banner and in `boost-config dump`. `os.Getenv` is invisible to both, so operators can't discover what's tunable.
+Every `config.Add` call shows up in the boot config table (`boost.print.config.enabled=true`). `os.Getenv` is invisible to it, so operators can't discover what's tunable.
 
 **Register the default in its native type** (`10*time.Second`, `0.01`, `true`, `[]string{...}`) -- not a stringified form (`"10s"`, `"0.01"`). The native literal self-documents the type and matches the getter; the env override still accepts a readable string because env values are always parsed on read.
 
@@ -67,7 +67,17 @@ The slice getter is `config.Strings` (plural) -- there is no `StringSlice`. For 
 
 ## Env override is automatic
 
-A key registered as `myapp.outbound.subject` is overridden at deploy time by env var `MYAPP_OUTBOUND_SUBJECT` (uppercased, dots → underscores). Framework-layer keys live under `boost.*` (e.g., `boost.factory.echo.port` ← `BOOST_FACTORY_ECHO_PORT`). Application-layer keys can use any namespace.
+The loader derives the key FROM the env var name, with this exact rule (`parseEnv`): first every `__` (double underscore) becomes a hyphen, then the name is split on `_` (each piece becomes one dot-segment), then each segment is lowercased -- and a segment that contains a hyphen is camelCased with a lowercase first letter.
+
+Consequences, in order of how often they bite:
+
+- The var's own casing is irrelevant (everything is lowercased first).
+- A single `_` is a **dot**, never a word separator inside a segment: `MYAPP_OUTBOUND_SUBJECT` -> `myapp.outbound.subject`.
+- A **camelCase key segment needs `__`**: `MYAPP_OUTBOUND_MAX__ATTEMPTS` -> `myapp.outbound.maxAttempts`. `MYAPP_OUTBOUND_MAXATTEMPTS` would yield `myapp.outbound.maxattempts` -- a different key, silently ignored. Each extra `__` adds another hump (`K_CAMEL__CASE__TWO` -> `k.camelCaseTwo`).
+
+Framework-layer keys live under `boost.*` (e.g., `boost.factory.echo.port` <- `BOOST_FACTORY_ECHO_PORT`). Application-layer keys can use any namespace.
+
+A `[]string` (or any slice) key has **no** env form: the value arrives as a plain string, and `config.Strings` only unwraps `[]interface{}` / `[]string`, so a comma-separated env var yields an **empty** slice, not the parsed list. Override slices via a config file, or register a single string and split it yourself.
 
 ## See every config at boot, hide the secrets
 
@@ -75,7 +85,7 @@ Enable the startup config table (`key | default | resolved value`) -- invaluable
 
 ```
 boost.print.config.enabled   = true   # env: BOOST_PRINT_CONFIG_ENABLED=true   (dev / .env only)
-boost.print.config.maxLength = 25      # env: BOOST_PRINT_CONFIG_MAXLENGTH      (truncates long values)
+boost.print.config.maxLength = 25      # env: BOOST_PRINT_CONFIG_MAX__LENGTH    (truncates long values)
 ```
 
 Mark every secret with `config.WithHide()` so its value renders `****` in that table (the boot printer does `if entry.Options.Hide { v = "****" }`):

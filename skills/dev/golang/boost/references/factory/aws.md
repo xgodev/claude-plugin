@@ -47,7 +47,16 @@ Only Datadog has a plugin here (no OTel, no Prometheus):
 
 | Vendor | Import | Usage |
 |---|---|---|
-| Datadog | `.../factory/contrib/aws/aws-sdk-go-v2/v1/plugins/contrib/datadog/dd-trace-go.v1` | `awsfact.NewConfigWithOptions(ctx, opts, dd.NewDatadog(opts).Register)` (constructor returns an error, check it) |
+| Datadog | `.../factory/contrib/aws/aws-sdk-go-v2/v1/plugins/contrib/datadog/dd-trace-go.v1` | two steps -- `NewDatadog` returns `(*Datadog, error)` so it cannot be chained, and it takes `awstrace.Option`s, not boost `*Options` |
+
+```go
+ddPlugin, err := dd.NewDatadog()          // optional awstrace.Option...
+if err != nil { log.Fatalf("datadog: %v", err) }
+
+cfg, err := awsfact.NewConfig(ctx, ddPlugin.Register)
+```
+
+`ddPlugin.Register` matches the factory's `Plugin` type (`func(context.Context, *aws.Config) error`). The package also exposes a package-level `dd.Register` with default options, usable directly as a plugin.
 
 ## Umbrella SDK layout (factory side only)
 

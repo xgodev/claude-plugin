@@ -9,7 +9,7 @@ import "github.com/xgodev/boost/factory/contrib/go-resty/resty/v2"
 
 func init() {
     resty.ConfigAdd("boost.factory.resty.customer")
-    resty.ConfigAdd("boost.factory.resty.janis")
+    resty.ConfigAdd("boost.factory.resty.pricing")
 }
 
 func main() {
@@ -19,14 +19,14 @@ func main() {
     customerHTTP, err := resty.NewClientWithConfigPath(ctx, "boost.factory.resty.customer")
     if err != nil { log.Fatalf("customer http: %v", err) }
 
-    janisHTTP, err := resty.NewClientWithConfigPath(ctx, "boost.factory.resty.janis")
-    if err != nil { log.Fatalf("janis http: %v", err) }
+    pricingHTTP, err := resty.NewClientWithConfigPath(ctx, "boost.factory.resty.pricing")
+    if err != nil { log.Fatalf("pricing http: %v", err) }
 
     // ... pass into your domain services ...
 }
 ```
 
-Each upstream gets its own config root, registered in `init()` via `resty.ConfigAdd("boost.factory.resty.<target>")`. The boot banner then enumerates timeouts, retries, base URL, etc., per target. Operators override via `BOOST_FACTORY_RESTY_CUSTOMER_*` / `BOOST_FACTORY_RESTY_JANIS_*`.
+Each upstream gets its own config root, registered in `init()` via `resty.ConfigAdd("boost.factory.resty.<target>")`. The boot banner then enumerates timeouts, host, transport knobs, etc., per target. Operators override via `BOOST_FACTORY_RESTY_CUSTOMER_*` / `BOOST_FACTORY_RESTY_PRICING_*`.
 
 ## Per-target tunables (under each `boost.factory.resty.<target>` root)
 
@@ -34,10 +34,13 @@ Standard knobs registered automatically:
 
 | Key suffix | What |
 |---|---|
-| `.baseURL` | Base URL for every request |
-| `.timeout` | Per-request timeout (`time.Duration`) |
-| `.retryCount` | Retry budget |
-| `.retryWaitTime` | Base backoff between retries |
+| `.host` | Base URL for every request (default `http://localhost`) |
+| `.requestTimeout` | Per-request timeout (default `2s`) |
+| `.connectionTimeout` | Connection timeout (default `3m`) |
+| `.accept` / `.headers` / `.queryParams` / `.authorization` | Default request shape |
+| `.transport.*` | Idle conns, keep-alives, TLS handshake timeout, HTTP/2 |
+
+Retry is NOT core config -- it is the `plugins/extra/retry` plugin, with its own config root.
 
 Application-specific extras (auth header, client ID, etc.) typically live in your own service config, not `boost.factory.resty.*` -- pass them explicitly to your client constructor.
 
@@ -65,5 +68,5 @@ The constructors also accept `plugins ...Plugin` -- if the service uses one of t
 | `resty.New()` directly from the upstream SDK | Use `resty.NewClientWithConfigPath(ctx, "boost.factory.resty.<target>")` |
 | Single `resty.NewClient` shared across multiple upstreams | One client per upstream, each with its own config root |
 | Config root not registered via `resty.ConfigAdd` in `init()` | Register so the boot banner discovers the target |
-| Hard-coded base URL or timeout in the client constructor | Tune via `boost.factory.resty.<target>.baseURL` / `.timeout` |
+| Hard-coded base URL or timeout in the client constructor | Tune via `boost.factory.resty.<target>.host` / `.requestTimeout` |
 | Reading API keys / auth headers via `os.Getenv` | Register them as `myapp.<target>.apiKey` via `config.Add` (see `references/wrapper/config.md`) |

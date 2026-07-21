@@ -1,4 +1,4 @@
-**REQUIRED BACKGROUND:** `references/start.md`, `references/wrapper/config.md`. For cache-abstraction usage on top of Redis → `references/wrapper/cache.md`.
+**REQUIRED BACKGROUND:** `references/start.md`, `references/wrapper/config.md`. For cache-abstraction usage on top of Redis -> `references/wrapper/cache.md`.
 
 ## Canonical examples (ship with boost)
 
@@ -34,7 +34,7 @@ Configure under `boost.factory.redis.*` (override `BOOST_FACTORY_REDIS_*`).
 
 Common knobs (same prefix): `...dialTimeout`, `...readTimeout`,
 `...writeTimeout`, `...maxRetries`, `...minRetryBackoff`,
-`...maxRetryBackoff` → `BOOST_FACTORY_REDIS_DIALTIMEOUT`, etc.
+`...maxRetryBackoff` -> `BOOST_FACTORY_REDIS_DIALTIMEOUT`, etc.
 
 The endpoint must be a **resolvable** address from inside the runtime.
 In Kubernetes that's the **Service FQDN**

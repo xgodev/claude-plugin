@@ -7,7 +7,7 @@ vc, err := vaultfact.NewClient(ctx)
 if err != nil { log.Fatalf("vault: %v", err) }
 ```
 
-Configure address, auth method (token, k8s, approle), namespace under `boost.factory.vault.*` (override `BOOST_FACTORY_VAULT_*`).
+Configure under `boost.factory.vault.*` (override `BOOST_FACTORY_VAULT_*`): `.addr`, `.caPath`, `.type` (`TOKEN`/`K8S`/`JWT`, default `TOKEN`), `.token`, and for K8S `.k8s.role` plus `.k8s.jwt.file` / `.k8s.jwt.content`. The client only builds auth for `TOKEN` and `K8S` -- there is no approle and no namespace key.
 
 ## Two `ConfigAdd` entry points
 
@@ -18,16 +18,18 @@ Configure address, auth method (token, k8s, approle), namespace under `boost.fac
 
 Pick the manager when you need cached, periodic refresh; pick the raw client for one-shot reads at startup.
 
-## Pattern: read secrets at startup, inject as boost config
+## Pattern: read secrets at startup, pass them to the factory
+
+`wrapper/config` has no key/value setter (`config.Set` takes a `Provider`, not a path+value), so you cannot inject a secret back into the config tree. Pass it explicitly through the factory's `*WithOptions` constructor instead:
 
 ```go
 vc, _ := vaultfact.NewClient(ctx)
 secret, _ := vc.Read(ctx, "secret/data/myapp/db")
 
-// Inject the password into boost config so downstream factories use it
-config.Set("boost.factory.pgx.password", secret.Data["password"])
+o, _ := pgx.NewOptions()
+o.Password = secret.Data["password"].(string)
 
-db, _ := pgx.NewDB(ctx)   // picks up the injected password
+db, _ := pgx.NewDBWithOptions(ctx, o)
 ```
 
 ## Red flags

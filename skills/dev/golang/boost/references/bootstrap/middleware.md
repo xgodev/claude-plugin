@@ -6,7 +6,7 @@
 ## Canonical chain
 
 ```
-recovery → logger → publisher
+recovery -> logger -> publisher
 ```
 
 ```go
@@ -37,19 +37,21 @@ wrp := middleware.NewAnyErrorWrapper[*cloudevents.Event](ctx, "bootstrap", rec, 
 
 Reordering is a footgun: putting `recovery` innermost means a panic short-circuits before the logger; putting `publisher` outermost means it fires before the handler ran.
 
-## Wrapping errors for deadletter routing
+## Returning errors for deadletter routing
 
-The publisher middleware in deadletter mode matches on the unwrapped error type name:
+In deadletter mode the publisher middleware walks the error chain with `stderrors.Unwrap` and matches each link's `%T` name against the configured list (`middleware/publisher/publisher.go:99-113`). There is exactly ONE deadletter subject (`...publisher.deadletter.subject`, `middleware/publisher/config.go:14`, applied at `publisher.go:53,65`) -- not a topic per error type. The default matched list is `[]string{"internal"}` (`config.go:21`), so `Internalf` is the default deadletter class and `NotValidf` is not routed unless you add `"notvalid"` to `...publisher.deadletter.errors`.
+
+Return the typed error **directly**:
 
 ```go
-// Routed to a "notvalid" deadletter topic; not retried
-return nil, bootsterrors.Wrap(err, bootsterrors.NotValidf("invalid event data"))
+// Matched by the default list -> published to the deadletter subject
+return nil, bootsterrors.Internalf("downstream call failed")
 
-// Routed to retry / alerting; transient
-return nil, bootsterrors.Wrap(err, bootsterrors.Internalf("downstream call failed"))
+// Not in the default list -> propagated to the caller, not published
+return nil, bootsterrors.NotValidf("invalid event data")
 ```
 
-`fmt.Errorf("%w", err)` defeats this -- the matcher cannot recover the type name. Always use `bootsterrors.Wrap` (see `references/model-errors.md`).
+Do NOT use `bootsterrors.Wrap(err, bootsterrors.Internalf(...))`: `Wrap` stores the typed error in `cause` and sets `previous` to the other error (`model/errors/functions.go:130-137`), while `(*Err).Unwrap()` returns `previous` (`model/errors/error.go:101-103`). The typed error is never reachable from the chain the matcher walks. `fmt.Errorf("%w", err)` is fine -- `stderrors.Unwrap` traverses it. See `references/model-errors.md`.
 
 ## `ignore_errors` middleware
 
@@ -68,7 +70,7 @@ fn, _ := function.New[*cloudevents.Event](rec, imi, lmi, pmi)
 
 | Red flag | Fix |
 |---|---|
-| Chain ordered `publisher → logger → recovery` (or any permutation that violates outermost=recovery) | Reorder to `recovery → logger → publisher` |
+| Chain ordered `publisher -> logger -> recovery` (or any permutation that violates outermost=recovery) | Reorder to `recovery -> logger -> publisher` |
 | Forgetting `recovery` middleware | Always include it -- production functions die otherwise |
-| `fmt.Errorf("%w", err)` from a handler returned through this chain | `bootsterrors.Wrap(err, bootsterrors.<Type>(...))` |
+| `bootsterrors.Wrap(err, bootsterrors.<Type>(...))` for deadletter routing | Return the typed error directly -- `Wrap` hides it from the matcher |
 | Mixing `T = cloudevents.Event` and `T = *cloudevents.Event` across middlewares | All on `*cloudevents.Event` |

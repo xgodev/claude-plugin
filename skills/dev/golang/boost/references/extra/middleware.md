@@ -42,6 +42,8 @@ These are separate `AnyErrorMiddleware`/`AnyMiddleware`/`ErrorMiddleware` implem
 | Datadog | `.../extra/middleware/plugins/contrib/datadog/dd-trace-go/v1` | `middleware.NewAnyErrorWrapper(ctx, "name", datadog.NewAnyErrorMiddleware(ctx, "span-name", "web"))` |
 | Prometheus | `.../extra/middleware/plugins/contrib/prometheus/client_golang/v1` | `middleware.NewAnyErrorWrapper(ctx, "name", prometheus.NewAnyErrorMiddleware(ctx))` |
 | Fallback (no-op passthrough) | `.../extra/middleware/plugins/native/fallback` | `middleware.NewAnyErrorWrapper(ctx, "name", fallback.NewAnyErrorMiddleware[Result]())` -- a stub middleware that delegates unchanged; useful as a placeholder slot in a chain built conditionally |
+| Log (boost `wrapper/log`) | `.../extra/middleware/plugins/local/wrapper/log` | `log.NewAnyErrorMiddleware[Result](ctx)`; also `log.NewAnyMiddleware[Result](ctx)` and `log.NewErrorMiddleware(ctx)` (not generic) |
+| Cache (boost `wrapper/cache`) | `.../extra/middleware/plugins/local/wrapper/cache` | `cache.NewAnyErrorMiddleware[Result](ctx, manager, opts...)` with `manager *wrappercache.Manager[Result]` and `opts ...wrappercache.OptionSet` (from `wrapper/cache`; alias one of the two `cache` packages at the import site); also `cache.NewAnyMiddleware[Result](ctx, manager, opts...)` |
 
 ## Red flags
 

@@ -41,27 +41,38 @@ repos. Read them before changing anything.
   plugin-dependencies / hooks) before asserting.
 - **Names are contract.** The plugin name `claude-plugin` and the
   marketplace name `xgodev` do not change without a documented
-  migration (README + CHANGELOG + `renames` map in `marketplace.json`).
-  The former plugin names (`golang-boost`, `quality-gate`, `dev-rules`,
-  `skill-rules`) are mapped to `claude-plugin` in `renames` -- do not
-  remove those entries; they migrate old installs.
+  migration (README + CHANGELOG + a `renames` map in `marketplace.json`).
+  The pre-1.0.0 names (`golang-boost`, `quality-gate`, `dev-rules`,
+  `skill-rules`) were mapped to `claude-plugin` via `renames` until
+  1.17.0, when the map was dropped by owner decision -- installs still
+  pinned to one of those names are orphaned and must reinstall
+  `claude-plugin@xgodev` by hand. Do not re-add the map expecting it to
+  rescue them retroactively; if a future rename happens, ship the
+  `renames` entry in the SAME release as the rename.
 - **Single plugin, single manifest.** Do NOT reintroduce per-area
   `plugin.json`s, per-area marketplaces, or `dependencies` between the
   bundled areas. Everything ships together. EXTERNAL dependencies are
-  allowed; pick the resolution by where the plugin canonically lives:
-  if it is in `claude-plugins-official` (preconfigured for every user),
-  use the cross-marketplace form
-  (`{"name": X, "marketplace": "claude-plugins-official"}` +
-  `allowCrossMarketplaceDependenciesOn`) -- NEVER re-list an
-  official-marketplace plugin in the `xgodev` marketplace, that
-  DUPLICATES it for users who already have the official install
-  (superpowers 1.1.1 incident). Only list a plugin in the `xgodev`
-  marketplace with a GitHub source when it is NOT in the official
-  marketplace. ALWAYS smoke-test an install from a temp project before
-  pushing a dependency change: a dependency with an invalid upstream
-  manifest fails the WHOLE claude-plugin install. Today the only
-  external dependency is `superpowers` (official marketplace); design
-  content ships in the bundled `ux-ui` skill.
+  allowed, ALWAYS as a cross-marketplace dependency
+  (`{"name": X, "marketplace": Y}` in `plugin.json` + `Y` listed in
+  `allowCrossMarketplaceDependenciesOn`) -- NEVER by re-listing the
+  upstream plugin in the `xgodev` marketplace, which DUPLICATES it for
+  users who already have the upstream install (superpowers 1.1.1
+  incident). Two consequences to respect:
+  (1) **A dependency from a marketplace the user has not added leaves
+  `claude-plugin` DISABLED** until they run
+  `claude plugin marketplace add <owner/repo>` -- so every non-official
+  marketplace we depend on MUST be named, with that exact command, in
+  the README install section.
+  (2) **Only pin a `version` when the upstream tags releases** as
+  `{plugin-name}--v{version}`; an untagged upstream resolves to
+  `no-matching-tag` and disables the plugin, so those dependencies stay
+  bare (tracking the upstream marketplace's latest).
+  ALWAYS smoke-test an install from a temp project before pushing a
+  dependency change: a dependency with an invalid upstream manifest fails
+  the WHOLE claude-plugin install. Today the external dependencies are
+  `superpowers` (`claude-plugins-official`) and `code-craftsmanship` +
+  `systems-architecture` (`wondelai-skills`, untagged -- bare, no version
+  constraint); design content ships in the bundled `ux-ui` skill.
 - **Hooks live in `hooks/hooks.json` ONLY (auto-discovered).** Never also
   declare `"hooks"` in `plugin.json` -- the manifest key is only for
   ADDITIONAL non-standard files, and double registration breaks the whole
@@ -91,6 +102,21 @@ repos. Read them before changing anything.
   `skills/dev/golang/boost/index.md` for a new component), with a version bump.
 - Run `python3 scripts/verify_references.py` after editing any reference
   file -- every `references/*.md` pointer must resolve.
+- **Run `BOOST_SRC=<boost checkout> python3 scripts/verify_config_roots.py`
+  too.** It extracts the literal `boost.factory.*` config roots from a boost
+  checkout and fails when the skill documents a namespace that matches none of
+  them. This exists because the drift is INVISIBLE at runtime: a wrong
+  namespace means the keys and their `BOOST_*` env vars are silently ignored,
+  the service boots on defaults, and nothing errors -- six leaves shipped that
+  way (`kafka`->`confluent`, `ftp`->`jlaffaye`, ...) until the 1.17.0 audit.
+  Only `boost.factory.*` is covered; `boost.bootstrap.*` and `boost.wrapper.*`
+  roots are composed at runtime and still need a human against the source.
+- **A claim about boost is only as good as the source line behind it.** Every
+  signature, config key, default, and behavioral statement in a reference file
+  must be verifiable in `xgodev/boost` at the version the skill targets --
+  routing tests do NOT catch a leaf that routes perfectly and teaches a
+  constructor that no longer exists. When editing a leaf, cite the source
+  file:line you checked in the commit message.
 
 ### Quality Gate (`skills/dev/engineering/gate.md`, `hooks/quality-gate/`)
 
@@ -102,7 +128,7 @@ repos. Read them before changing anything.
   workflow all belong to the gate repo now.
 - **What this plugin owns:** the `gate.md` skill (picks the per-language
   image by root sentinel, runs `docker run -v "$PWD:/src" -w /src
-  ghcr.io/xgodev/quality-gate/<lang>:v1 --format json`, interprets the JSON,
+  ghcr.io/xgodev/quality-gate/<lang>:latest --format json`, interprets the JSON,
   enforces the anti-bypass LAWs) and the `hooks/quality-gate/pr-gate.sh`
   PreToolUse hook (same docker run before `gh pr create`). Neither embeds any
   gate logic -- detection, measurement, tamper-resistance, and rulesets are
@@ -110,7 +136,7 @@ repos. Read them before changing anything.
 - **`docker` is a runtime prerequisite.** Both the skill and the hook fail
   OPEN when docker or the image is unavailable (a missing runtime must never
   brick the user's git); they never fall back to running tools directly.
-- **Pin with `QG_TAG` (default `v1`); override the whole ref with `QG_IMAGE`**
+- **Default tag `latest`, refreshed each run via `--pull=always`; set `QG_TAG` to a fixed version for reproducibility, or override the whole ref with `QG_IMAGE`**
   (local gate development). The skill/hook read the gate's JSON contract and
   exit codes only -- the contract's source of truth is
   `xgodev/quality-gate/docs/`.
@@ -151,7 +177,7 @@ repos. Read them before changing anything.
   silently stops).
 - Declaring `hooks` in `plugin.json` (breaks the whole plugin).
 - Reintroducing per-area plugins/marketplaces or cross-marketplace
-  dependencies -- retired in 1.0.0; the `renames` map replaced them.
+  dependencies -- retired in 1.0.0.
 - Putting USER-FACING skills in `.claude/skills/` (project-local, not
   distributed); shipped plugin skills live in `skills/<name>/SKILL.md`.
 - Any Portuguese string (run a language sweep before push).

@@ -23,7 +23,7 @@ func main() {
 }
 ```
 
-`logrus.NewLogger(hooks ...lg.Hook) log.Logger` is the one factory entrypoint that takes arguments -- pass native `logrus.Hook` values for sinks the config tree doesn't model (Sentry, etc.). The formatter is chosen at construction time from `FormatterType()` (`boost.factory.logrus.formatterType`): `CLOUDWATCH` → `formatter/cloudwatch`, `JSON` → `formatter/json`, anything else → `formatter/text`. `log.Set` must come **after** `boost.Start()`.
+`logrus.NewLogger(hooks ...lg.Hook) log.Logger` is the one factory entrypoint that takes arguments -- pass native `logrus.Hook` values for sinks the config tree doesn't model (Sentry, etc.). The formatter is chosen at construction time from `FormatterType()` (`boost.factory.logrus.formatterType`): `CLOUDWATCH` -> `formatter/cloudwatch`, `JSON` -> `formatter/json`, anything else -> `formatter/text`. `log.Set` must come **after** `boost.Start()`.
 
 ## Config tree -- `boost.factory.logrus` (cited from `factory/contrib/sirupsen/logrus/v1/config.go`)
 

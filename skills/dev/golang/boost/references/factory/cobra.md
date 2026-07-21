@@ -1,4 +1,4 @@
-**REQUIRED BACKGROUND:** `references/start.md`. For event-driven function CLI shape (`fn.Run` uses cobra internally) → `references/bootstrap/function.md`.
+**REQUIRED BACKGROUND:** `references/start.md`. For event-driven function CLI shape (`fn.Run` uses cobra internally) -> `references/bootstrap/function.md`.
 
 ```go
 import cobrafact "github.com/xgodev/boost/factory/contrib/spf13/cobra/v1"
@@ -8,11 +8,12 @@ root := &co.Command{Use: "myapp"}
 sync := &co.Command{Use: "sync", RunE: runSync}
 backfill := &co.Command{Use: "backfill", RunE: runBackfill}
 
-cmd := cobrafact.NewCommand(root, sync, backfill)
-cmd.Execute()
+err := cobrafact.Run(root, sync, backfill)
 ```
 
-`NewCommand(root, subcommands...)` wires boost-aware defaults (config flag, version flag, structured logging) onto the root before attaching subcommands.
+`Run(root, subcommands...)` (and `RunContext(ctx, root, subcommands...)`) is what wires boost in: it attaches the subcommands, turns every registered boost config entry into a persistent flag, adds the `--conf` flag for config file paths, and then calls `Execute()` / `ExecuteContext(ctx)`.
+
+`NewCommand(root, subcommands...)` only calls `root.AddCommand(subcommands...)` and returns the root -- no boost wiring. Using `NewCommand(...)` + `cmd.Execute()` loses the config flags.
 
 ## When to use vs when to skip
 
@@ -22,6 +23,7 @@ Use cobra when the binary genuinely has multiple modes (sync, backfill, migrate,
 
 | Red flag | Fix |
 |---|---|
-| Hand-rolling cobra with no boost integration | `cobrafact.NewCommand(root, ...)` |
+| Hand-rolling cobra with no boost integration | `cobrafact.Run(root, ...)` |
+| `cobrafact.NewCommand(root, ...)` + `cmd.Execute()` | Only adds subcommands -- use `cobrafact.Run` / `RunContext` to get the config flags |
 | Defining subcommands inside `init()` of multiple files | Compose them in `main`, not via package-init side effects |
 | Reading flags via `os.Args` directly | Use cobra's `cmd.Flags()` |

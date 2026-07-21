@@ -1,11 +1,10 @@
-**REQUIRED BACKGROUND:** `references/start.md`, `references/wrapper/config.md`. For raw Kafka producer/consumer → `references/factory/kafka.md`.
+**REQUIRED BACKGROUND:** `references/start.md`, `references/wrapper/config.md`. For raw Kafka producer/consumer -> `references/factory/kafka.md`.
 
 ```go
 import gokafact "github.com/xgodev/boost/factory/contrib/lovoo/goka/v1"
 
 emitter, err := gokafact.NewEmitter(ctx)
 if err != nil { log.Fatalf("goka: %v", err) }
-defer emitter.Finish()
 ```
 
 Configure brokers, stream name, codec under `boost.factory.goka.*` (override `BOOST_FACTORY_GOKA_*`).
@@ -22,4 +21,4 @@ The publisher driver `wrapper/publisher/driver/contrib/lovoo/goka/v1` (see `refe
 |---|---|
 | `goka.NewEmitter(...)` directly | `gokafact.NewEmitter(ctx)` |
 | Brokers via `os.Getenv` | `BOOST_FACTORY_GOKA_*` |
-| Forgetting `emitter.Finish()` on shutdown | Add it -- flushes pending writes |
+| Fire-and-forget `Emit` when the write must be durable before returning | Use `EmitSync` / `EmitSyncWithHeaders` |

@@ -2,12 +2,12 @@
 
 ## What it provides
 
-Shared GCP API options (credentials JSON, endpoint URL, user-agent) registered under `boost.factory.gcp.api.*` and composed by every concrete GCP factory at `<root>.apiOptions.*`. You rarely import this skill's package directly -- you configure its keys instead.
+Shared GCP API options (credentials JSON, endpoint URL, user-agent). The package registers nothing on its own -- it only exports `ConfigAdd(path)`, which each concrete GCP factory calls at `<service-root>.apiOptions` (e.g. `boost.factory.gcp.pubsub.apiOptions`). There is no `boost.factory.gcp.api.*` root and no inheritance. You rarely import this package directly -- you configure the per-service keys instead.
 
 ## Tunables
 
-- `apiOptions.projectID` -- GCP project
-- `apiOptions.credentialsJSON` / `apiOptions.credentialsFile` -- service-account override
+- `apiOptions.projectId` -- GCP project
+- `apiOptions.credentials.json` / `apiOptions.credentials.file` -- service-account override
 - `apiOptions.endpoint` -- emulator URL (e.g., `localhost:8085` for the Pub/Sub emulator) or private endpoint
 - `apiOptions.userAgent` -- header used in API calls
 
@@ -21,6 +21,6 @@ BOOST_FACTORY_GCP_BIGQUERY_APIOPTIONS_ENDPOINT=localhost:9050
 
 | Red flag | Fix |
 |---|---|
-| Setting GCP credentials at the cloud-google service factory level when multiple services share them | Set under `boost.factory.gcp.api.*` once; service factories inherit |
+| Expecting a shared `boost.factory.gcp.api.*` root that service factories inherit | No such root exists -- set the keys on each service's own `<service-root>.apiOptions.*` |
 | Pointing one env var at all GCP services when only one needs an emulator | Use the per-service `apiOptions.endpoint` override |
 | Hardcoded service-account JSON in the repo | Provide via Vault (`references/factory/vault.md`) or workload identity |

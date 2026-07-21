@@ -1,4 +1,4 @@
-**REQUIRED BACKGROUND:** `references/start.md`, `references/wrapper/config.md`. Layout/trio convention → `references/CONTRIBUTING.md`.
+**REQUIRED BACKGROUND:** `references/start.md`, `references/wrapper/config.md`. Layout/trio convention -> `references/CONTRIBUTING.md`.
 
 ```go
 import buntdb "github.com/xgodev/boost/factory/contrib/tidwall/buntdb/v1"

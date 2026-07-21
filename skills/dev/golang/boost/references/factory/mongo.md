@@ -18,7 +18,7 @@ import mongofact "github.com/xgodev/boost/factory/contrib/go.mongodb.org/mongo-d
 
 conn, err := mongofact.NewConn(ctx)
 if err != nil { log.Fatalf("mongo: %v", err) }
-defer conn.Close(ctx)
+// use conn.Client (*mongo.Client) and conn.Database (*mongo.Database)
 ```
 
 Configure via `boost.factory.mongo.*` (override `BOOST_FACTORY_MONGO_*`). Multi-database: `mongofact.ConfigAdd("boost.factory.mongo.<name>")` per logical DB + `NewConnWithConfigPath`.
@@ -39,4 +39,4 @@ Same plugin set on both v1 and v2 (swap the import's version segment):
 |---|---|
 | `mongo.Connect(ctx, ...)` directly from upstream SDK | `mongofact.NewConn(ctx)` |
 | URI via `os.Getenv` | `BOOST_FACTORY_MONGO_*` |
-| Forgetting `defer conn.Close(ctx)` | Add it |
+| `defer conn.Close(ctx)` | `*Conn` has no `Close` -- it exposes `ClientOptions`, `Client`, `Database`, `Options`, `Plugins` only |

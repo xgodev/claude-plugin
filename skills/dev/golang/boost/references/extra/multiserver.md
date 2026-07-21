@@ -56,11 +56,13 @@ multiserver.Serve(ctx, &echoServer{echo: e, addr: ":8080"}, &grpcServer{server: 
 ## Check and Shutdown
 
 ```go
-func Check(ctx context.Context) error     // nil if every registered server reports Ok; else a ServiceUnavailable error
+func Check(ctx context.Context) error     // nil if every registered server reports Ok; else a ServiceUnavailable error; PANICS if none are registered
 func Shutdown(ctx context.Context)        // calls Shutdown(ctx) on every registered server; panics if none are configured
 ```
 
 `Check` is what you'd wire into a readiness checker (see `references/extra/health.md`) to fail readiness if one of the multiplexed servers went down without crashing the process.
+
+**`Check` panics with `no servers configured` when the registry is empty** -- the registry is only populated by `Serve`. A readiness probe that lands before `Serve` runs (startup race, or a health endpoint served by a different listener) panics the process instead of returning 503. Register the multiserver checker only after `Serve` has started, or guard the checker so it reports unhealthy rather than calling `Check` on an empty registry.
 
 ## Red flags
 

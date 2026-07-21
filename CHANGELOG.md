@@ -1,5 +1,136 @@
 # Changelog
 
+## [1.17.0]
+
+### Added
+
+- **`scripts/verify_config_roots.py` -- a gate against the defect class above.**
+  It extracts the literal `boost.factory.*` config roots from a boost checkout
+  (`BOOST_SRC=...`) and fails when the skill documents a namespace matching
+  none of them. Namespace drift is invisible at runtime and survives every
+  routing test, so it needed a mechanical check rather than discipline.
+  `scripts/config_roots_allowlist.txt` records the namespaces a leaf mentions
+  precisely to say they do NOT exist, each with its justification -- a checker
+  that fails on correct docs is a checker somebody switches off. Scope is
+  deliberately `boost.factory.*` only: `boost.bootstrap.*` and
+  `boost.wrapper.*` roots are composed at runtime, and faking coverage there
+  would produce the false positives that kill a gate.
+
+### Fixed
+
+- **Veracity sweep of the whole boost skill against `xgodev/boost` -- ~68
+  defects corrected.** The skill had never been verified against the framework
+  it documents; routing tests cannot catch a leaf that routes perfectly and
+  then teaches a constructor that no longer exists. Five independent audits
+  (one per family) checked every import path, signature, config key, default
+  and behavioral claim against a boost checkout, and a second, separate agent
+  per family re-verified each finding before applying the fix. Highlights:
+  - **Config namespace drift, silent at runtime** -- the skill documented the
+    friendly vendor name where boost declares the module name:
+    `boost.factory.kafka` -> `.confluent`, `.ftp` -> `.jlaffaye`,
+    `.gocloud.pubsub` -> `.gocloud`, `.golang.x.net.http2.server` ->
+    `.http2.server`, plus `boost.factory.gcp.api`/`.gcp.grpc`, which are not
+    roots at all (those keys live at `<service-root>.apiOptions`/`.grpcOptions`).
+    Wrong keys and their `BOOST_*` env vars are ignored without error, so the
+    service boots on defaults and nothing complains.
+  - **The env-var rule itself was wrong**, which invalidated camelCase examples
+    throughout: the koanf loader lowercases each `_`-separated segment and needs
+    `__` to mark camelCase, so `BOOST_PRINT_CONFIG_MAXLENGTH` never overrode
+    `maxLength` (correct form: `..._MAX__LENGTH`).
+  - **Deadletter routing was documented inverted** -- `Internal` is the default
+    deadletter class (allowlist `[]string{"internal"}`), not `NotValid`; there
+    is one subject, not per-type topics; and the prescribed `errors.Wrap`
+    recipe made the matcher never fire, because `Unwrap()` returns `previous`
+    while `Wrap` stores the typed error in `cause`.
+  - **`wrapper/cache.md` did not compile at all** -- wrong driver constructor,
+    wrong `NewManager` signature, a TTL argument `Set` does not take, `Get`
+    documented with two return values instead of three, and a
+    `cache.ErrNotFound` symbol that does not exist.
+  - **Nonexistent symbols** in examples and red flags: `multiserver.New`/
+    `WithServer`/`Run`, `emitter.Finish`, `srv.GracefulStop`, `fxfact.New`,
+    `conn.Close`, `config.Set(key, value)`, and `.Register` used as a method
+    value where the plugin interface takes the value itself.
+  - **`start.md`** claimed config getters return zero values before `Start`
+    (they panic), that the log backend is config-selected (it is always
+    zerolog), and that the banner and config dump are default behavior (both
+    opt-in, default false).
+  - **`fx/modules.md`** taught hand-rolling modules that boost already ships --
+    34 of them, including the exact example the file wrote by hand.
+  - `NotValid` maps to HTTP 400, not 422.
+  What held up: every import path incl. version segments, the full
+  observability coverage matrix, and `echo`/`zap`/`zerolog`/`logrus`/`nats`/
+  `pubsub`/`graphql`/`redis`/`elasticsearch`/`cassandra`/`language`.
+- **Proprietary name removed from the public repo.** A client product name was
+  used as the example upstream in `factory/resty.md` and `factory/hystrix.md`,
+  present since 1.0.0; replaced with neutral names. It remains in git history.
+- **`factory/database.md` now routes category requests, not just product
+  names.** The table listed 12 storage components as bare vendor names with
+  no data model, so a request phrased as a category ("a document database",
+  "an embedded key-value store") was unroutable. Measured with cold
+  subagents navigating from the `dev` door with grep/glob disabled: before,
+  a document-database request landed on Mongo purely from the agent's own
+  product knowledge ("the tables do NOT let me identify which components
+  are document-oriented"), and an embedded-key-value request produced a
+  4-way tie (BuntDB/MemDB/BigCache/FreeCache) the agent itself called
+  guessing. Added a "Data model / role" column plus an instruction to route
+  by it; both cases now resolve from the table's own text. Product-name
+  routing ("quero usar BuntDB") was already correct -- verified 4/4
+  unchanged (BuntDB, Goka, Vault, FreeCache) -- and the root `index.md`
+  verified 6/6, so neither was rewritten.
+
+### Changed
+
+- **BREAKING: the `renames` map was removed from `marketplace.json`.**
+  The pre-1.0.0 plugin names (`golang-boost`, `quality-gate`,
+  `dev-rules`, `skill-rules`) no longer migrate to `claude-plugin`. Any
+  install still pinned to one of those names stops resolving and receives
+  no further updates; recover with
+  `/plugin install claude-plugin@xgodev`. Re-adding the map later does
+  not restore those installs retroactively.
+- `CLAUDE.md` external-dependency law rewritten: cross-marketplace is now
+  the form for ALL external dependencies (not only official-marketplace
+  ones), with the two rules learned here -- name every non-official
+  marketplace in the README install section, and only pin a `version`
+  when the upstream tags releases.
+- **Gate image default tag is now `latest`, force-pulled every run.** The
+  skill and PR-gate hook defaulted to `:v1`, which the gate repo does not
+  publish yet (only `:latest`, on main pushes), so the pull silently failed
+  and enforcement stayed off. Default is now `ghcr.io/xgodev/quality-gate/
+  <lang>:latest` with `docker run --pull=always`, so a moving `latest` is
+  refreshed each run instead of gating against a stale cached copy. Set
+  `QG_TAG` to a fixed version for reproducible verdicts; gate developers
+  testing a locally built `QG_IMAGE` set `QG_PULL=never`.
+- `CLAUDE.md` boost rule now requires verifying a leaf's claims against the
+  boost source (with the file:line in the commit message) and running the new
+  namespace checker -- the 1.17.0 audit found ~68 defects that pointer checks
+  and routing tests had passed over for months.
+
+### Not done, on purpose
+
+- **No dependency on external design/code-quality skills.** Depending on
+  `code-craftsmanship` + `systems-architecture` was implemented, then reverted
+  after measuring it: those two plugins carry 12 skills whose descriptions load
+  in EVERY session, ~2,000 tokens, against the ~304 tokens this whole plugin
+  costs today. A door row pointing at them was also dropped -- a cold subagent
+  invoked `domain-driven-design` on a domain-modeling prompt with no row
+  present, so the row would have been documentation for a problem that does not
+  exist. Install them directly if you want them; nothing here depends on them.
+
+## [1.16.1]
+
+### Added
+
+- **Integration verifier for the consumed gate image.**
+  `scripts/verify-gate-integration.sh` pulls the pinned
+  `ghcr.io/xgodev/quality-gate/<lang>:<tag>` image and runs the plugin's exact
+  `docker run` invocation against a throwaway rust repo, asserting a real
+  verdict -- failing loudly if the image is missing/unpullable or produces no
+  verdict, so the integration cannot silently rot behind the skill/hook
+  fail-open. `.github/workflows/gate-integration.yml` runs it on demand + a
+  daily heartbeat. Surfaced two blockers, tracked in `xgodev/quality-gate#15`:
+  no `:v1` tag is published yet (only `:latest`, on main pushes), and the GHCR
+  package must be made public for unauthenticated consumers.
+
 ## [1.16.0]
 
 ### Changed

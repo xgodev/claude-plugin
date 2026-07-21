@@ -1,6 +1,6 @@
 **REQUIRED BACKGROUND:** `references/start.md`, `references/wrapper/config.md`. Typically composed by `references/factory/echo.md`.
 
-The factory exposes HTTP/2 server-side tunables under `boost.factory.golang.x.net.http2.server.*` (override `BOOST_FACTORY_GOLANG_X_NET_HTTP2_SERVER_*`):
+The factory exposes HTTP/2 server-side tunables under `boost.factory.http2.server.*` (override `BOOST_FACTORY_HTTP2_SERVER_*`):
 
 | Knob | What |
 |---|---|
@@ -24,5 +24,5 @@ Most services don't need this -- Echo's default HTTP/2 wiring is fine. Reach for
 
 | Red flag | Fix |
 |---|---|
-| Patching `http2.Server{}` fields after server start | Configure before via `BOOST_FACTORY_GOLANG_X_NET_HTTP2_SERVER_*` |
+| Patching `http2.Server{}` fields after server start | Configure before via `BOOST_FACTORY_HTTP2_SERVER_*` |
 | Disabling HTTP/2 entirely to avoid tuning | Tune the knobs that hurt; HTTP/2 is the default for good reasons (multiplexing, header compression) |

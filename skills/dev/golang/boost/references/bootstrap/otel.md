@@ -1,4 +1,4 @@
-**REQUIRED BACKGROUND:** `references/bootstrap/function.md`, `references/bootstrap/middleware.md` (canonical `recovery → logger → publisher` chain -- this slots in anywhere, no ordering constraint).
+**REQUIRED BACKGROUND:** `references/bootstrap/function.md`, `references/bootstrap/middleware.md` (canonical `recovery -> logger -> publisher` chain -- this slots in anywhere, no ordering constraint).
 
 ```go
 import om "github.com/xgodev/boost/bootstrap/function/middleware/go.opentelemetry.io/otel/v1"

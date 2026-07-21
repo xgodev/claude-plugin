@@ -10,11 +10,11 @@ import "github.com/xgodev/boost/model/restresponse"
 
 ```go
 type Error struct {
-    HttpStatusCode int
-    ErrorCode      string                 `json:",omitempty"`
-    Message        string
-    Info           string                 `json:",omitempty"`
-    AdditionalInfo []AdditionalInfoError  `json:",omitempty"`
+    HttpStatusCode int                   `json:"httpStatusCode"`
+    ErrorCode      string                `json:"errorCode,omitempty"`
+    Message        string                `json:"message"`
+    Info           string                `json:"info,omitempty"`
+    AdditionalInfo []AdditionalInfoError `json:"additionalInfo,omitempty"`
 }
 
 type AdditionalInfoError struct {
@@ -27,13 +27,13 @@ For request validation failures (HTTP 422), use the constructor instead of build
 
 ```go
 type ValidationError struct {
-    FieldName string
-    Message   string
+    FieldName string `json:"fieldName"`
+    Message   string `json:"message"`
 }
 
 type UnprocessableEntityError struct {
-    Error            // embedded
-    ValidationErrors []ValidationError
+    Error                                  // embedded
+    ValidationErrors []ValidationError     `json:"validationErrors,omitempty"`
 }
 
 func NewUnprocessableEntity(err validator.ValidationErrors) UnprocessableEntityError
@@ -59,15 +59,15 @@ Builds on `extra/health` -- see `references/extra/health.md` for registering che
 func NewHealth(ctx context.Context) (Health, int)   // runs health.CheckAll, returns body + status (200/207/503)
 
 type Health struct {
-    Status  HealthStatus    // Ok | Partial | Down
-    Details []HealthDetail
+    Status  HealthStatus   `json:"status"`             // Ok | Partial | Down
+    Details []HealthDetail `json:"details,omitempty"`
 }
 
 type HealthDetail struct {
-    Status      HealthStatus
-    Name        string
-    Description string
-    Error       string `json:",omitempty"`
+    Status      HealthStatus `json:"status"`
+    Name        string       `json:"name"`
+    Description string       `json:"description,omitempty"`
+    Error       string       `json:"error,omitempty"`
 }
 ```
 
@@ -84,11 +84,11 @@ srv.GET("/readyz", func(c echo.Context) error {
 func NewResourceStatus() ResourceStatusResponse
 
 type ResourceStatusResponse struct {
-    ApplicationName       string
-    ImplementationVersion string
-    ImplementationBuild   string
-    CommitSHA             string
-    BuildDate             string
+    ApplicationName       string `json:"applicationName"`
+    ImplementationVersion string `json:"implementationVersion"`
+    ImplementationBuild   string `json:"implementationBuild"`
+    CommitSHA             string `json:"commitSHA"`
+    BuildDate             string `json:"buildDate"`
 }
 ```
 

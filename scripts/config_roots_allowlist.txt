@@ -1,0 +1,13 @@
+# Namespaces that verify_config_roots.py must NOT flag, with the reason.
+#
+# The checker greps for `boost.factory.*` without understanding context, so a
+# leaf that correctly documents a namespace as NON-EXISTENT looks identical to
+# one that wrongly documents it as real. Every entry here is a namespace the
+# docs mention in order to say it does not exist. Format: `namespace<TAB>reason`.
+#
+# Adding an entry is a claim you verified against the boost source. Do not add
+# one to silence a failure you have not investigated -- that is the exact
+# failure this checker exists to catch.
+
+boost.factory.gcp.api	Not a root. cloud.google.com/api/v0/config.go has no root const and no init(); it only exports ConfigAdd(path), which each GCP factory calls at <service-root>.apiOptions. gcp-api.md names it to state it does not exist.
+boost.factory.gcp.grpc	Not a root. cloud.google.com/grpc/v1/config.go has no root const and no init(); keys land at <service-root>.grpcOptions. gcp-grpc.md names it to state it does not exist.

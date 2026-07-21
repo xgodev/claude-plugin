@@ -13,7 +13,7 @@
 | Function adapter | `bootstrap/function/adapter/contrib/<vendor>/<lib>/v<major>/` |
 | Function middleware | `bootstrap/function/middleware/<name>/` |
 | Factory contrib | `factory/contrib/<vendor>/<lib>/v<major>/` |
-| Echo plugin | `factory/contrib/labstack/echo/v4/plugins/{native,extra,local}/<name>/` |
+| Echo plugin | `factory/contrib/labstack/echo/v4/plugins/{native,contrib,extra,local}/<name>/` -- `native/` = echo's own middleware (cors, gzip, recover, ...), `contrib/` = third-party vendor (datadog, go.opentelemetry.io, prometheus, goccy, bytedance, swaggo, hiko1129) and versioned like a factory contrib (`contrib/<vendor>/<lib>/v<major>/`), `extra/` = boost-authored generic (error_handler, semaphore), `local/` = wires another boost package (`local/extra/health`, `local/wrapper/log`, `local/model/restresponse`) |
 | Fx module | `fx/modules/<area>/<component>/` |
 
 **Package name = the short library name** (`pubsub`, `nats`, `confluent`, `goka`, `sns`, `redis`), **not** the version directory leaf. Alias the upstream SDK at the import site if a name clash would occur:
@@ -42,7 +42,7 @@ func NewWithOptions(ctx context.Context, c *upstream.Client, opts *Options) publ
 func NewWithConfigPath(ctx context.Context, c *upstream.Client, path string) (publisher.Driver, error)
 ```
 
-Every driver/adapter exposes the same trio so call sites are interchangeable.
+This is the trio to aim for in NEW code, so call sites are interchangeable -- but it is not universal today. Among publisher drivers only Pub/Sub (`wrapper/publisher/driver/contrib/cloud.google.com/pubsub/v1`) and Confluent Kafka (`.../confluentinc/confluent-kafka-go/v2`) ship all three; NATS exposes only `New(conn *nats.Conn) publisher.Driver` and Goka only `New(emitter *g.Emitter) publisher.Driver`, both with no `Options` and no `config.go`. Mirror the closest existing contrib: a driver with real tunables gets the full trio + config registration; a thin driver with nothing to configure can stay at a single `New`.
 
 ## Config registration
 
@@ -121,7 +121,7 @@ make v 2>/dev/null || go mod vendor   # if you added a dep
 
 - [ ] Files at `<area>/<kind>/contrib/<vendor>/<lib>/v<major>/` (or per-service for multi-service SDKs).
 - [ ] Package name is the short library name, not the version leaf.
-- [ ] Constructor trio present.
+- [ ] Constructor trio present (or a single `New` matching the closest existing contrib, if the driver has no tunables).
 - [ ] `init()` calls `config.Add` for every tunable; `ConfigAdd(path)` exported for multi-instance.
 - [ ] Errors via `model/errors`; logger via `wrapper/log.FromContext`.
 - [ ] Every extrapolation marked with `// TODO(maintainer-review):` and called out in the PR.

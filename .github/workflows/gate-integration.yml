@@ -1,0 +1,35 @@
+name: gate-integration
+
+# Guarantees the plugin's integration with the published quality-gate image:
+# pulls the pinned image and runs the plugin's exact `docker run` invocation
+# against a throwaway rust repo, asserting a real verdict. Fails loudly if the
+# image is missing/unpullable or does not produce a verdict -- so the
+# integration cannot silently rot behind the skill/hook fail-open.
+#
+# Runs on demand and on a daily heartbeat (the image lives in another repo);
+# also on changes to the runner scripts themselves. Requires the GHCR package
+# to be public or org-readable (see xgodev/quality-gate#15).
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: image tag to verify
+        default: v1
+        type: string
+  schedule:
+    - cron: '17 6 * * *'
+  push:
+    branches: [main]
+    paths:
+      - scripts/verify-gate-integration.sh
+      - .github/workflows/gate-integration.yml
+
+jobs:
+  rust:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify the pinned rust image runs the gate
+        env:
+          QG_TAG: ${{ inputs.tag || 'v1' }}
+        run: bash scripts/verify-gate-integration.sh rust "$QG_TAG"

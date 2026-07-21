@@ -18,7 +18,7 @@ command segment, not as a substring). For a gated command it:
    `go.mod` -> go, ...); no sentinel -> allow.
 2. Resolves the base ref: the branch upstream (`@{upstream}`), else the remote
    default branch (`origin/HEAD`), else **absolute mode** (no base).
-3. Runs `docker run -v "$root:/src" -w /src ghcr.io/xgodev/quality-gate/<lang>:v1
+3. Runs `docker run -v "$root:/src" -w /src ghcr.io/xgodev/quality-gate/<lang>:latest
    [--base <ref>]` (logs bind-mounted to a temp host dir).
 4. Maps the gate exit code to a decision:
    - `0` passed / bypassed, `3` no supported language -> **allow**
