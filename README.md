@@ -9,11 +9,12 @@ capability:
   grouped-index documentation for
   [`xgodev/boost`](https://github.com/xgodev/boost), the modular Go service
   framework. See [`docs/golang-boost.md`](docs/golang-boost.md).
-- **Quality Gate** -- the `qg` dispatcher + per-language gates (Rust, Go,
-  Python, Node.js, Java, Swift, Kotlin, Web), the gate flow inside the
-  `dev` skill,
-  and an opt-in PR-gate hook (`gh pr create` is gated; `git push` never is). Fails only when a PR worsens a
-  metric vs a base ref. Also usable as a plain CLI in CI. See
+- **Quality Gate** -- the gate flow inside the `dev` skill plus an opt-in
+  PR-gate hook (`gh pr create` is gated; `git push` never is). The gate itself
+  lives in [`xgodev/quality-gate`](https://github.com/xgodev/quality-gate) and
+  ships as per-language Docker images (`ghcr.io/xgodev/quality-gate/<lang>`);
+  this plugin runs the pinned image (`docker` required, fails open when
+  absent). Fails only when a change worsens a metric vs a base ref. See
   [`docs/quality-gate.md`](docs/quality-gate.md).
 - **`dev-rules`** -- macro, language-agnostic engineering-discipline skill
   (data ownership, zero coupling, RED-first TDD, docs-synced commits,
@@ -36,9 +37,7 @@ capability:
 
 Skills are namespaced by the plugin name: `claude-plugin:dev`,
 `claude-plugin:ux-ui` (design), `claude-plugin:skill-rules`. They trigger on
-natural phrases (e.g. "run quality gate" / "run QG") without the prefix. (The `add-quality-gate`
-skill is maintainer-only and lives project-local in this repo -- it is
-not shipped with the plugin.)
+natural phrases (e.g. "run quality gate" / "run QG") without the prefix.
 
 ## Install
 
@@ -124,33 +123,21 @@ pay-per-use:
 .claude-plugin/        plugin.json (the single plugin) + marketplace.json (xgodev)
 skills/                dev/{SKILL.md router, engineering/, golang/boost/, rust/}
                        ux-ui/ (design: catalog + references)  skill-rules/ (shipped)
-.claude/skills/        add-quality-gate/ (maintainer-only, project-local)
 hooks/                 hooks.json (merged registry) + test/; scripts grouped by area:
                        quality-gate/pr-gate.sh, dev-rules/{red-first-guard.sh,
                        main-folder-guard.sh, line-cap-guard.sh,
                        issue-comment-reminder.sh, mode-prompt.sh,
                        clear-after-commit.sh, lib/}
-tools/quality-gate/
-                       qg (dispatcher; also a plain CLI), per-language gates
-                       (<lang>/qg.sh + lib/ + rules/ + test-fixtures/ for go, java,
-                       kotlin, nodejs, python, rust, swift, web), tests/ (bats suite)
 scripts/               verify_references.py (boost skill link checker)
-docs/                  per-area docs + Quality Gate contract, languages, hooks
+docs/                  per-area docs (quality-gate, hooks, dev-rules, ...)
 ```
 
-## Quality Gate as a CLI (no Claude Code)
-
-```bash
-git clone git@github.com:xgodev/claude-plugin.git ~/.claude-plugin
-cd /path/to/your/project
-~/.claude-plugin/tools/quality-gate/qg --base origin/main
-```
-
-See [`docs/quality-gate.md`](docs/quality-gate.md) and
-[`docs/contract.md`](docs/contract.md).
+The quality gate is not bundled here -- it lives in
+[`xgodev/quality-gate`](https://github.com/xgodev/quality-gate) as Docker
+images. See [`docs/quality-gate.md`](docs/quality-gate.md).
 
 ## License
 
 MIT -- see [LICENSE](LICENSE).
 
-- Version: 1.15.0
+- Version: 1.16.0

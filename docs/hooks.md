@@ -14,14 +14,18 @@ On any `Bash` tool call, `hooks/quality-gate/pr-gate.sh` runs. It fast-exits
 for everything except `gh pr create` (matched as the leading tokens of a
 command segment, not as a substring). For a gated command it:
 
-1. Resolves the base ref: the branch upstream (`@{upstream}`), else the remote
+1. Picks the per-language image by a root file-sentinel (`Cargo.toml` -> rust,
+   `go.mod` -> go, ...); no sentinel -> allow.
+2. Resolves the base ref: the branch upstream (`@{upstream}`), else the remote
    default branch (`origin/HEAD`), else **absolute mode** (no base).
-2. Runs `${CLAUDE_PLUGIN_ROOT}/tools/quality-gate/qg [--base <ref>]` in the
-   project.
-3. Maps the gate exit code to a decision:
+3. Runs `docker run -v "$root:/src" -w /src ghcr.io/xgodev/quality-gate/<lang>:v1
+   [--base <ref>]` (logs bind-mounted to a temp host dir).
+4. Maps the gate exit code to a decision:
    - `0` passed / bypassed, `3` no supported language -> **allow**
    - `1` regressed / threshold, `2` tool error -> **deny** (JSON
      `permissionDecision: "deny"` with a concise reason)
+   - docker unavailable / image not pulled (`125`/`126`/`127`) -> **allow**
+     (fail open; CI is the hard gate)
 
 ## Bypass
 
@@ -34,9 +38,9 @@ is allowed. Example:
 ## Fail-open by design
 
 A broken hook must never brick the user's git. If `jq` is missing, stdin is
-malformed, `qg` is not found at `${CLAUDE_PLUGIN_ROOT}/tools/quality-gate`, or
-the project is not a git repo, the hook allows the command and prints a note
-to stderr.
+malformed, `docker` (or its daemon) is unavailable, the image cannot be
+pulled, no supported language is detected, or the project is not a git repo,
+the hook allows the command and prints a note to stderr.
 
 ## Registration
 
@@ -53,5 +57,6 @@ non-standard hook files). The script locates the gate through
 This hook is **advisory enforcement**, not a hard security boundary: it is
 opt-in and it fails open. Detection keys on the leading tokens of each command
 segment, so uncommon forms (a subshell-wrapped or `eval`-ed `gh pr create`)
-are not gated. For a gate that cannot be sidestepped, enforce `qg` in CI --
-the hook is a fast local check, not a replacement for a server-side gate.
+are not gated. For a gate that cannot be sidestepped, enforce the gate in CI
+(the `xgodev/quality-gate` reusable workflow) -- the hook is a fast local
+check, not a replacement for a server-side gate.

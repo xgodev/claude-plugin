@@ -32,15 +32,31 @@ done <<< "$(printf '%s' "$cmd" | sed -E 's/(\|\||&&|;|\|)/\n/g')"
 
 [ "$should_gate" -eq 1 ] || exit 0
 
-# --- locate project + plugin ----------------------------------------------
+# --- locate project -------------------------------------------------------
 proj="${CLAUDE_PROJECT_DIR:-$PWD}"
-plugin="${CLAUDE_PLUGIN_ROOT:-}"
-qg_bin="$plugin/tools/quality-gate/qg"
-if [ -z "$plugin" ] || [ ! -x "$qg_bin" ]; then
-  echo "qg-hook: qg not found at CLAUDE_PLUGIN_ROOT; skipping enforcement" >&2
+root="$(git -C "$proj" rev-parse --show-toplevel 2>/dev/null)" || exit 0  # not a repo -> allow
+
+# The gate is a Docker image (xgodev/quality-gate). Docker absent -> fail open:
+# a missing runtime must never brick the user's git.
+if ! command -v docker >/dev/null 2>&1 || ! docker info >/dev/null 2>&1; then
+  echo "qg-hook: docker unavailable; skipping gate enforcement" >&2
   exit 0
 fi
-git -C "$proj" rev-parse --show-toplevel >/dev/null 2>&1 || exit 0   # not a repo -> allow
+
+# --- pick the per-language image by root sentinel -------------------------
+lang=""
+if   [ -f "$root/Cargo.toml" ]; then lang=rust
+elif [ -f "$root/go.mod" ]; then lang=go
+elif [ -f "$root/pom.xml" ]; then lang=java
+elif [ -f "$root/build.gradle" ] || [ -f "$root/build.gradle.kts" ]; then lang=kotlin
+elif [ -f "$root/Package.swift" ]; then lang=swift
+elif [ -f "$root/pyproject.toml" ] || [ -f "$root/setup.py" ] || [ -f "$root/requirements.txt" ]; then lang=python
+elif [ -f "$root/package.json" ]; then lang=nodejs
+elif ls "$root"/*.html "$root"/*.css >/dev/null 2>&1; then lang=web
+fi
+[ -z "$lang" ] && exit 0   # no supported language -> allow
+
+image="${QG_IMAGE:-ghcr.io/xgodev/quality-gate/${lang}:${QG_TAG:-v1}}"
 
 # --- resolve base ref (upstream -> origin default -> absolute) ------------
 base="$(git -C "$proj" rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null || true)"
@@ -48,12 +64,21 @@ if [ -z "$base" ]; then
   base="$(git -C "$proj" symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null || true)"
 fi
 
-# --- run the gate ----------------------------------------------------------
+# --- run the gate in the container ----------------------------------------
+logs="$(mktemp -d "${TMPDIR:-/tmp}/qg-hook-XXXXXX")"
+run_gate() { docker run --rm -v "$root:/src" -w /src -v "$logs:/logs" "$image" --log-dir /logs "$@" 2>&1; }
 if [ -n "$base" ]; then
-  out="$(cd "$proj" && "$qg_bin" --base "$base" 2>&1)"; rc=$?
+  out="$(run_gate --base "$base")"; rc=$?
 else
-  out="$(cd "$proj" && "$qg_bin" 2>&1)"; rc=$?   # absolute mode
+  out="$(run_gate)"; rc=$?   # absolute mode
 fi
+rm -rf "$logs"
+
+# Image not pulled / pull denied / daemon hiccup -> docker exit 125/126/127.
+# Fail open: enforcement is best-effort locally, CI is the hard gate.
+case "$rc" in
+  125|126|127) echo "qg-hook: image '$image' unavailable (docker rc $rc); skipping" >&2; exit 0 ;;
+esac
 
 # --- map exit code to decision --------------------------------------------
 case "$rc" in

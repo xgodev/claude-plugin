@@ -1,14 +1,16 @@
 # Quality Gate
 
-Skill that invokes the shared gate's **dispatcher**
-(`quality-gate`) locally, interprets the result and guides the
-user. The gate (dispatcher + per-language scripts) is bundled
-in this same plugin.
+Skill that runs the shared gate as a **Docker image** locally,
+interprets the result and guides the user. The gate itself lives in a
+separate repo (`xgodev/quality-gate`) and is published as per-language
+images to GHCR (`ghcr.io/xgodev/quality-gate/<lang>`). This plugin does
+NOT bundle the gate scripts -- it pulls and runs the pinned image.
 
-Language detection is NO longer the responsibility of this skill nor of
-the AI. The dispatcher `${CLAUDE_PLUGIN_ROOT}/tools/quality-gate/qg` detects the
-language(s) on its own (100% shell, zero AI) and runs the matching
-gate(s). This skill only calls the dispatcher and interprets the JSON.
+Inside the image, the dispatcher `qg` still detects the language and runs
+the matching gate(s) (100% shell, zero AI). This skill's only extra job is
+to pick the right per-language image (one file-sentinel check) and mount the
+project into the container; everything else is the dispatcher's and this
+skill only interprets the JSON.
 
 ## LAW -- a bypass is NEVER the skill's decision
 
@@ -58,28 +60,48 @@ Do not use:
 
 ## Prerequisites
 
-- `git` installed (the dispatcher uses it to resolve the base ref).
-- Prerequisites of each supported language (documented in
-  `${CLAUDE_PLUGIN_ROOT}/tools/quality-gate/<lang>/README.md`).
+- `docker` installed and the daemon running (this skill runs the gate as a
+  container). If `docker` is absent: exit 2 with
+  `::error::docker is required to run the quality gate -- install Docker (https://docs.docker.com/get-docker/) and start the daemon`. Do NOT
+  fall back to running tools directly -- that would not be the gate.
+- `git` installed (used to resolve the base ref and to mount the repo with
+  its history).
+- The per-language toolchain lives INSIDE the image -- nothing to install on
+  the host. Language prerequisites are documented in the gate repo
+  (`xgodev/quality-gate`, `docs/languages/<lang>.md`).
 
 ## Flow (mandatory steps -- do not skip)
 
-### 1. Locate the dispatcher (bundled in this plugin)
+### 1. Select the per-language image
 
-The gate (dispatcher `qg` + the `<lang>/qg.sh` scripts + contract) is
-**bundled inside this plugin**. There is NO clone or `git pull` at
-runtime -- the dispatcher lives at `${CLAUDE_PLUGIN_ROOT}/tools/quality-gate/qg` and is updated
-together with the plugin (`claude plugin update` / auto-update). This eliminates
-any staleness window and cache divergence.
+The gate ships as per-language images
+(`ghcr.io/xgodev/quality-gate/<lang>:<tag>`). Pick the language by
+file-sentinel at the project root (first match wins; a monorepo may match
+several -- run one image per matched language and aggregate, worst verdict
+wins):
+
+| Sentinel | `<lang>` |
+|---|---|
+| `Cargo.toml` | `rust` |
+| `go.mod` | `go` |
+| `pom.xml` | `java` |
+| `build.gradle` / `build.gradle.kts` | `kotlin` |
+| `Package.swift` | `swift` |
+| `pyproject.toml` / `setup.py` / `requirements.txt` | `python` |
+| `package.json` | `nodejs` |
+| only `*.html`/`*.css`, NO `package.json` | `web` |
+
+If NO sentinel matches: treat as **exit 3** (no supported language) -- see
+the exit-code map. Do NOT improvise a gate.
 
 ```bash
-GATE_PATH="${QG_PATH:-$CLAUDE_PLUGIN_ROOT/tools/quality-gate}"
-test -x "$GATE_PATH/qg" || { echo "::error::dispatcher 'qg' not found in $GATE_PATH -- corrupted plugin install (reinstall: /plugin install)"; exit 2; }
+QG_TAG="${QG_TAG:-v1}"                       # consumers pin the moving major
+QG_IMAGE="ghcr.io/xgodev/quality-gate/<lang>:${QG_TAG}"
 ```
 
-**Developer override:** if the env var `QG_PATH` is set, use
-that path directly (useful for someone editing the gate itself locally
-outside the installed plugin).
+**Developer override:** `QG_IMAGE` (run a specific image/tag, e.g. a locally
+built `qg-rust:test` while working on the gate) and `QG_TAG` (pin a different
+published tag) both take precedence.
 
 ### 2. Detect `--base`
 
@@ -98,22 +120,27 @@ absolute and asking, prefer to **ask** the user which ref to use.
 similar, use `--base origin/release/2026-Q2`. Always prefix with
 `origin/` if it is missing, except if the user passed an absolute SHA.
 
-### 3. Invoke the dispatcher with `--format json`
+### 3. Run the image with `--format json`
 
-Always the **dispatcher** `qg` (never `<lang>/qg.sh` directly -- language
-detection is the dispatcher's, 100% shell). Always `--format json`. Use
-a timestamped `--log-dir` so runs do not collide:
+Run the container's entrypoint (the dispatcher `qg` -- never `<lang>/qg.sh`
+directly). Always `--format json`. The project is mounted **read-write** at
+`/src` **with its `.git`** (the baseline uses `git archive <base>`). Logs go to
+a SEPARATE host dir bind-mounted at `/logs` -- never inside `/src`, so the run
+does not dirty the user's repo -- and this skill reads `pr-*.log` from there:
 
 ```bash
-LOG_DIR="/tmp/qg-$(date -u +%Y%m%dT%H%M%S)"
-mkdir -p "$LOG_DIR"
+LOG_DIR="$(mktemp -d "${TMPDIR:-/tmp}/qg-XXXXXX")"   # host-side, outside the repo
 
-GATE_PATH="${QG_PATH:-$CLAUDE_PLUGIN_ROOT/tools/quality-gate}"
+QG_TAG="${QG_TAG:-v1}"
+QG_IMAGE="${QG_IMAGE:-ghcr.io/xgodev/quality-gate/<lang>:${QG_TAG}}"
 
-"$GATE_PATH/qg" \
+docker run --rm \
+  -v "$PWD:/src" -w /src \
+  -v "$LOG_DIR:/logs" \
+  "$QG_IMAGE" \
   --base "<ref>" \
   --format json \
-  --log-dir "$LOG_DIR" \
+  --log-dir /logs \
   > "$LOG_DIR/result.json" 2> "$LOG_DIR/stderr.log"
 GATE_EXIT=$?
 ```
@@ -121,10 +148,18 @@ GATE_EXIT=$?
 In **absolute mode** (no base ref available), omit `--base`:
 
 ```bash
-"$GATE_PATH/qg" --format json --log-dir "$LOG_DIR" \
+docker run --rm -v "$PWD:/src" -w /src -v "$LOG_DIR:/logs" "$QG_IMAGE" \
+  --format json --log-dir /logs \
   > "$LOG_DIR/result.json" 2> "$LOG_DIR/stderr.log"
 GATE_EXIT=$?
 ```
+
+Notes:
+- The base ref must be resolvable inside the container. If `git archive <ref>`
+  fails there, the host must have fetched it first (`git fetch origin`); the
+  mounted `.git` carries the refs.
+- A `docker` invocation failure (daemon down, image pull denied) is a **tool
+  error, exit 2** -- relay it literally, do NOT interpret any JSON.
 
 #### Dispatcher exit-code map
 
@@ -133,7 +168,7 @@ GATE_EXIT=$?
 | `0`  | `passed` / fast-path / absolute mode with no violation | Render green. Do NOT open a PR. (`bypassed` also exits 0 but renders the WARNING of section 6, never plain green.) |
 | `1`  | `regressed` (comparative) or `failed` (absolute threshold violated) | Render table + analysis of the logs. Do NOT open a PR. Do NOT suggest a bypass. |
 | `2`  | Tool error / missing prerequisite / invalid `.qg.yaml` | Relay the `stderr.log` message literally. Do NOT interpret the JSON. Do NOT install the prereq. STOP. |
-| `3`  | **No supported language detected** (dispatcher-exclusive) | Report: "no supported language -- open an issue in `quality-gate` or run the `add-quality-gate` skill in the gate repo". Do NOT improvise an ad-hoc gate. |
+| `3`  | **No supported language detected** (no sentinel matched, or the dispatcher found none) | Report: "no supported language -- open an issue in `xgodev/quality-gate`". Do NOT improvise an ad-hoc gate. |
 
 If `GATE_EXIT == 2`: **do NOT interpret the JSON as a verdict**. Report the
 tool error literally (`$LOG_DIR/stderr.log`) and STOP. **Do NOT
@@ -142,7 +177,7 @@ prerequisite is installed by the user.
 
 If `GATE_EXIT == 3`: language out of scope. Do NOT run `npm test +
 eslint` and call it "the gate". Do NOT write `<lang>/qg.sh` into the project. STOP and
-guide opening an issue / using `add-quality-gate`.
+guide opening an issue in `xgodev/quality-gate`.
 
 ### 4. Interpret the JSON (single or monorepo)
 
@@ -283,16 +318,16 @@ exception for urgency, hotfix, or a vague request:
 
 | Rationalization | Skill's rebuttal |
 |---|---|
-| "This is Node, but `npm test + eslint` covers it well." | An ad-hoc gate without a contract. STOP, guide an issue / `add-quality-gate`. |
+| "This is Node, but `npm test + eslint` covers it well." | An ad-hoc gate without a contract. STOP, guide opening an issue in `xgodev/quality-gate`. |
 | "I'll run `<lang>/qg.sh` even without a sentinel." | Detection is the dispatcher's. Exit 3 = out of scope. STOP. |
 | "Language X should already be supported." | Update the plugin (claude plugin update) and re-run the dispatcher. If exit 3 persists, STOP and guide an issue. |
-| "I'll quickly create a `<lang>/qg.sh` here." | Adding a language is the gate repo's task, with `add-quality-gate`. |
+| "I'll quickly create a `<lang>/qg.sh` here." | Adding a language is the gate repo's task -- open an issue in `xgodev/quality-gate`. |
 | "I'll say it ran OK because the tests passed." | Reporting green without the dispatcher's JSON is a lie. STOP. |
 
 ## Cross-scenario patterns (summary)
 
 1. **Confusing local tools with the gate.** The gate is the dispatcher
-   `${CLAUDE_PLUGIN_ROOT}/tools/quality-gate/qg --format json`.
+   INSIDE the image: `docker run ... ghcr.io/xgodev/quality-gate/<lang> --format json`.
 2. **Auto-fixing under pressure.** Only **propose** to the user.
 3. **Making a bypass decision on its own.** Never.
 4. **Inventing missing abstractions.** Exit 3 becomes "open an issue", not
@@ -321,19 +356,28 @@ exception for urgency, hotfix, or a vague request:
   Node.js, Java, Swift, Kotlin, **Web (static HTML/CSS)**. The `web`
   gate only measures `fmt`+`lint` and only fires in a project WITHOUT a `package.json`;
   React/Vue/etc. with a `package.json` = a nodejs project.
-- Detection is 100% the dispatcher's (`qg --detect`); the skill does NOT keep
-  a sentinel table.
-- The gate is bundled in the plugin; it updates with the plugin (`claude plugin update` / auto-update). No runtime clone/cache. Override for local dev: env `QG_PATH`.
-- The skill does not install the gate's prerequisites. Exit 2 -> relay the gate's
-  message to the user.
+- The skill uses a file-sentinel only to PICK the per-language image; the
+  actual language detection + measurement is still the dispatcher's
+  (`qg --detect`) inside the container.
+- The gate is a Docker image (`ghcr.io/xgodev/quality-gate/<lang>`), versioned
+  in `xgodev/quality-gate`. Pin with `QG_TAG` (default `v1`); override the whole
+  image ref with `QG_IMAGE` for local gate development. Update = pull a newer tag.
+- `docker` is required. Missing docker/daemon -> exit 2, relay the message; the
+  skill never falls back to running tools directly.
+- The skill does not install prerequisites (they live in the image). Exit 2 ->
+  relay the gate's message to the user.
+- Monorepo with several languages: one image per matched language; aggregate
+  verdict = worst of the per-language verdicts.
 
 ## Contract details
 
-Reference documentation (in the gate repo, bundled in the plugin):
+Reference documentation lives in the gate repo `xgodev/quality-gate`:
 
-- `${CLAUDE_PLUGIN_ROOT}/docs/contract.md` -- CLI contract, dispatcher,
-  tamper-resistance, `.qg.yaml projects:`.
-- `${CLAUDE_PLUGIN_ROOT}/docs/output-format.md` -- JSON/text format,
-  including the monorepo envelope (`aggregate_verdict`/`results`).
-- `${CLAUDE_PLUGIN_ROOT}/docs/consume.md` -- how to use it locally.
-- `${CLAUDE_PLUGIN_ROOT}/tools/quality-gate/<lang>/README.md` -- the language's prerequisites.
+- `docs/contract.md` -- CLI contract, dispatcher, tamper-resistance,
+  `.qg.yaml projects:`.
+- `docs/output-format.md` -- JSON/text format, including the monorepo
+  envelope (`aggregate_verdict`/`results`).
+- `docs/consume.md` -- how to run it locally / in CI (the `gate.yml`
+  reusable workflow).
+- `docs/languages/<lang>.md` -- the language's prerequisites (all inside the
+  image; nothing to install on the host).
