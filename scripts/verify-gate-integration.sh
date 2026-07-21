@@ -12,12 +12,12 @@
 #   scripts/verify-gate-integration.sh [lang] [tag]
 #   QG_IMAGE=my-local:tag scripts/verify-gate-integration.sh   # override image
 #
-# Defaults: lang=rust, tag=${QG_TAG:-v1}. Only rust has a self-contained
+# Defaults: lang=rust, tag=${QG_TAG:-latest}. Only rust has a self-contained
 # fixture here; other languages are verified once their images publish.
 set -uo pipefail
 
 LANG_ARG="${1:-rust}"
-TAG="${2:-${QG_TAG:-v1}}"
+TAG="${2:-${QG_TAG:-latest}}"
 IMAGE="${QG_IMAGE:-ghcr.io/xgodev/quality-gate/${LANG_ARG}:${TAG}}"
 
 fail() { echo "FAIL: $*" >&2; exit 1; }

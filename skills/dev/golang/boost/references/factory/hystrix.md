@@ -6,7 +6,7 @@ import "github.com/afex/hystrix-go/hystrix"
 
 func init() {
     hystrixfact.CommandConfigAdd("customer-api")
-    hystrixfact.CommandConfigAdd("janis-api")
+    hystrixfact.CommandConfigAdd("pricing-api")
 }
 
 err := hystrix.Do("customer-api", func() error {
@@ -14,11 +14,11 @@ err := hystrix.Do("customer-api", func() error {
 }, nil)
 ```
 
-Each `CommandConfigAdd("<name>")` registers `boost.factory.hystrix.<name>.*` keys: `timeout`, `maxConcurrentRequests`, `errorPercentThreshold`, `sleepWindow`, `requestVolumeThreshold`. Override at deploy via `BOOST_FACTORY_HYSTRIX_<NAME>_*`.
+Each `CommandConfigAdd("<name>")` registers `boost.factory.hystrix.commands.<name>.*` keys (note the `commands` segment): `timeout`, `maxConcurrentRequests`, `errorPercentThreshold`, `sleepWindow`, `requestVolumeThreshold`. Override at deploy via `BOOST_FACTORY_HYSTRIX_COMMANDS_<NAME>_*`.
 
 ## Per-upstream commands
 
-One command name per upstream (CustomerAPI, Janis, Pricing, ...). Sharing collapses their failure budgets -- you can't isolate one bad upstream from the others.
+One command name per upstream (CustomerAPI, PricingAPI, InventoryAPI, ...). Sharing collapses their failure budgets -- you can't isolate one bad upstream from the others.
 
 ## Observability plugin
 
@@ -33,5 +33,5 @@ Only Prometheus has a plugin here (no Datadog, no OTel):
 | Red flag | Fix |
 |---|---|
 | Single global command for all outbound calls | Per-upstream commands via `CommandConfigAdd` |
-| `hystrix.ConfigureCommand("name", ...)` from upstream API directly | Configure via `BOOST_FACTORY_HYSTRIX_<NAME>_*` so it shows in the boot banner |
+| `hystrix.ConfigureCommand("name", ...)` from upstream API directly | Configure via `BOOST_FACTORY_HYSTRIX_COMMANDS_<NAME>_*` so it shows in the boot banner |
 | Circuit breaker around in-process function calls | Use it at the outbound HTTP / RPC boundary; in-process calls don't need it |

@@ -8,7 +8,7 @@ if err != nil { log.Fatalf("firestore: %v", err) }
 defer client.Close()
 ```
 
-Configure under `boost.factory.gcp.firestore.*`. Composes `apiOptions.*` (GCP credentials, endpoint) + `grpcOptions.*` (keepalive, retries). Override at deploy via `BOOST_FACTORY_GCP_FIRESTORE_*`. `plugins ...clientgrpc.Plugin` accepts gRPC interceptors.
+Configure under `boost.factory.gcp.firestore.*`. Composes `apiOptions.*` (GCP credentials, endpoint) + `grpcOptions.*` (`tls.*`, window sizes, `hostOverwrite`, `connectParams.backoff.*`, `keepalive.*` -- no retry or message-size keys). Override at deploy via `BOOST_FACTORY_GCP_FIRESTORE_*`. `plugins ...clientgrpc.Plugin` accepts gRPC interceptors.
 
 ## Red flags
 

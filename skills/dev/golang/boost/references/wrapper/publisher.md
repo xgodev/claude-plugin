@@ -1,4 +1,4 @@
-**REQUIRED BACKGROUND:** `references/start.md`. For function deadletter integration → `references/bootstrap/middleware.md`. For adding a new driver to boost → `references/CONTRIBUTING.md`.
+**REQUIRED BACKGROUND:** `references/start.md`. For function deadletter integration -> `references/bootstrap/middleware.md`. For adding a new driver to boost -> `references/CONTRIBUTING.md`.
 
 ## Construct via the driver-agnostic wrapper
 

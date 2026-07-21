@@ -14,14 +14,14 @@ defer tracer.Stop()
 
 `NewLogger()` returns a `ddtrace.Logger` adapter that funnels Datadog's internal logs through boost's `wrapper/log`, so trace/log routing stays unified.
 
-Configure agent host/port, service name, env, version, sampling under `boost.factory.datadog.*` (override `BOOST_FACTORY_DATADOG_*`). Standard Datadog env vars (`DD_AGENT_HOST`, `DD_SERVICE`, ...) also work via koanf.
+Configure agent `.host`/`.port`, `.env`, `.version`, `.tags`, `.tracer.enabled`, `.profiler.enabled`, `.analytics`/`.analyticsRate`, `.httpClient.*` and `.log.level` under `boost.factory.datadog.*` (override `BOOST_FACTORY_DATADOG_*`). There is no `.service` key -- the service name comes from Datadog's own `DD_SERVICE`. Standard Datadog env vars (`DD_AGENT_HOST`, `DD_SERVICE`, ...) also work via koanf.
 
 ## Datadog vs OpenTelemetry
 
 | Pick | When |
 |---|---|
 | `references/factory/datadog.md` | Stack already in Datadog; full APM features (continuous profiler, trace search, RUM) |
-| `references/factory/otel.md` | Vendor-neutral pipeline (OTLP collector → Tempo/Jaeger/Honeycomb/...) |
+| `references/factory/otel.md` | Vendor-neutral pipeline (OTLP collector -> Tempo/Jaeger/Honeycomb/...) |
 
 Don't mix -- one tracing pipeline per service.
 
@@ -30,5 +30,5 @@ Don't mix -- one tracing pipeline per service.
 | Red flag | Fix |
 |---|---|
 | `tracer.Start()` without a custom logger | Pass `tracer.WithLogger(ddfact.NewLogger())` so logs are unified |
-| Service name / env via raw `os.Getenv("DD_SERVICE")` | Use `BOOST_FACTORY_DATADOG_SERVICE` (registered via `config.Add`) |
+| Env / version via raw `os.Getenv("DD_ENV")` | Use `BOOST_FACTORY_DATADOG_ENV` / `BOOST_FACTORY_DATADOG_VERSION` (registered via `config.Add`) |
 | `tracer.Stop()` missing on shutdown | Add `defer tracer.Stop()` after `tracer.Start` |

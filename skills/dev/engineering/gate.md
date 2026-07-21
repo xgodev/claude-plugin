@@ -95,13 +95,14 @@ If NO sentinel matches: treat as **exit 3** (no supported language) -- see
 the exit-code map. Do NOT improvise a gate.
 
 ```bash
-QG_TAG="${QG_TAG:-v1}"                       # consumers pin the moving major
+QG_TAG="${QG_TAG:-latest}"                   # moving tag -- always refreshed (see step 3)
 QG_IMAGE="ghcr.io/xgodev/quality-gate/<lang>:${QG_TAG}"
 ```
 
 **Developer override:** `QG_IMAGE` (run a specific image/tag, e.g. a locally
-built `qg-rust:test` while working on the gate) and `QG_TAG` (pin a different
-published tag) both take precedence.
+built `qg-rust:test` while working on the gate) and `QG_TAG` (pin a fixed
+published version, e.g. `v1.2.0`, for reproducible verdicts) both take
+precedence.
 
 ### 2. Detect `--base`
 
@@ -128,13 +129,18 @@ directly). Always `--format json`. The project is mounted **read-write** at
 a SEPARATE host dir bind-mounted at `/logs` -- never inside `/src`, so the run
 does not dirty the user's repo -- and this skill reads `pr-*.log` from there:
 
+`--pull` (default `always` via `QG_PULL`) refreshes the moving `latest` tag
+every run, so a cached copy never gates against a stale gate (a pull failure
+surfaces as exit 2 -- see the notes). Gate developers testing a locally built
+`QG_IMAGE` set `QG_PULL=never`:
+
 ```bash
 LOG_DIR="$(mktemp -d "${TMPDIR:-/tmp}/qg-XXXXXX")"   # host-side, outside the repo
 
-QG_TAG="${QG_TAG:-v1}"
+QG_TAG="${QG_TAG:-latest}"
 QG_IMAGE="${QG_IMAGE:-ghcr.io/xgodev/quality-gate/<lang>:${QG_TAG}}"
 
-docker run --rm \
+docker run --rm --pull="${QG_PULL:-always}" \
   -v "$PWD:/src" -w /src \
   -v "$LOG_DIR:/logs" \
   "$QG_IMAGE" \
@@ -148,7 +154,7 @@ GATE_EXIT=$?
 In **absolute mode** (no base ref available), omit `--base`:
 
 ```bash
-docker run --rm -v "$PWD:/src" -w /src -v "$LOG_DIR:/logs" "$QG_IMAGE" \
+docker run --rm --pull="${QG_PULL:-always}" -v "$PWD:/src" -w /src -v "$LOG_DIR:/logs" "$QG_IMAGE" \
   --format json --log-dir /logs \
   > "$LOG_DIR/result.json" 2> "$LOG_DIR/stderr.log"
 GATE_EXIT=$?
@@ -360,7 +366,9 @@ exception for urgency, hotfix, or a vague request:
   actual language detection + measurement is still the dispatcher's
   (`qg --detect`) inside the container.
 - The gate is a Docker image (`ghcr.io/xgodev/quality-gate/<lang>`), versioned
-  in `xgodev/quality-gate`. Pin with `QG_TAG` (default `v1`); override the whole
+  in `xgodev/quality-gate`. Default tag `latest` (refreshed each run via
+  `--pull=always`); set `QG_TAG` to a fixed version for reproducibility, or
+  override the whole
   image ref with `QG_IMAGE` for local gate development. Update = pull a newer tag.
 - `docker` is required. Missing docker/daemon -> exit 2, relay the message; the
   skill never falls back to running tools directly.

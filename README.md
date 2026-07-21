@@ -129,6 +129,7 @@ hooks/                 hooks.json (merged registry) + test/; scripts grouped by 
                        issue-comment-reminder.sh, mode-prompt.sh,
                        clear-after-commit.sh, lib/}
 scripts/               verify_references.py (boost skill link checker)
+                       verify_config_roots.py (boost config namespaces vs source)
 docs/                  per-area docs (quality-gate, hooks, dev-rules, ...)
 ```
 
@@ -140,4 +141,4 @@ images. See [`docs/quality-gate.md`](docs/quality-gate.md).
 
 MIT -- see [LICENSE](LICENSE).
 
-- Version: 1.16.1
+- Version: 1.17.0

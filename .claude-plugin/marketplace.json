@@ -8,12 +8,6 @@
     "description": "The xgodev Claude Code marketplace: a single all-in-one plugin bundling every xgodev skill, hook, and tool."
   },
   "allowCrossMarketplaceDependenciesOn": ["claude-plugins-official"],
-  "renames": {
-    "golang-boost": "claude-plugin",
-    "quality-gate": "claude-plugin",
-    "dev-rules": "claude-plugin",
-    "skill-rules": "claude-plugin"
-  },
   "plugins": [
     {
       "name": "claude-plugin",

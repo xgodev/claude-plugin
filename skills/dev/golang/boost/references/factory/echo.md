@@ -32,11 +32,11 @@ func main() {
     defer cancel()
 
     srv, err := echoserver.NewServer(ctx,
-        recoverplugin.Register, // panics → 500, no process death
+        recoverplugin.Register, // panics -> 500, no process death
         requestid.Register,     // X-Request-ID propagation
         logplugin.Register,     // request access log via boost logger
         restresponse.Register,  // sets Type=REST so error_handler emits JSON
-        error_handler.Register, // model/errors → HTTP status mapping
+        error_handler.Register, // model/errors -> HTTP status mapping
     )
     if err != nil {
         log.FromContext(ctx).WithError(err).Fatal("failed to build echo server")
@@ -58,7 +58,7 @@ func main() {
 
 | Plugin | Purpose | Skip when |
 |---|---|---|
-| `native/recover` | Panic → 500 | Never |
+| `native/recover` | Panic -> 500 | Never |
 | `native/requestid` | X-Request-ID | Never |
 | `local/wrapper/log` | Access log via boost logger | Never |
 | `local/model/restresponse` | Sets `Type=REST` for `error_handler` JSON mode | Never (REST APIs) |
@@ -120,7 +120,7 @@ srv, err := echoserver.NewServer(ctx,
 )
 ```
 
-## Custom error → status, or ignore
+## Custom error -> status, or ignore
 
 The handler resolves status via `model/errors.Classify`. To make a non-boost
 error return a specific status (or be ignored / treated as 200), register it at

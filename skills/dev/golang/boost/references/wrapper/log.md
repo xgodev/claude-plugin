@@ -24,7 +24,7 @@ The request- or call-scoped context carries enrichment that previous middlewares
 | `log.WithTypeOf(*p)` | Inside library/driver code to stamp the type name |
 | `log.Fatal/Fatalf` | Process-fatal init failures only -- never inside a handler |
 
-The configured backend (zap, zerolog, logrus) is picked at `boost.Start` based on `boost.factory.<backend>.console.level` config. Switching backends doesn't require code changes -- the wrapper is the abstraction.
+`boost.Start` always installs **zerolog** (`log.Set(zerolog.NewLogger())`) -- there is no config key that selects the backend. Running on zap or logrus is an explicit `log.Set(...)` call in `main` after `Start` (see `references/wrapper/log-backends.md`). Config only tunes the backend you installed (level, formatter); handler code never changes either way -- the wrapper is the abstraction.
 
 ## Red flags
 

@@ -2,6 +2,9 @@
 
 ```go
 import (
+    "context"
+    "sync"
+
     antsfact "github.com/xgodev/boost/factory/contrib/panjf2000/ants/v2"
     "github.com/panjf2000/ants/v2"
 )
@@ -10,10 +13,16 @@ pool, _ := ants.NewPool(100)
 defer pool.Release()
 
 w := antsfact.NewWrapper(pool /* , middlewares ... */)
-w.Submit(func() {
+
+var wg sync.WaitGroup
+err := w.Submit(ctx, func(ctx context.Context) context.Context {
     // bounded-concurrency work
-})
+    return ctx
+}, &wg)
+wg.Wait()
 ```
+
+`Submit(ctx, task, wg)` does the `wg.Add(1)` / `wg.Done()` for you -- pass the WaitGroup and wait on it. `AsyncSubmit(ctx, task)` is the fire-and-forget variant (no WaitGroup). A `Task` is `func(ctx context.Context) context.Context`: it returns the context so middlewares' `After` sees what the task put in it.
 
 `NewWrapper` lets you stack middlewares (panic recovery, metrics, tracing) around the pool's `Submit` calls without modifying call sites.
 

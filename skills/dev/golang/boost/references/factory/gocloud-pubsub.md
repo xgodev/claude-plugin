@@ -17,14 +17,14 @@ sub, err := gcppubsub.NewSubscription(ctx)
 defer sub.Shutdown(ctx)
 ```
 
-Configure topic/subscription URLs (`gcppubsub://...`, `kafka://...`, `awssns:///...`, `mempubsub://...`) under `boost.factory.gocloud.pubsub.*` (override `BOOST_FACTORY_GOCLOUD_PUBSUB_*`).
+Configure `.type` (default `memory`; valid: `sqs`, `sns`, `kafka`, `nats`, `pubsub`), `.resource` (default `topicA`) and `.region` under `boost.factory.gocloud.*` (override `BOOST_FACTORY_GOCLOUD_*`). The factory builds the provider URL from `.type` + `.resource` -- operators never supply a URL.
 
 ## When gocloud.dev vs the native factory?
 
 | Reach for gocloud.dev | Reach for native (`references/factory/pubsub.md`, `references/factory/kafka.md`, ...) |
 |---|---|
-| Want to swap providers via URL config without code change | Committed to one provider; want full feature surface |
-| Tests use `mempubsub://` for in-process fakes | Production-only path; tests run against real broker |
+| Want to swap providers via `.type` config without code change | Committed to one provider; want full feature surface |
+| Tests use the default `memory` type for in-process fakes | Production-only path; tests run against real broker |
 
 The native factories expose more provider-specific knobs. gocloud.dev exposes the lowest-common-denominator API.
 
@@ -33,5 +33,5 @@ The native factories expose more provider-specific knobs. gocloud.dev exposes th
 | Red flag | Fix |
 |---|---|
 | `pubsub.OpenTopic(ctx, url)` directly | `gcppubsub.NewTopic(ctx)` |
-| URL via `os.Getenv` | `BOOST_FACTORY_GOCLOUD_PUBSUB_*` |
+| Type/resource via `os.Getenv` | `BOOST_FACTORY_GOCLOUD_*` |
 | Forgetting `defer topic.Shutdown(ctx)` | Add it |

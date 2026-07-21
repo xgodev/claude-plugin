@@ -1,4 +1,4 @@
-**REQUIRED BACKGROUND:** `references/start.md`, `references/wrapper/config.md`. For typed cache abstraction → `references/wrapper/cache.md`.
+**REQUIRED BACKGROUND:** `references/start.md`, `references/wrapper/config.md`. For typed cache abstraction -> `references/wrapper/cache.md`.
 
 ```go
 import freecachefact "github.com/xgodev/boost/factory/contrib/coocood/freecache/v1"
@@ -7,7 +7,7 @@ c, err := freecachefact.NewCache(ctx)
 if err != nil { log.Fatalf("freecache: %v", err) }
 ```
 
-Configure size (in bytes) under `boost.factory.freecache.size` (override `BOOST_FACTORY_FREECACHE_SIZE`). Once full, freecache evicts oldest entries -- predictable memory ceiling.
+Configure size (in bytes, default 100MB) under `boost.factory.freecache.cacheSize` (override `BOOST_FACTORY_FREECACHE_CACHESIZE`). Once full, freecache evicts oldest entries -- predictable memory ceiling.
 
 ## bigcache vs freecache
 

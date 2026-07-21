@@ -1,4 +1,4 @@
-**REQUIRED BACKGROUND:** `references/start.md`, `references/wrapper/config.md`. For event-handler integration (CloudEvents + middleware chain) → `references/bootstrap/adapter-kafka.md`.
+**REQUIRED BACKGROUND:** `references/start.md`, `references/wrapper/config.md`. For event-handler integration (CloudEvents + middleware chain) -> `references/bootstrap/adapter-kafka.md`.
 
 ## Canonical examples (ship with boost)
 
@@ -14,7 +14,7 @@ producer, err := kafkafact.NewProducer(ctx)
 consumer, err := kafkafact.NewConsumer(ctx)
 ```
 
-Configure brokers, group id, security under `boost.factory.kafka.*` (override `BOOST_FACTORY_KAFKA_*`).
+Configure brokers (`.brokers`), consumer group id (`.consumer.groupId`), security protocol (`.consumer.protocol`), producer (`.producer.*`) and log (`.log.*`) under `boost.factory.confluent.*` (override `BOOST_FACTORY_CONFLUENT_*`).
 
 ## Factory vs adapter
 
@@ -28,5 +28,5 @@ Configure brokers, group id, security under `boost.factory.kafka.*` (override `B
 | Red flag | Fix |
 |---|---|
 | `kafka.NewProducer(&kafka.ConfigMap{...})` directly | `kafkafact.NewProducer(ctx)` |
-| Brokers/groupID via `os.Getenv` | `BOOST_FACTORY_KAFKA_*` |
+| Brokers/groupID via `os.Getenv` | `BOOST_FACTORY_CONFLUENT_*` |
 | Forgetting `producer.Close()` / `consumer.Close()` on shutdown | Add it |

@@ -6,21 +6,26 @@ The factory provides the integration glue between boost and `prometheus/client_g
 
 ```go
 import (
+    "context"
     "net/http"
     "github.com/prometheus/client_golang/prometheus/promhttp"
     "github.com/xgodev/boost/extra/multiserver"
 )
 
+// multiserver.Server is Serve(ctx) / Shutdown(ctx) -- *http.Server does NOT satisfy it.
+type metricsServer struct{ srv *http.Server }
+
+func (s *metricsServer) Serve(ctx context.Context)    { _ = s.srv.ListenAndServe() }
+func (s *metricsServer) Shutdown(ctx context.Context) { _ = s.srv.Shutdown(ctx) }
+
 metricsMux := http.NewServeMux()
 metricsMux.Handle("/metrics", promhttp.Handler())
-metricsSrv := &http.Server{Addr: ":9090", Handler: metricsMux}
 
-ms := multiserver.New(
-    multiserver.WithServer("api",     apiSrv),
-    multiserver.WithServer("metrics", metricsSrv),
-)
-ms.Run(ctx)
+// apiSrv is e.g. an echo.Server -- it already has Serve(ctx)/Shutdown(ctx).
+multiserver.Serve(ctx, apiSrv, &metricsServer{srv: &http.Server{Addr: ":9090", Handler: metricsMux}})
 ```
+
+`multiserver` exposes only `Serve(ctx, srvs ...Server)`, `Check(ctx)` and `Shutdown(ctx)`.
 
 Splitting metrics from the API port means scraping doesn't compete with user traffic and metrics stay accessible if the API saturates.
 

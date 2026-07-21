@@ -1,6 +1,6 @@
 **REQUIRED BACKGROUND:** `references/start.md`, `references/fx/modules.md` (composition patterns), `references/wrapper/log.md` (the logger fx uses).
 
-The factory wraps `go.uber.org/fx`'s `fx.New` with boost defaults: the app's logger comes from `wrapper/log` so fx events appear in your structured log stream, and the lifecycle is wired into the boot sequence so `OnStart` / `OnStop` hooks run with proper context cancellation.
+The factory wraps `go.uber.org/fx`'s `fx.New` with exactly one boost default: it prepends `fx.Logger(NewLogger())` so fx events appear in your structured log stream (level from `boost.factory.fx.log.level`). Nothing else is wired -- lifecycle, `OnStart` / `OnStop` and their contexts behave exactly as in raw fx.
 
 ```go
 import (
@@ -11,7 +11,7 @@ import (
 func main() {
     boost.Start()
 
-    app := fxfact.New(
+    app := fxfact.NewApp(
         myModule.Module(),
         otherModule.Module(),
         fx.Provide(NewService),
@@ -33,7 +33,7 @@ A constructor in `fx.Provide` or an `fx.Invoke` that returns an error makes fx f
 
 | Red flag | Fix |
 |---|---|
-| `fx.New(...)` directly with `fx.WithLogger(fxevent.NopLogger)` | `fxfact.New(...)` so events flow through `wrapper/log` |
-| A boot provider returns a bare error on bad config → opaque `exit 1` | Log the specific bad key/value in the provider before returning; wrap with `errors.NewInternal(err, "config: <key>=<value>")`. A swallowed boot error costs hours to diagnose. |
+| `fx.New(...)` directly with `fx.WithLogger(fxevent.NopLogger)` | `fxfact.NewApp(...)` so events flow through `wrapper/log` |
+| A boot provider returns a bare error on bad config -> opaque `exit 1` | Log the specific bad key/value in the provider before returning; wrap with `errors.NewInternal(err, "config: <key>=<value>")`. A swallowed boot error costs hours to diagnose. |
 | `app.Run()` before `boost.Start()` | `boost.Start()` is always first |
-| Mixing `fxfact.New` with `fx.New` in the same binary | Pick one |
+| Mixing `fxfact.NewApp` with `fx.New` in the same binary | Pick one |
