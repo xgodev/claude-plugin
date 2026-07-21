@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.17.1]
+
+### Fixed
+
+- **Kafka adapter config namespace follows the upstream fix.** The adapter root
+  was `.kafka_confluent`, whose literal underscore no env var could express
+  (the loader splits on `_`), so those keys were file-only. `xgodev/boost`
+  renamed it to `.confluent` (issue #48, fixed in `ba0cff2`), so
+  `adapter-kafka.md` now documents `boost.bootstrap.function.adapter.confluent.*`
+  and the `BOOST_BOOTSTRAP_FUNCTION_ADAPTER_CONFLUENT_*` overrides that now work.
+
 ## [1.17.0]
 
 ### Added

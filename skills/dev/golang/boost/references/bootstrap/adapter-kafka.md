@@ -20,10 +20,10 @@ Two distinct namespaces (`.../confluent-kafka-go/v2/config.go`):
 
 | Namespace | Keys |
 |---|---|
-| `boost.bootstrap.function.adapter.kafka_confluent.*` (adapter, `config.go:10-18`) | `topics`, `timeOut`, `manualCommit`, `maxWorkers`, `backoff`, `backoffBase`, `maxBackoff`, `retryLimit` |
+| `boost.bootstrap.function.adapter.confluent.*` (adapter, `config.go:10-18`) | `topics`, `timeOut`, `manualCommit`, `maxWorkers`, `backoff`, `backoffBase`, `maxBackoff`, `retryLimit` |
 | `boost.factory.confluent.*` (client, `factory/.../config.go:8,22-23,33-35`) | `brokers`, `consumer.groupId`, `consumer.autoOffsetReset`, `consumer.autoCommit`, producer settings |
 
-Env overrides use `_` as the path separator, so factory keys map straightforwardly (`BOOST_FACTORY_CONFLUENT_BROKERS`). The literal underscore inside the `kafka_confluent` segment is NOT expressible in the env parser (`wrapper/config/contrib/knadh/koanf/v1/loader.go:214-235` splits on `_`) -- set the adapter keys in a config file.
+Env overrides use `_` as the path separator: `BOOST_FACTORY_CONFLUENT_BROKERS` for the factory keys, `BOOST_BOOTSTRAP_FUNCTION_ADAPTER_CONFLUENT_TOPICS` for the adapter ones.
 
 ## Production caveat -- same ctx-loss as Pub/Sub
 
