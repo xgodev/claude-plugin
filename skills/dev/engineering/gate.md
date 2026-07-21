@@ -140,7 +140,7 @@ LOG_DIR="$(mktemp -d "${TMPDIR:-/tmp}/qg-XXXXXX")"   # host-side, outside the re
 QG_TAG="${QG_TAG:-latest}"
 QG_IMAGE="${QG_IMAGE:-ghcr.io/xgodev/quality-gate/<lang>:${QG_TAG}}"
 
-docker run --rm --pull="${QG_PULL:-always}" \
+docker run --rm --pull="${QG_PULL:-always}" ${QG_PLATFORM:+--platform $QG_PLATFORM} \
   -v "$PWD:/src" -w /src \
   -v "$LOG_DIR:/logs" \
   "$QG_IMAGE" \
@@ -154,7 +154,7 @@ GATE_EXIT=$?
 In **absolute mode** (no base ref available), omit `--base`:
 
 ```bash
-docker run --rm --pull="${QG_PULL:-always}" -v "$PWD:/src" -w /src -v "$LOG_DIR:/logs" "$QG_IMAGE" \
+docker run --rm --pull="${QG_PULL:-always}" ${QG_PLATFORM:+--platform $QG_PLATFORM} -v "$PWD:/src" -w /src -v "$LOG_DIR:/logs" "$QG_IMAGE" \
   --format json --log-dir /logs \
   > "$LOG_DIR/result.json" 2> "$LOG_DIR/stderr.log"
 GATE_EXIT=$?
@@ -166,6 +166,9 @@ Notes:
   mounted `.git` carries the refs.
 - A `docker` invocation failure (daemon down, image pull denied) is a **tool
   error, exit 2** -- relay it literally, do NOT interpret any JSON.
+- `no matching manifest for <arch>`: the image has no variant for the host
+  arch. Set `QG_PLATFORM=linux/amd64` to run under emulation (slower). The real
+  fix is a multi-arch image in the gate repo.
 
 #### Dispatcher exit-code map
 
