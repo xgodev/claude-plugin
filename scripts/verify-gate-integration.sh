@@ -74,11 +74,15 @@ RS
 git -C "$repo" add -A && git -C "$repo" commit -qm change
 
 echo "== 3. run the plugin's exact invocation =="
-docker run --rm -v "$repo:/src" -w /src -v "$logs:/logs" "$IMAGE" \
+plat="${QG_PLATFORM:+--platform $QG_PLATFORM}"
+docker run --rm $plat -v "$repo:/src" -w /src -v "$logs:/logs" "$IMAGE" \
   --base main --format json --log-dir /logs \
   > "$logs/result.json" 2> "$logs/stderr.log"
 rc=$?
 echo "   exit=$rc"
+if grep -qi 'no matching manifest' "$logs/stderr.log"; then
+  fail "image '$IMAGE' has no variant for this host arch ($(uname -m)). Publish multi-arch (xgodev/quality-gate#16), or set QG_PLATFORM=linux/amd64 to run under emulation."
+fi
 
 echo "== 4. assert a real verdict was produced =="
 case "$rc" in

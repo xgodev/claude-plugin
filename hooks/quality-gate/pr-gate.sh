@@ -71,7 +71,10 @@ logs="$(mktemp -d "${TMPDIR:-/tmp}/qg-hook-XXXXXX")"
 # -> rc 125 -> fail open below. Gate developers testing a locally built image
 # set QG_PULL=never.
 pull="${QG_PULL:-always}"
-run_gate() { docker run --rm "--pull=$pull" -v "$root:/src" -w /src -v "$logs:/logs" "$image" --log-dir /logs "$@" 2>&1; }
+# QG_PLATFORM: force a platform (e.g. linux/amd64) when the image has no variant
+# for the host arch -- a native run then fails with "no matching manifest".
+plat="${QG_PLATFORM:+--platform $QG_PLATFORM}"
+run_gate() { docker run --rm "--pull=$pull" $plat -v "$root:/src" -w /src -v "$logs:/logs" "$image" --log-dir /logs "$@" 2>&1; }
 if [ -n "$base" ]; then
   out="$(run_gate --base "$base")"; rc=$?
 else

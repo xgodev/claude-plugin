@@ -4,6 +4,13 @@
 
 ### Added
 
+- **`QG_PLATFORM` escape hatch for single-arch gate images.** When the pulled
+  image has no variant for the host arch, docker fails with `no matching
+  manifest` and the gate never runs. Setting `QG_PLATFORM=linux/amd64` runs it
+  under emulation (slower). Wired into the skill, the PR-gate hook and
+  `verify-gate-integration.sh`, which now names that cause instead of reporting
+  a generic tool error. The real fix is a multi-arch image in the gate repo.
+
 - **`scripts/verify_config_roots.py` -- a gate against the defect class above.**
   It extracts the literal `boost.factory.*` config roots from a boost checkout
   (`BOOST_SRC=...`) and fails when the skill documents a namespace matching
