@@ -1,118 +1,50 @@
 # Quality Gate
 
-Quality gate shared across projects. Runs **the same** locally and in CI: fails **only** when the PR worsens some metric relative to a chosen base ref.
+The quality gate fails a change **only** when it worsens a metric (fmt, lint,
+build, test, complexity, coverage) relative to a base ref -- pre-existing debt
+never blocks, only regressions do.
 
-The Quality Gate ships as part of the all-in-one `claude-plugin`
-(see the [repo README](../README.md) for install) and is **two-in-one**:
+**The gate itself is not in this repo.** It lives in
+[`xgodev/quality-gate`](https://github.com/xgodev/quality-gate) and ships as
+per-language Docker images on GHCR (`ghcr.io/xgodev/quality-gate/<lang>`). Its
+contract, exit codes, metrics, tamper-resistance, and per-language details are
+documented there (`docs/contract.md`, `docs/output-format.md`,
+`docs/languages/<lang>.md`).
 
-- **CLI/CI:** clone the `xgodev/claude-plugin` repo and run the dispatcher `./tools/quality-gate/qg` (or `tools/quality-gate/<lang>/qg.sh`) directly -- `.claude-plugin/` is inert outside Claude Code.
-- **Claude Code plugin:** the gate flow (a leaf of the `dev` skill) installs **together** with the scripts (bundled dispatcher, no runtime clone) when you install `claude-plugin@xgodev`. (`add-quality-gate` is maintainer-only, project-local in this repo -- not shipped.)
+This plugin only **consumes** those images, in two places:
 
-## How it works
+## 1. The `gate.md` skill (`skills/dev/engineering/gate.md`)
 
-1. Each supported language has a standalone script at `<lang>/qg.sh` (e.g. `rust/qg.sh`).
-2. The script compares metrics (fmt, lint, build, test, complexity, coverage) between the current state and the base ref passed via `--base`.
-3. Pre-existing debt never blocks. Only worsening blocks.
+A leaf of the `dev` skill. When you ask to "run the quality gate" / "check
+quality before PR", it:
 
-### Dispatcher `qg` (entry point)
+1. Picks the per-language image by a root file-sentinel (`Cargo.toml` -> rust,
+   `go.mod` -> go, ...).
+2. Runs it: `docker run --rm -v "$PWD:/src" -w /src
+   ghcr.io/xgodev/quality-gate/<lang>:v1 --base <ref> --format json`
+   (logs bind-mounted to a separate host dir, never into your repo).
+3. Interprets the JSON verdict, reads the per-metric logs, and reports with
+   file:line pointers -- and enforces the anti-bypass LAWs (never sets
+   `QG_BYPASS_REASON`, never edits code/config to pass, never opens the PR).
 
-The canonical way to run is the **bundled `qg` dispatcher** (at
-`tools/quality-gate/` in the repo):
+## 2. The PR-gate hook (`hooks/quality-gate/pr-gate.sh`)
 
-```bash
-cd /path/to/your/project
-~/.claude-plugin/tools/quality-gate/qg --base origin/main   # run the gate(s)
-~/.claude-plugin/tools/quality-gate/qg --detect             # list languages
-```
+A PreToolUse hook that runs the same image before `gh pr create`. `git push`
+is never gated (work-in-progress must stay cheap; CI is the hard gate).
 
-100% shell detection (zero AI): `qg` calls `<lang>/qg.sh --detect` to
-discover the language(s) and run the matching gate(s). It forwards
-all flags. **Monorepo:** a `.qg.yaml` with a `projects:` block lists the
-sub-projects. Exit codes: `0` green, `1` regression/threshold, `2`
-tool/setup, **`3` no supported language detected** (dispatcher-exclusive).
-Aggregate verdict of N gates = worst (precedence `2 > 1 > 3 > 0`);
-with `--format json` it emits `{aggregate_verdict, results:[...]}`.
+## Requirements & overrides
 
-### Absolute mode and `--detect` (contract v1.1)
+- **`docker`** installed with the daemon running. Both the skill and the hook
+  **fail open** (allow, with a warning) when docker or the image is
+  unavailable -- a missing runtime never bricks your git. They never fall back
+  to running tools directly.
+- **Pin** the image with `QG_TAG` (default `v1`). **Override** the whole image
+  ref with `QG_IMAGE` (e.g. a locally built image while developing the gate).
+- The base ref must be resolvable inside the container; the mounted `.git`
+  carries the refs (in CI, `actions/checkout` with `fetch-depth: 0`).
 
-- **`--detect`**: `<lang>/qg.sh --detect` prints the language slug + exit 0 if the sentinel exists at the project root, or exit 1 if not. Short-circuits everything. The dispatcher uses this to discover which gates to run without a hardcoded table.
-- **Absolute mode**: running `<lang>/qg.sh` (or `qg`) **without** `--base` (and without `QG_BASE_REF`) measures the current state once, with no baseline. Exit 0 always, except if `.qg.yaml` defines `absolute_thresholds` and some metric violates a threshold (exit 1). Useful when there is no base ref (e.g. legacy without a reference PR). JSON carries `mode: "absolute"`, `base_ref: null`, `schema_version: "1.1"`.
+## Changing the gate
 
-Comparative mode (with `--base`) does not change -- v1.1 is additive and backward-compatible.
-
-### Tamper-resistance
-
-The gate **ships and enforces its own rulesets** (`<lang>/rules/`). Quality
-configs of the target project (`.eslintrc`, `clippy.toml`, `.stylelintrc`,
-etc.) are **ignored by default** -- otherwise the dev loosens a rule in
-their own repo and the gate becomes theater. Override only via the external
-env var `QG_RULESET_DIR` (whoever RUNS the gate), never from `.qg.yaml`/a project file.
-
-### React / Vue / Svelte / Angular = nodejs project
-
-A project with `package.json` (even React/Vue/etc.) is covered by
-`nodejs/qg.sh`. The `web` gate only covers **pure static HTML/CSS** (no
-`package.json`). Framework rules go into the QG ruleset
-(`nodejs/rules/`), never into the project config.
-
-## Enforcement hook
-
-The plugin also ships an **opt-in** `PreToolUse` hook (`hooks/quality-gate/pr-gate.sh`)
-that blocks `gh pr create` unless the gate passes for the current HEAD
-(`git push` is never gated), re-running `qg` against the branch upstream (falling back to
-`origin/HEAD`, then absolute mode). Exporting `QG_BYPASS_REASON` overrides it
-the same way it overrides the gate itself, and the hook fails **open** (never
-blocks) on its own errors -- missing `jq`/`qg`, malformed input, or a
-non-git directory. See [`docs/hooks.md`](hooks.md).
-
-## Supported languages
-
-| Language | Script | Measured metrics | Prereqs |
-|---|---|---|---|
-| Rust | [`rust/qg.sh`](../tools/quality-gate/rust/README.md) | fmt, lint, build, test, complexity, coverage | cargo, cargo-llvm-cov, jq |
-| Go | [`go/qg.sh`](../tools/quality-gate/go/README.md) | fmt, lint, build, test, complexity, coverage | go, gofmt, gocyclo, golangci-lint (optional), jq |
-| Python | [`python/qg.sh`](../tools/quality-gate/python/README.md) | fmt, lint, build, test, complexity, coverage | python3, ruff, pytest, pytest-cov, radon, jq |
-| Node.js | [`nodejs/qg.sh`](../tools/quality-gate/nodejs/README.md) | fmt, lint, build, test, complexity, coverage | node 18+, npm, npx, jq (prettier/eslint/c8 via npx) |
-| Java | [`java/qg.sh`](../tools/quality-gate/java/README.md) | fmt, lint, build, test, complexity, coverage | java 17+, mvn, google-java-format, pmd, jq (jacoco plugin in the project) |
-| Swift\* | [`swift/qg.sh`](../tools/quality-gate/swift/README.md) | fmt, lint, build, test, coverage | swift 5.9+, swift-format, swiftlint, jq (xcrun on macOS) |
-| Kotlin | [`kotlin/qg.sh`](../tools/quality-gate/kotlin/README.md) | fmt, lint, build, test, complexity, coverage | java 17+, gradle, ktlint, detekt, jq (kover plugin in the project) |
-| Web (HTML/CSS)\* | [`web/qg.sh`](../tools/quality-gate/web/qg.sh) | fmt, lint | node 18+, jq (prettier/stylelint/htmlhint via npx) |
-
-\* `complexity` omitted in Swift -- see [`docs/languages/swift.md`](languages/swift.md) section "Omitted metrics". `build`, `test`, `complexity` and `coverage` omitted in Web (static HTML/CSS has no build/test/complexity/coverage) -- see [`docs/languages/web.md`](languages/web.md). A React/Vue/etc. project with `package.json` = **nodejs** project (`nodejs/qg.sh`), not web.
-
-## Quick start
-
-```bash
-# Clone once
-git clone git@github.com:xgodev/claude-plugin.git ~/.claude-plugin
-
-# Run in your project (the dispatcher detects the language on its own)
-cd /path/to/your/project
-~/.claude-plugin/tools/quality-gate/qg --base origin/main
-```
-
-## Documentation
-
-- [`docs/contract.md`](contract.md) -- contract common to every language (CLI, exit codes, output, bypass, `.qg.yaml`).
-- [`docs/output-format.md`](output-format.md) -- detailed text and JSON formats.
-- [`docs/consume.md`](consume.md) -- how to integrate it in your project (local now; CI in V2).
-- [`docs/hooks.md`](hooks.md) -- the opt-in PR-gate hook (blocks `gh pr create` on a failing gate; `git push` is never gated).
-- [`docs/languages/rust.md`](languages/rust.md) -- prereqs, metrics and troubleshooting for Rust.
-- [`docs/languages/go.md`](languages/go.md) -- prereqs, metrics and troubleshooting for Go.
-- [`docs/languages/python.md`](languages/python.md) -- prereqs, metrics and troubleshooting for Python.
-- [`docs/languages/nodejs.md`](languages/nodejs.md) -- prereqs, metrics and troubleshooting for Node.js.
-- [`docs/languages/java.md`](languages/java.md) -- prereqs, metrics and troubleshooting for Java.
-- [`docs/languages/swift.md`](languages/swift.md) -- prereqs, metrics and troubleshooting for Swift (complexity omitted).
-- [`docs/languages/kotlin.md`](languages/kotlin.md) -- prereqs, metrics and troubleshooting for Kotlin.
-- [`docs/languages/web.md`](languages/web.md) -- prereqs and troubleshooting for Web (HTML/CSS; only fmt+lint; React/Vue=nodejs).
-
-## Contributing
-
-See [`CONTRIBUTING.md`](../CONTRIBUTING.md). To add a new language with AI assistance, use the maintainer-only `add-quality-gate` skill (project-local, in this repo's `.claude/skills/`).
-
-## Hygiene scan
-
-Every `qg` run ends with a repo-level hygiene scan (neutered CI test
-steps, rotten debt allowlists, `TODO(#N)` pointing at closed issues,
-blanket lint suppression). Hard violations fail the gate; details in
-[the contract](contract.md). Disable per run with `QG_HYGIENE=0`.
+Adding a language, a metric, a Dockerfile, or a ruleset is work in
+`xgodev/quality-gate` -- open an issue there. From this repo we consume the
+images; we do not edit the gate.

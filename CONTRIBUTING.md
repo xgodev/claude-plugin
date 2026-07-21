@@ -1,68 +1,49 @@
-# Contributing to Quality Gate
+# Contributing to claude-plugin
+
+This repo is the all-in-one `claude-plugin` (skills + hooks) and the single
+`xgodev` marketplace. It does NOT contain the quality gate anymore -- that
+moved to [`xgodev/quality-gate`](https://github.com/xgodev/quality-gate) and
+ships as Docker images this plugin consumes.
 
 ## Principles
 
-1. **Per-language independence.** Each `<lang>/qg.sh` is standalone. No orchestrator, no `lib/` shared across languages.
-2. **The contract is law.** Any change affecting CLI, exit codes, output or config goes through a review of `docs/contract.md` before the code.
-3. **English in the output.** Messages, ::error::, ::warning::, table headers in English. Identifiers and metric names in EN ASCII.
-4. **TDD is mandatory** for script changes. Test fixtures in `<lang>/test-fixtures/baseline/` and `<lang>/test-fixtures/regressed/`.
+1. **Docs update in the same change.** Any change to a skill, hook, or
+   structure updates every doc it affects (`README.md`, `CHANGELOG.md`,
+   `CLAUDE.md`, `docs/**`) in the same commit. A doc that lies is a defect.
+2. **One version for the whole bundle.** Any content change bumps the single
+   plugin version -- `.claude-plugin/plugin.json`, the README `- Version:`
+   line, and a `CHANGELOG.md` entry, together.
+3. **English only, everywhere.** Docs, manifests, skills, comments, runtime
+   output. ASCII identifiers; `--` not em-dash.
+4. **Skills are gated on `writing-skills`.** Editing ANY file under `skills/`
+   follows the writing-skills workflow (subagent baseline before writing) and
+   obeys the `skill-rules` portability law (no absolute paths, no pinned
+   versions).
+5. **Hook changes run `hooks/test/*.sh`** (all green) before commit.
 
-## Add a new language
+## The quality gate lives elsewhere
 
-### With AI (recommended)
-
-Invoke the `add-quality-gate` skill (project-local, in
-`.claude/skills/add-quality-gate/` -- it loads when working inside this
-repo; it is NOT shipped with the plugin):
-
-```
-add quality gate for Go
-```
-
-The skill follows a mandatory 22-step checklist. Do not skip any.
-
-### Manual (without AI)
-
-Follow the same checklist documented in `.claude/skills/add-quality-gate/SKILL.md`.
-
-## Change the contract
-
-1. Update `docs/contract.md` + `docs/contract-v1.schema.json`.
-2. Update ALL `<lang>/qg.sh` to comply with the new version.
-3. Bump `QG_CONTRACT_VERSION` in each script's header.
-4. Update test fixtures if the change affects output.
-5. Update `.claude/skills/add-quality-gate/SKILL.md` if it affects the process.
-
-Breaking change -> bump major (v1 -> v2). V1 still has no tag-based versioning (deliberate spec decision).
+Anything about the gate's behavior -- a new language, a metric, a Dockerfile,
+a ruleset, the contract -- is work in `xgodev/quality-gate`. **Open an issue
+there.** That repo is maintained separately; from here we only file issues and
+consume its published images. What lives HERE is only how the plugin *runs*
+the gate: `skills/dev/engineering/gate.md` and `hooks/quality-gate/pr-gate.sh`
+(both `docker run` the pinned image). See [`docs/quality-gate.md`](docs/quality-gate.md).
 
 ## Repo structure
 
 ```
 claude-plugin/
-|-- README.md
-|-- CONTRIBUTING.md
-|-- docs/
-|   |-- contract.md
-|   |-- contract-v1.schema.json
-|   |-- output-format.md
-|   |-- consume.md
-|   `-- languages/<lang>.md
-|-- .claude/skills/add-quality-gate/   (maintainer-only, not shipped)
-`-- tools/quality-gate/
-    |-- qg                 (dispatcher)
-    |-- tests/             (bats suite + helpers)
-    `-- <lang>/
-        |-- qg.sh
-        |-- README.md
-        `-- test-fixtures/{baseline,regressed}/
+|-- .claude-plugin/     plugin.json + marketplace.json
+|-- skills/             shipped skills (dev/, ux-ui/, skill-rules/)
+|-- hooks/              hooks.json + quality-gate/ + dev-rules/ + test/
+|-- docs/               plugin docs (quality-gate.md, hooks.md, dev-rules.md, ...)
+|-- README.md  CHANGELOG.md  CLAUDE.md
 ```
 
-## Tests for the gate itself
-
-`tools/quality-gate/tests/` contains tests in [bats](https://github.com/bats-core/bats-core). Run:
+## Tests
 
 ```bash
-bats tools/quality-gate/tests/
+hooks/test/*.sh              # hook behavior (run all before committing a hook change)
+hooks/test/hooks_json_test.sh
 ```
-
-Every change to `<lang>/qg.sh` requires a corresponding test in `tools/quality-gate/tests/<lang>-qg.bats`.

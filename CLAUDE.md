@@ -3,10 +3,12 @@
 This repo is the **all-in-one `claude-plugin`** by `xgodev` AND the single
 `xgodev` marketplace (`.claude-plugin/marketplace.json`, one plugin
 entry, source `./`). Everything that used to live in the retired repos'
-plugin form -- `boost-claude` (`boost` skill), `quality-gate` (dispatcher +
-gates + skills + PR-gate hook), `dev-rules` (skill + RED-first hooks),
-`skill-rules` (skill) -- now lives HERE, as one plugin, one version, one
-install. The plugin ships ONLY what is its own: no third-party MCP
+plugin form -- `boost-claude` (`boost` skill), `dev-rules` (skill +
+RED-first hooks), `skill-rules` (skill) -- now lives HERE, as one plugin,
+one version, one install. The **quality gate** was bundled here too but
+moved back out to `xgodev/quality-gate` (per-language Docker images on
+GHCR); this plugin now only CONSUMES those images via the `gate.md` skill
+and the PR-gate hook -- it does not ship the gate. The plugin ships ONLY what is its own: no third-party MCP
 servers (the `playwright` MCP wiring was removed in 1.1.0 -- users who
 want it add it to their own config).
 
@@ -90,36 +92,32 @@ repos. Read them before changing anything.
 - Run `python3 scripts/verify_references.py` after editing any reference
   file -- every `references/*.md` pointer must resolve.
 
-### Quality Gate (`tools/quality-gate/`, `hooks/quality-gate/`)
+### Quality Gate (`skills/dev/engineering/gate.md`, `hooks/quality-gate/`)
 
-- **The gate bundle lives under `tools/quality-gate/`** (dispatcher
-  `qg`, the `<lang>/` gates, and `tests/`), NOT at the repo root -- moved
-  in 1.1.0 to keep the root plugin-only. Path references in hooks, skills,
-  and docs point there; do not move it back or split it.
-- **Self-contained -- no runtime clone/pull/cache.** The skill invokes the
-  dispatcher at `${CLAUDE_PLUGIN_ROOT}/tools/quality-gate/qg`
-  (override only via `QG_PATH`, which points at the quality-gate dir, for
-  local development). Never reintroduce a `~/.<x>` clone + `git pull`
-  cache.
-- **Tamper-resistance is law.** The gate ships and enforces its own
-  rulesets (`<lang>/rules/`); project quality configs are ignored by
-  default. The only override is the `QG_RULESET_DIR` env var supplied by
-  whoever RUNS the gate -- never read from a project file.
-- **fmt/lint/complexity measure SOURCE, not generated output** (canonical
-  QG-owned ignore list, never the project's ignore files).
-- **The project's declared toolchain/build-system is authoritative.** If it
-  cannot be honored exactly, that is tool-error exit 2 -- never silently
-  substitute (no npm for a `yarn.lock`, no mvn for Gradle).
-- **Every "tool missing" error teaches how to install it** (Linux + macOS
-  commands + consequence).
-- The full contract lives in `docs/contract.md`; adding a language follows
-  the `add-quality-gate` skill and updates `docs/languages/<lang>.md` +
-  `tools/quality-gate/<lang>/README.md` in the same change. Test
-  suite: `tools/quality-gate/tests/*.bats`.
-- **`add-quality-gate` is maintainer-only and project-local**
-  (`.claude/skills/add-quality-gate/`). It is deliberately NOT in
-  `skills/` -- end users must not receive it. Do not move it back into
-  the shipped plugin.
+- **The gate itself is NO LONGER in this repo.** It lives in
+  `xgodev/quality-gate` and ships as per-language Docker images on GHCR
+  (`ghcr.io/xgodev/quality-gate/<lang>`). This plugin only CONSUMES those
+  images. Do NOT reintroduce a bundled `tools/quality-gate/` -- the gate
+  scripts, the contract, the per-language rulesets, and the `add-quality-gate`
+  workflow all belong to the gate repo now.
+- **What this plugin owns:** the `gate.md` skill (picks the per-language
+  image by root sentinel, runs `docker run -v "$PWD:/src" -w /src
+  ghcr.io/xgodev/quality-gate/<lang>:v1 --format json`, interprets the JSON,
+  enforces the anti-bypass LAWs) and the `hooks/quality-gate/pr-gate.sh`
+  PreToolUse hook (same docker run before `gh pr create`). Neither embeds any
+  gate logic -- detection, measurement, tamper-resistance, and rulesets are
+  all inside the image.
+- **`docker` is a runtime prerequisite.** Both the skill and the hook fail
+  OPEN when docker or the image is unavailable (a missing runtime must never
+  brick the user's git); they never fall back to running tools directly.
+- **Pin with `QG_TAG` (default `v1`); override the whole ref with `QG_IMAGE`**
+  (local gate development). The skill/hook read the gate's JSON contract and
+  exit codes only -- the contract's source of truth is
+  `xgodev/quality-gate/docs/`.
+- **Anything about the gate's internals** (adding a language, a metric, a
+  Dockerfile, a ruleset) is an ISSUE in `xgodev/quality-gate`, not a change
+  here. That repo is maintained by a different agent -- from this repo we only
+  file issues there, never edit its code.
 
 ### dev-rules (`skills/dev/engineering/rules.md`, `hooks/dev-rules/`)
 
@@ -156,12 +154,9 @@ repos. Read them before changing anything.
   dependencies -- retired in 1.0.0; the `renames` map replaced them.
 - Putting USER-FACING skills in `.claude/skills/` (project-local, not
   distributed); shipped plugin skills live in `skills/<name>/SKILL.md`.
-  The inverse also holds: maintainer-only skills (`add-quality-gate`)
-  stay in `.claude/skills/` and must NOT be shipped.
 - Any Portuguese string (run a language sweep before push).
 - Historical asides in the README ("X removed in N.N.N", "formerly Y",
   migration walkthroughs for layouts nobody used). The README describes
   the CURRENT state only; history belongs in the CHANGELOG.
-- Touching `docs/quality-gate.md` links without re-checking relative paths
-  (that file lives in `docs/`, so gate dirs are
-  `../tools/quality-gate/<lang>/`).
+- Re-bundling the gate. It lives in `xgodev/quality-gate` as Docker images;
+  this plugin only runs them. Gate internals = an issue in that repo.

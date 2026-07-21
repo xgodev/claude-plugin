@@ -1,5 +1,34 @@
 # Changelog
 
+## [1.16.0]
+
+### Changed
+
+- **The quality gate is no longer bundled in this plugin.** It moved back
+  out to `xgodev/quality-gate` and ships as per-language Docker images on
+  GHCR (`ghcr.io/xgodev/quality-gate/<lang>`). This plugin now only
+  CONSUMES those images:
+  - `skills/dev/engineering/gate.md` picks the per-language image by a root
+    file-sentinel and runs `docker run -v "$PWD:/src" -w /src
+    ghcr.io/xgodev/quality-gate/<lang>:v1 --format json` (logs bind-mounted
+    to a separate host dir, never into the project). All anti-bypass LAWs,
+    the exit-code map, and JSON interpretation are unchanged.
+  - `hooks/quality-gate/pr-gate.sh` runs the same image before
+    `gh pr create`. `git push` is still never gated.
+  - Both **fail open** when `docker`/the daemon/the image is unavailable (a
+    missing runtime must never brick git); neither falls back to running
+    tools directly. Pin with `QG_TAG` (default `v1`); override the ref with
+    `QG_IMAGE`.
+
+### Removed
+
+- The bundled gate (`tools/quality-gate/`), the gate-describing docs
+  (`docs/contract.md`, `docs/consume.md`, `docs/output-format.md`,
+  `docs/languages/`), and the maintainer-only `add-quality-gate` skill --
+  all now belong to `xgodev/quality-gate`. Gate internals (a language, a
+  metric, a Dockerfile, a ruleset) are an issue in that repo, not a change
+  here.
+
 ## [1.15.0]
 
 ### Changed
