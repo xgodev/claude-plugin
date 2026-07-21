@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.16.1]
+
+### Added
+
+- **Integration verifier for the consumed gate image.**
+  `scripts/verify-gate-integration.sh` pulls the pinned
+  `ghcr.io/xgodev/quality-gate/<lang>:<tag>` image and runs the plugin's exact
+  `docker run` invocation against a throwaway rust repo, asserting a real
+  verdict -- failing loudly if the image is missing/unpullable or produces no
+  verdict, so the integration cannot silently rot behind the skill/hook
+  fail-open. `.github/workflows/gate-integration.yml` runs it on demand + a
+  daily heartbeat. Surfaced two blockers, tracked in `xgodev/quality-gate#15`:
+  no `:v1` tag is published yet (only `:latest`, on main pushes), and the GHCR
+  package must be made public for unauthenticated consumers.
+
 ## [1.16.0]
 
 ### Changed
