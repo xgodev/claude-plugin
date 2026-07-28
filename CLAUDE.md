@@ -136,6 +136,15 @@ repos. Read them before changing anything.
 - **`docker` is a runtime prerequisite.** Both the skill and the hook fail
   OPEN when docker or the image is unavailable (a missing runtime must never
   brick the user's git); they never fall back to running tools directly.
+- **Per-project opt-out lives in `.qg-hook.json` (this repo's file), NOT
+  `.qg.yaml`.** `{"pr_gate": {"<lang>": false}}` (or `{"pr_gate": false}`)
+  turns the PR-gate hook off for a language whose local gate is too slow to
+  run on every PR (CI still enforces). `.qg.yaml` is the gate repo's contract
+  -- never squat a key there (an unknown key trips exit 2). The opt-out is NOT
+  a bypass: no `QG_BYPASS_REASON`, no audit log, no code/test/ruleset touched.
+  Fail-safe: anything but a literal `false` leaves the gate ON. Both the hook
+  and the `gate.md` skill read it; keep them and `hooks/test/pr_gate_test.sh`
+  in lockstep.
 - **Default tag `latest`, refreshed each run via `--pull=always`; set `QG_TAG` to a fixed version for reproducibility, or override the whole ref with `QG_IMAGE`**
   (local gate development). The skill/hook read the gate's JSON contract and
   exit codes only -- the contract's source of truth is

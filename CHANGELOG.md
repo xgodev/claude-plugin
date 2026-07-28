@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.18.0]
+
+### Added
+
+- **Per-project opt-out for the PR-gate hook (`.qg-hook.json`).** A repo can
+  turn the `gh pr create` gate OFF for a given language with a versioned
+  `.qg-hook.json` at its root: `{"pr_gate": {"rust": false}}` disables it for
+  Rust only, `{"pr_gate": false}` for every language. Motivated by slow local
+  gates (Rust) where CI already enforces the same gate. The check runs right
+  after language detection, before docker is consulted, so a disabled language
+  never pulls or runs the image. This is **not a bypass** -- it sets no
+  `QG_BYPASS_REASON`, writes no audit-log entry, and touches no code, test, or
+  ruleset; the CI hard gate is unchanged. Fail-safe toward enforcement: an
+  absent file, invalid JSON, a missing key, or any value that is not exactly
+  `false` leaves the gate ON. The `/gate` skill honors the same file (a
+  disabled language no longer auto-offers to run before a PR).
+  `hooks/test/pr_gate_test.sh` covers the matrix.
+
 ## [1.17.1]
 
 ### Fixed

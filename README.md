@@ -14,7 +14,10 @@ capability:
   lives in [`xgodev/quality-gate`](https://github.com/xgodev/quality-gate) and
   ships as per-language Docker images (`ghcr.io/xgodev/quality-gate/<lang>`);
   this plugin runs the pinned image (`docker` required, fails open when
-  absent). Fails only when a change worsens a metric vs a base ref. See
+  absent). Fails only when a change worsens a metric vs a base ref. A repo can
+  turn the PR-gate hook off per language with a `.qg-hook.json`
+  (`{"pr_gate": {"rust": false}}`) when a local gate is too slow to run on
+  every PR and CI already enforces it -- not a bypass. See
   [`docs/quality-gate.md`](docs/quality-gate.md).
 - **`dev-rules`** -- macro, language-agnostic engineering-discipline skill
   (data ownership, zero coupling, RED-first TDD, docs-synced commits,
@@ -141,4 +144,4 @@ images. See [`docs/quality-gate.md`](docs/quality-gate.md).
 
 MIT -- see [LICENSE](LICENSE).
 
-- Version: 1.17.1
+- Version: 1.18.0

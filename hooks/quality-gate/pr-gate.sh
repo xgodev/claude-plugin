@@ -36,13 +36,6 @@ done <<< "$(printf '%s' "$cmd" | sed -E 's/(\|\||&&|;|\|)/\n/g')"
 proj="${CLAUDE_PROJECT_DIR:-$PWD}"
 root="$(git -C "$proj" rev-parse --show-toplevel 2>/dev/null)" || exit 0  # not a repo -> allow
 
-# The gate is a Docker image (xgodev/quality-gate). Docker absent -> fail open:
-# a missing runtime must never brick the user's git.
-if ! command -v docker >/dev/null 2>&1 || ! docker info >/dev/null 2>&1; then
-  echo "qg-hook: docker unavailable; skipping gate enforcement" >&2
-  exit 0
-fi
-
 # --- pick the per-language image by root sentinel -------------------------
 lang=""
 if   [ -f "$root/Cargo.toml" ]; then lang=rust
@@ -55,6 +48,34 @@ elif [ -f "$root/package.json" ]; then lang=nodejs
 elif ls "$root"/*.html "$root"/*.css >/dev/null 2>&1; then lang=web
 fi
 [ -z "$lang" ] && exit 0   # no supported language -> allow
+
+# --- per-project opt-out (.qg-hook.json) ----------------------------------
+# A repo can turn the PR-gate hook OFF for a given language via a versioned
+# `.qg-hook.json` at its root. This is NOT a bypass (no QG_BYPASS_REASON, no
+# audit log): it declares that this language's gate lives in CI only. Shapes:
+#   {"pr_gate": false}            -> off for every language
+#   {"pr_gate": {"rust": false}}  -> off for rust only
+# Anything else (file absent, invalid JSON, key/lang absent, value not false)
+# leaves the gate ON -- fail-safe toward enforcement.
+cfg="$root/.qg-hook.json"
+if [ -f "$cfg" ]; then
+  flag="$(jq -r --arg l "$lang" '
+    .pr_gate as $g
+    | if $g == false then "off"
+      elif ($g | type) == "object" and $g[$l] == false then "off"
+      else "on" end' "$cfg" 2>/dev/null || echo on)"
+  if [ "$flag" = "off" ]; then
+    echo "qg-hook: PR-gate disabled for '$lang' via .qg-hook.json; skipping" >&2
+    exit 0
+  fi
+fi
+
+# The gate is a Docker image (xgodev/quality-gate). Docker absent -> fail open:
+# a missing runtime must never brick the user's git.
+if ! command -v docker >/dev/null 2>&1 || ! docker info >/dev/null 2>&1; then
+  echo "qg-hook: docker unavailable; skipping gate enforcement" >&2
+  exit 0
+fi
 
 image="${QG_IMAGE:-ghcr.io/xgodev/quality-gate/${lang}:${QG_TAG:-latest}}"
 

@@ -57,6 +57,23 @@ Do not use:
 - If the user **explicitly** said "skip the gate" / "do not run the QG"
   / "I already ran the gate" in this session. Trust and proceed. **Do NOT
   infer** from vague hints (e.g. "everything is green here" is not a waiver).
+- If the repo has a root `.qg-hook.json` that turns the PR-gate OFF for
+  **this project's language** -- `{"pr_gate": {"<lang>": false}}` (pick
+  `<lang>` by the same sentinel table below), or `{"pr_gate": false}` for
+  every language. Then do NOT auto-offer to run the gate before a PR. This
+  file is a **versioned, explicit project waiver** -- honoring it is not the
+  same as inferring one from a vague hint; the repo has declared this
+  language's gate lives in CI only. Still run the gate on an **explicit**
+  request ("run QG"). Read `.qg-hook.json` before auto-firing; only a literal
+  `false` disables it -- an absent file, invalid JSON, a missing key, or any
+  other value leaves the gate ON.
+
+**The opt-out is NOT a bypass.** `.qg-hook.json` only silences the
+auto-offer. It never sets `QG_BYPASS_REASON`, is not audit-logged, and does
+not let you edit code/tests/config or run `gh pr create` after a verdict --
+every anti-circumvention LAW below still holds. When the gate DOES run
+(explicit request), a `regressed`/`failed` verdict is reported exactly as
+usual.
 
 ## Prerequisites
 

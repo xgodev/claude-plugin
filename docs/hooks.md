@@ -27,6 +27,27 @@ command segment, not as a substring). For a gated command it:
    - docker unavailable / image not pulled (`125`/`126`/`127`) -> **allow**
      (fail open; CI is the hard gate)
 
+## Per-project opt-out (`.qg-hook.json`)
+
+A repo can turn the PR-gate hook OFF for a given language with a versioned
+`.qg-hook.json` at its root -- useful when a language's local gate is too slow
+to run on every `gh pr create` (e.g. Rust) and CI already enforces it. The
+check runs right after language detection, before docker is even consulted, so
+a disabled language never pulls or runs the image.
+
+    { "pr_gate": { "rust": false } }   // off for rust only
+    { "pr_gate": false }               // off for every language
+
+This is **not a bypass**: it sets no `QG_BYPASS_REASON`, writes no audit-log
+entry, and touches no code, test, or ruleset. It declares that this language's
+gate lives in CI only -- the hard, server-side guarantee is unchanged. The
+`/gate` skill honors the same file: with a language disabled it no longer
+auto-offers to run before a PR (you can still invoke it explicitly).
+
+Fail-safe toward enforcement: an absent file, invalid JSON, a missing key, or
+any value that is not exactly `false` leaves the gate **ON**. Only a literal
+`false` disables it.
+
 ## Bypass
 
 The hook adds no bypass logic of its own. Exporting `QG_BYPASS_REASON` (already

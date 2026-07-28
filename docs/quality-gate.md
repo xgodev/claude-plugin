@@ -32,6 +32,12 @@ quality before PR", it:
 A PreToolUse hook that runs the same image before `gh pr create`. `git push`
 is never gated (work-in-progress must stay cheap; CI is the hard gate).
 
+A repo can turn this hook OFF per language with a versioned `.qg-hook.json` at
+its root (`{"pr_gate": {"rust": false}}`, or `{"pr_gate": false}` for all) --
+for when a local gate is too slow to run on every PR and CI already enforces
+it. It is not a bypass (no `QG_BYPASS_REASON`, no audit log, no code touched);
+anything but a literal `false` leaves the gate ON. See `docs/hooks.md`.
+
 ## Requirements & overrides
 
 - **`docker`** installed with the daemon running. Both the skill and the hook
