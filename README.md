@@ -5,7 +5,8 @@ The **all-in-one Claude Code plugin** by `xgodev`, and home of the
 capability:
 
 - **`dev` skill (door)** -- one skill routing to: engineering discipline
-  (`dev-rules`), the quality-gate flow, boost docs, and Rust discipline. Leaves:
+  (`dev-rules`), the quality-gate flow, boost docs, and Rust and Python
+  discipline. Leaves:
   grouped-index documentation for
   [`xgodev/boost`](https://github.com/xgodev/boost), the modular Go service
   framework. See [`docs/golang-boost.md`](docs/golang-boost.md).
@@ -113,7 +114,7 @@ pay-per-use:
 
 | Component | Always-on | Loaded when |
 |---|---|---|
-| `dev` description (door: engineering, gate, boost, rust, design) | ~110 tokens | every session |
+| `dev` description (door: engineering, gate, boost, rust, python, design) | ~118 tokens | every session |
 | `ux-ui` description (design) | ~85 tokens | every session |
 | `skill-rules` description | ~40 tokens | every session |
 | `dev` router SKILL.md + the leaf it routes to | 0 | only when the skill fires |
@@ -124,7 +125,8 @@ pay-per-use:
 
 ```
 .claude-plugin/        plugin.json (the single plugin) + marketplace.json (xgodev)
-skills/                dev/{SKILL.md router, engineering/, golang/boost/, rust/}
+skills/                dev/{SKILL.md router, engineering/, golang/boost/, rust/,
+                       python/}
                        ux-ui/ (design: catalog + references)  skill-rules/ (shipped)
 hooks/                 hooks.json (merged registry) + test/; scripts grouped by area:
                        quality-gate/pr-gate.sh, dev-rules/{red-first-guard.sh,
@@ -144,4 +146,4 @@ images. See [`docs/quality-gate.md`](docs/quality-gate.md).
 
 MIT -- see [LICENSE](LICENSE).
 
-- Version: 1.18.0
+- Version: 1.19.0

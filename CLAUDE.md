@@ -168,7 +168,7 @@ repos. Read them before changing anything.
   EVERY code session in every language -- a Rust idiom there is a token
   tax on a Java session. Language-specific shapes (unsafe/SAFETY:, clippy
   discipline, Go/boost, framework rules) live in their own leaf
-  (`golang/`, `rust/`, ... -- frameworks nest under their language, e.g. `golang/boost/`), routed by the `dev` door table, loaded ONLY
+  (`golang/`, `rust/`, `python/`, ... -- frameworks nest under their language, e.g. `golang/boost/`), routed by the `dev` door table, loaded ONLY
   when that language is in play. Adding a language-specific rule to
   rules.md is a defect (1.12.0 -> 1.12.1 incident: Rust idioms in LAWs
   15/16/18 shipped to every session).

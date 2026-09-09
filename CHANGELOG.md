@@ -1,5 +1,48 @@
 # Changelog
 
+## [1.19.0]
+
+### Added
+
+- **Python language leaf (`skills/dev/python/rules.md`), routed by the `dev`
+  door.** `engineering/rules.md` is language-agnostic BY LAW, so a Python
+  session had the LAWs and no Python-concrete shape for them -- Go and Rust
+  had leaves, Python did not. The leaf pins the shapes that were being
+  re-decided from scratch every session: `pyproject.toml` as the single
+  config source, `uv` for a new project and the EXISTING manager kept for an
+  existing one (poetry, pdm and pipenv all ship in the gate image, so a
+  migration is its own change), never two lockfiles -- the committed lockfile
+  picks the manager the gate must run, and a missing manager is exit 2, not a
+  verdict; `mypy --strict` as the floor for code you touch, with legacy
+  ratcheted per module instead of loosened at the root; `Protocol` as the DDD
+  port; per-line
+  `# noqa: CODE` / `# type: ignore[code]` with a written reason, never the
+  file-wide `# ruff: noqa` / `[tool.mypy] ignore_errors` the gate's hygiene
+  scan already fails; `except: pass` / `contextlib.suppress` needing an
+  `# intentional:` reason, and a `Thread` target whose exception dies with
+  the thread; pytest shapes for LAWs 14/15/17 (`tmp_path` over `$HOME`,
+  `pytest.raises` over `try/except: pass`, `xfail(strict=True)` over `skip`,
+  `Event.wait`/`join` over `time.sleep`, and a fixture addressed from
+  `Path(__file__).parent` rather than from the process's current directory);
+  and `ThreadPoolExecutor` / `asyncio.gather` for LAW 12.
+  It also documents what the `python` gate image actually measures (ruff
+  fmt/lint, compileall, pytest, radon `cc >= 11`, coverage) and the fact
+  that **the gate runs ruff with its own ruleset via `--config`** -- a
+  project's `[tool.ruff]` neither relaxes nor tightens the verdict, and a
+  repo with no ruff config is measured all the same.
+  The width rule in particular came out of testing the leaf: a session that
+  HAD the leaf still configured `line-length = 100`, ran `ruff check .` clean
+  against its own config, and would have opened a PR carrying 25 `E501`s and 8
+  unformatted files under the gate's ruleset. Telling a session that the
+  project's config does not govern the verdict is not enough -- it also needs
+  the width rule and a way to measure against the gate's ruleset.
+  Baseline (RED) evidence for the leaf: two independent sessions with only
+  the agnostic rules produced two different Python repos -- one on
+  setuptools + pip + mypy that never ran ruff at all and would have opened
+  its PR with two files failing the gate's `fmt` metric, the other on
+  uv + ruff + `select = ["ALL"]`, whose project ruleset the gate does not
+  read.
+
 ## [1.18.0]
 
 ### Added
