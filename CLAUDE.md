@@ -157,7 +157,8 @@ repos. Read them before changing anything.
 ### dev-rules (`skills/dev/engineering/rules.md`, `hooks/dev-rules/`)
 
 - The hooks make RED-first deterministic: production edits blocked until a
-  failing test exists (sentinels under `<project>/.dev-rules/`). Behavior
+  failing test exists (sentinels under `<workspace>/.dev-rules/`, scoped to the
+  `.solvers/<name>/` or root the call targets -- issue #26). Behavior
   and per-repo opt-out are documented in `docs/dev-rules.md` -- keep code
   and doc in lockstep.
 - Hook changes require running `hooks/test/*.sh` (all green) before commit.

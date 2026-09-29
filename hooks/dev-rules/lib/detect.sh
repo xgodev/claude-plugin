@@ -79,14 +79,16 @@ dr_dir_may_contain() { # <dir> <glob>
   return 0
 }
 
+# dr_is_production <path> [root] -- root is the workspace the path is relative
+# to (default: the project root); used only to tell directories apart.
 dr_is_production() {
   local path="$1"
   dr_is_test_file "$path" && return 1
   dr_is_docs_or_config "$path" && return 1
   # Explicit production_globs in config win exclusively when present.
   # A token counts as a directory when it ends in `/` or exists as a dir
-  # (relative to the project or the cwd).
-  local proj="${CLAUDE_PROJECT_DIR:-.}"
+  # (relative to the workspace or the cwd).
+  local proj="${2:-${CLAUDE_PROJECT_DIR:-.}}"
   local dirchk="${path%/}"
   dirchk="${dirchk#"$proj"/}"; dirchk="${dirchk#./}"
   local is_dir=1
@@ -111,3 +113,46 @@ EOF
   done
   return 1
 }
+
+# Issue #26: gate sentinels belong to ONE workspace -- the one a call targets.
+# dr_workspace <path> -> the nearest .solvers/<name> ancestor of path
+# (absolute), else the project root. Relative paths resolve against the root.
+dr_workspace() {
+  local proj="${CLAUDE_PROJECT_DIR:-.}" path="$1" head tail name
+  proj="${proj%/}"
+  case "$path" in /*) ;; *) path="$proj/$path" ;; esac
+  path="${path%/}/"
+  case "$path" in
+    */.solvers/*/*)
+      head="${path%/.solvers/*}"          # shortest suffix -> LAST .solvers
+      tail="${path#"$head"/.solvers/}"
+      name="${tail%%/*}"
+      if [ -n "$name" ] && [ "$name" != . ] && [ "$name" != .. ]; then
+        printf '%s' "$head/.solvers/$name"; return
+      fi ;;
+  esac
+  printf '%s' "$proj"
+}
+
+# dr_bash_cwd <command> <base-cwd> -> the directory a Bash command runs in:
+# the first `cd <dir>` or `-C <dir>` (git -C, make -C) target, resolved
+# against base-cwd; otherwise base-cwd itself.
+dr_bash_cwd() {
+  local cmd="${1//$'\n'/ }" base="${2%/}" prev="" tok dir=""
+  local -a toks
+  read -ra toks <<<"$cmd"
+  for tok in ${toks[@]+"${toks[@]}"}; do
+    case "$prev" in cd|"(cd"|-C) dir="$tok"; break ;; esac
+    prev="$tok"
+  done
+  dir="${dir%%[;&|)]*}"
+  dir="${dir%\"}"; dir="${dir#\"}"; dir="${dir%\'}"; dir="${dir#\'}"
+  case "$dir" in
+    "") printf '%s' "$base" ;;
+    /*) printf '%s' "$dir" ;;
+    *) printf '%s' "$base/${dir#./}" ;;
+  esac
+}
+
+# dr_sentinel <workspace> <name> -- the sentinel exists in THAT workspace only.
+dr_sentinel() { [ -f "${1%/}/.dev-rules/$2" ]; }

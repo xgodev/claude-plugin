@@ -3,8 +3,9 @@
 # Plugin hook: it runs from the plugin cache, so the PROJECT root comes from
 # $CLAUDE_PROJECT_DIR, never BASH_SOURCE.
 #
-# Sentinels under $CLAUDE_PROJECT_DIR/.dev-rules/ (also honored under
-# .solvers/*/.dev-rules/ for isolated-workspace flows):
+# Sentinels live in <workspace>/.dev-rules/, where the workspace is the one
+# the call TARGETS (issue #26): the nearest .solvers/<name>/ ancestor of the
+# path, else the project root. A sentinel never unlocks another workspace.
 #   none               -> bug discipline: production READ and EDIT blocked.
 #   .mode-feature      -> feature flow: READ and EDIT allowed (red-first is the
 #                         BUG gate; features are governed by the plan, not RED).
@@ -26,17 +27,12 @@ printf '%s' "$input" | jq -e . >/dev/null 2>&1 || exit 0
 
 tool="$(printf '%s' "$input" | jq -r '.tool_name // empty')"
 proj="${CLAUDE_PROJECT_DIR:-$(printf '%s' "$input" | jq -r '.cwd // "."')}"
+proj="${proj%/}"
+base="$(printf '%s' "$input" | jq -r '.cwd // empty')"; base="${base:-$proj}"
 
 . "$(dirname "${BASH_SOURCE[0]}")/lib/detect.sh"
 dr_enabled || exit 0
 
-sentinel() {
-  [ -f "$proj/.dev-rules/$1" ] && return 0
-  ls "$proj"/.solvers/*/.dev-rules/"$1" >/dev/null 2>&1 && return 0
-  return 1
-}
-red_unlocked() { sentinel ".red-first-unlocked"; }
-feature_mode() { sentinel ".mode-feature"; }
 
 # Classify intent (read vs write) and gather the target path(s).
 intent="read"; target=""
@@ -46,6 +42,7 @@ case "$tool" in
   Edit|Write) intent="write"; target="$(printf '%s' "$input" | jq -r '.tool_input.file_path // empty')" ;;
   Bash)
     cmd="$(printf '%s' "$input" | jq -r '.tool_input.command // empty')"
+    base="$(dr_bash_cwd "$cmd" "$base")"   # cd <dir> && ... / git -C <dir>
     c=" $cmd "   # pad so a leading/trailing command token still matches the spaced arms;
                  # ">"[!&] catches file redirects (> >> >file) but NOT 2>&1 / &> -- so a
                  # read that merely redirects stderr is not misclassified as a write.
@@ -62,16 +59,21 @@ case "$tool" in
 esac
 [ -n "$target" ] || exit 0
 
-# Production implicated (and not a test file)? Claude Code sends ABSOLUTE
-# paths for Edit/Write, while production_globs are project-relative: strip the
-# project prefix (and an isolated-workspace .solvers/<name>/ prefix) first.
-prod_touched=""
+# Production implicated (and not a test file)? Each token resolves against the
+# effective cwd; its workspace (.solvers/<name>/ or the root) owns the sentinel,
+# and production_globs match the path relative to that workspace.
+prod_touched=""; ws=""
 for tok in $target; do
-  tok="${tok#"$proj"/}"
-  case "$tok" in .solvers/*/*) tok="${tok#.solvers/*/}" ;; esac
-  if dr_is_production "$tok"; then prod_touched="yes"; break; fi
+  case "$tok" in /*) abs="$tok" ;; *) abs="${base%/}/$tok" ;; esac
+  w="$(dr_workspace "$abs")"
+  case "$abs" in "$w"/*) rel="${abs#"$w"/}" ;; *) rel="$tok" ;; esac
+  if dr_is_production "$rel" "$w"; then prod_touched="yes"; ws="$w"; break; fi
 done
 [ -n "$prod_touched" ] || exit 0
+
+case "$ws" in "$proj") at=".dev-rules" ;; *) at="${ws#"$proj"/}/.dev-rules" ;; esac
+red_unlocked() { dr_sentinel "$ws" ".red-first-unlocked"; }
+feature_mode() { dr_sentinel "$ws" ".mode-feature"; }
 
 deny() {
   jq -nc --arg r "$1" '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:"deny",permissionDecisionReason:$r}}'
@@ -81,9 +83,9 @@ deny() {
 if [ "$intent" = "write" ]; then
   red_unlocked && exit 0
   feature_mode && exit 0
-  deny "Production EDIT locked (dev-rules). Do NOT pick a flow yourself -- ASK THE USER which applies: (a) BUG: write the failing test for the INTENDED behavior, run it, SEE it fail (RED), then create .dev-rules/.red-first-unlocked; (b) FEATURE/IMPROVEMENT: create .dev-rules/.mode-feature after brainstorming (plan-governed, not RED); (c) the dev may DISABLE the gates: touch .dev-rules/.off (until removed) or relaunch with DEV_RULES_OFF=1."
+  deny "Production EDIT locked (dev-rules). Do NOT pick a flow yourself -- ASK THE USER which applies: (a) BUG: write the failing test for the INTENDED behavior, run it, SEE it fail (RED), then create $at/.red-first-unlocked; (b) FEATURE/IMPROVEMENT: create $at/.mode-feature after brainstorming (plan-governed, not RED); (c) the dev may DISABLE the gates: touch .dev-rules/.off (until removed) or relaunch with DEV_RULES_OFF=1."
 else
   red_unlocked && exit 0
   feature_mode && exit 0
-  deny "Read-locked (dev-rules LAW 13). Do NOT pick a flow yourself -- ASK THE USER which applies: (a) BUG: write the failing test from the INTENDED behavior BEFORE reading the code (reading the buggy code first contaminates the oracle), see it RED, then create .dev-rules/.red-first-unlocked; (b) FEATURE/IMPROVEMENT: after brainstorming, create .dev-rules/.mode-feature (plan-governed; unlocks read and edit); (c) the dev may DISABLE the gates: touch .dev-rules/.off (until removed) or relaunch with DEV_RULES_OFF=1."
+  deny "Read-locked (dev-rules LAW 13). Do NOT pick a flow yourself -- ASK THE USER which applies: (a) BUG: write the failing test from the INTENDED behavior BEFORE reading the code (reading the buggy code first contaminates the oracle), see it RED, then create $at/.red-first-unlocked; (b) FEATURE/IMPROVEMENT: after brainstorming, create $at/.mode-feature (plan-governed; unlocks read and edit); (c) the dev may DISABLE the gates: touch .dev-rules/.off (until removed) or relaunch with DEV_RULES_OFF=1."
 fi

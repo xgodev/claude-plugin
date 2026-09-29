@@ -29,8 +29,8 @@ deterministic instead of advisory.
 **Requirement:** `jq` on `PATH`. Without it the hooks degrade to warn + allow
 (they never block when they cannot inspect the call).
 
-**State machine** (sentinels live under `<project>/.dev-rules/`, also honored
-under `.solvers/*/.dev-rules/`):
+**State machine** (sentinels live under `<workspace>/.dev-rules/`, see
+*Sentinel scope* below):
 
 | Sentinel | Production READ | Production EDIT |
 |---|---|---|
@@ -58,7 +58,23 @@ mode unlocks edits too; TDD per unit is still expected, governed by the plan and
 review rather than the hook.
 
 A cycle-closing commit (`fix(`/`feat(`/`bugfix(`/`Fix #`/`Fixes #`) auto-clears
-both sentinels, so the next cycle re-brainstorms and re-REDs.
+both sentinels of the workspace it ran in, so the next cycle re-brainstorms
+and re-REDs.
+
+**Sentinel scope (per workspace).** A sentinel belongs to ONE workspace --
+the one the call targets -- and never unlocks or re-arms another:
+
+- `Read`/`Edit`/`Write`/`Grep`/`Glob`: the nearest `.solvers/<name>/`
+  ancestor of the path, otherwise the project root.
+- `Bash`: the effective cwd -- the target of `cd <dir> && ...` or
+  `git -C <dir>` when present, otherwise the hook input's `cwd` -- and any
+  path token resolved against it (`cat .solvers/A/src/x.go` from the root
+  uses A).
+- The cycle-closing commit clears only the committing workspace's sentinels.
+- The start-of-cycle prompt checks the session cwd's workspace. A root
+  session with `.solvers/` workspaces present is told to create sentinels in
+  `.solvers/<name>/.dev-rules/`, never in the root: a root sentinel only
+  unlocks the root itself.
 
 **Per-repo config / opt-out (`.dev-rules.json` at the repo root):**
 

@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # dev-rules: re-arm the gates after a cycle-closing commit. PostToolUse/Bash.
 # Idempotent: a missing sentinel is a no-op; a failed commit never clears.
+# Clears ONLY the workspace the commit ran in (issue #26): the effective cwd
+# (cd <dir> && ... / git -C <dir> / .cwd) -> its .solvers/<name>/ or the root.
 set -euo pipefail
 
 input="$(cat)"
@@ -9,7 +11,7 @@ tool="$(printf '%s' "$input" | jq -r '.tool_name // empty')"
 [ "$tool" = "Bash" ] || exit 0
 
 cmd="$(printf '%s' "$input" | jq -r '.tool_input.command // empty')"
-case "$cmd" in *"git commit"*) ;; *) exit 0 ;; esac
+case "$cmd" in *"git commit"*|*"git -C "*" commit"*) ;; *) exit 0 ;; esac
 
 # Tolerate exit_code / exitCode / success; a missing field means success.
 # Do NOT use jq `//` here: it treats a JSON `false` (a FAILED commit reported
@@ -25,12 +27,14 @@ case "$exit_code" in 0) ;; *) exit 0 ;; esac
 # substring (intentionally broad): any of these appearing in the command counts.
 case "$cmd" in *"fix("*|*"feat("*|*"bugfix("*|*"Fix #"*|*"Fixes #"*) ;; *) exit 0 ;; esac
 
-proj="${CLAUDE_PROJECT_DIR:-$(printf '%s' "$input" | jq -r '.cwd // "."')}"
+base="$(printf '%s' "$input" | jq -r '.cwd // empty')"
+base="${base:-${CLAUDE_PROJECT_DIR:-.}}"
+. "$(dirname "${BASH_SOURCE[0]}")/lib/detect.sh"
+ws="$(dr_workspace "$(dr_bash_cwd "$cmd" "$base")")"
 removed=0
 for name in .red-first-unlocked .mode-feature; do
-  for f in "$proj/.dev-rules/$name" "$proj"/.solvers/*/.dev-rules/"$name"; do
-    [ -f "$f" ] && { rm -f "$f"; removed=$((removed + 1)); }
-  done
+  f="$ws/.dev-rules/$name"
+  [ -f "$f" ] && { rm -f "$f"; removed=$((removed + 1)); }
 done
 
 if [ "$removed" -gt 0 ]; then

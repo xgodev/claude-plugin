@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.19.1]
+
+### Fixed
+
+- **dev-rules sentinels are scoped to the workspace a call targets
+  (issue #26).** The RED-first guard, the mode prompt and the
+  clear-after-commit hook read `<root>/.dev-rules/` plus a
+  `.solvers/*/.dev-rules/` glob where a sentinel in ANY workspace counted.
+  With parallel `.solvers/<name>/` clones that meant one workspace's
+  `.mode-feature` unlocked every other one and the root, and a `feat(`/`fix(`
+  commit in one workspace re-armed (locked) all the others mid-work. Each
+  sentinel now resolves to exactly one workspace: the nearest
+  `.solvers/<name>/` ancestor of the target path, or -- for `Bash` -- of the
+  effective cwd (`cd <dir> && ...`, `git -C <dir>`, else the hook `cwd`),
+  falling back to the project root. The commit hook clears only the committing
+  workspace (and now also sees `git -C <dir> commit`), and the mode prompt
+  checks the session cwd's workspace and never tells a root session to put
+  sentinels in the root while workspaces exist. The glob is gone.
+
 ## [1.19.0]
 
 ### Added

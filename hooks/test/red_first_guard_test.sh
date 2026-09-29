@@ -117,6 +117,38 @@ out="$(run Bash '{"tool_name":"Bash","tool_input":{"command":"ls tests/"}}')"
 if denied "$out"; then echo "FAIL: ls tests/ must stay allowed"; fail=1; else echo "ok  : ls tests/ allowed"; fi
 rm -f "$SBX/.dev-rules.json"
 
+# 9. Issue #26: a sentinel belongs to the workspace the call TARGETS, never to
+# a sibling .solvers/<name>/ or the root. A has .mode-feature, B has nothing.
+reset; rm -rf "$SBX/.solvers"
+mkdir -p "$SBX/.solvers/A/.dev-rules" "$SBX/.solvers/B" "$SBX/.solvers/A/src" "$SBX/.solvers/B/src"
+: >"$SBX/.solvers/A/.dev-rules/.mode-feature"
+out="$(run Edit "{\"tool_name\":\"Edit\",\"tool_input\":{\"file_path\":\"$SBX/.solvers/B/src/x.go\"}}")"
+if denied "$out"; then echo "ok  : edit in B denied (sentinel only in A)"; else echo "FAIL: A's sentinel must not unlock an edit in B"; fail=1; fi
+out="$(run Edit "{\"tool_name\":\"Edit\",\"tool_input\":{\"file_path\":\"$SBX/.solvers/A/src/x.go\"}}")"
+if denied "$out"; then echo "FAIL: A's sentinel must unlock an edit in A"; fail=1; else echo "ok  : edit in A allowed by A's sentinel"; fi
+out="$(run Read "{\"tool_name\":\"Read\",\"tool_input\":{\"file_path\":\"$SBX/internal/x.go\"}}")"
+if denied "$out"; then echo "ok  : root read denied by A's sentinel"; else echo "FAIL: A's sentinel must not unlock the root"; fail=1; fi
+# 9b. A root sentinel does not leak into a workspace either.
+mkdir -p "$SBX/.dev-rules"; : >"$SBX/.dev-rules/.mode-feature"
+out="$(run Edit "{\"tool_name\":\"Edit\",\"tool_input\":{\"file_path\":\"$SBX/.solvers/B/src/x.go\"}}")"
+if denied "$out"; then echo "ok  : root sentinel does not unlock B"; else echo "FAIL: a root sentinel must not unlock B"; fail=1; fi
+rm -rf "$SBX/.dev-rules"
+# 9c. Bash resolves the EFFECTIVE cwd: cd <dir> && ..., git -C <dir>, then .cwd.
+out="$(run Bash "{\"tool_name\":\"Bash\",\"cwd\":\"$SBX\",\"tool_input\":{\"command\":\"cd .solvers/A && cat src/x.go\"}}")"
+if denied "$out"; then echo "FAIL: cd .solvers/A must use A's sentinel"; fail=1; else echo "ok  : cd .solvers/A uses A's sentinel"; fi
+out="$(run Bash "{\"tool_name\":\"Bash\",\"cwd\":\"$SBX\",\"tool_input\":{\"command\":\"cd .solvers/B && cat src/x.go\"}}")"
+if denied "$out"; then echo "ok  : cd .solvers/B denied"; else echo "FAIL: cd .solvers/B must not borrow A's sentinel"; fail=1; fi
+out="$(run Bash "{\"tool_name\":\"Bash\",\"cwd\":\"$SBX\",\"tool_input\":{\"command\":\"git -C .solvers/A grep foo src/\"}}")"
+if denied "$out"; then echo "FAIL: git -C .solvers/A must use A's sentinel"; fail=1; else echo "ok  : git -C .solvers/A uses A's sentinel"; fi
+out="$(run Bash "{\"tool_name\":\"Bash\",\"cwd\":\"$SBX/.solvers/A\",\"tool_input\":{\"command\":\"cat src/x.go\"}}")"
+if denied "$out"; then echo "FAIL: .cwd inside A must use A's sentinel"; fail=1; else echo "ok  : .cwd inside A uses A's sentinel"; fi
+out="$(run Bash "{\"tool_name\":\"Bash\",\"cwd\":\"$SBX/.solvers/B\",\"tool_input\":{\"command\":\"cat src/x.go\"}}")"
+if denied "$out"; then echo "ok  : .cwd inside B denied"; else echo "FAIL: .cwd inside B must not borrow A's sentinel"; fail=1; fi
+# A root-session path that points into a workspace resolves to that workspace.
+out="$(run Bash "{\"tool_name\":\"Bash\",\"cwd\":\"$SBX\",\"tool_input\":{\"command\":\"cat .solvers/A/src/x.go\"}}")"
+if denied "$out"; then echo "FAIL: cat .solvers/A/... must use A's sentinel"; fail=1; else echo "ok  : cat .solvers/A/... uses A's sentinel"; fi
+rm -rf "$SBX/.solvers"
+
 # Malformed / empty stdin must not crash or block -- clean allow (exit 0, no deny).
 printf '%s' 'not-json' | bash "$GUARD" >/dev/null 2>&1; rc=$?
 if [ "$rc" = 0 ]; then echo "ok  : malformed stdin exits 0 (allow)"; else echo "FAIL: malformed stdin exit $rc"; fail=1; fi
