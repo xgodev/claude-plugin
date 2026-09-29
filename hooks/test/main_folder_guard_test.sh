@@ -67,11 +67,23 @@ if denied "$out"; then echo "FAIL: git -C .solvers commit must be allowed"; fail
 out="$(run Bash '{"tool_name":"Bash","tool_input":{"command":"cd .solvers/issue-9 && git commit -m x"}}')"
 if denied "$out"; then echo "FAIL: cd .solvers && git commit must be allowed"; fail=1; else echo "ok  : cd .solvers && git commit allowed"; fi
 
-# 7. Read-only VCS and clone/worktree setup stay allowed in the main folder.
+# 7. Read-only VCS and clone setup stay allowed in the main folder.
 out="$(run Bash '{"tool_name":"Bash","tool_input":{"command":"git status && git log --oneline -3"}}')"
 if denied "$out"; then echo "FAIL: read-only git must be allowed"; fail=1; else echo "ok  : read-only git allowed"; fi
+out="$(run Bash '{"tool_name":"Bash","tool_input":{"command":"git clone git@example.com:o/r.git .solvers/issue-9"}}')"
+if denied "$out"; then echo "FAIL: git clone into .solvers must be allowed"; fail=1; else echo "ok  : git clone into .solvers allowed"; fi
+
+# 7b. A workspace is a CLONE with its own .git, never a worktree: a worktree
+# registers its branch in the main .git and breaks checkouts there.
 out="$(run Bash '{"tool_name":"Bash","tool_input":{"command":"git worktree add .solvers/issue-9 -b issue-9"}}')"
-if denied "$out"; then echo "FAIL: git worktree add must be allowed"; fail=1; else echo "ok  : git worktree add allowed"; fi
+if denied "$out" && grep -q 'git clone' <<<"$out"; then echo "ok  : git worktree add denied, points at git clone"; else echo "FAIL: git worktree add must be denied and recommend git clone"; fail=1; fi
+
+# 7c. No deny message ever recommends a worktree.
+out="$(run Edit "{\"tool_name\":\"Edit\",\"tool_input\":{\"file_path\":\"$SBX/src/x.go\"}}")"
+out2="$(run Bash '{"tool_name":"Bash","tool_input":{"command":"git commit -m x"}}')"
+if grep -q "worktree add" <<<"$out$out2" || ! grep -q 'git clone' <<<"$out" || ! grep -q 'git clone' <<<"$out2"; then
+  echo "FAIL: deny messages must recommend git clone, never worktree"; fail=1
+else echo "ok  : deny messages recommend git clone only"; fi
 
 # 8. Malformed stdin: clean allow.
 printf '%s' 'not-json' | bash "$GUARD" >/dev/null 2>&1; rc=$?

@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.19.2]
+
+### Fixed
+
+- **main-folder guard: isolated workspaces are clones, never worktrees.**
+  The guard's deny messages and `docs/dev-rules.md` told the agent to create
+  the workspace with `git worktree add .solvers/<name> -b <name>`, and the
+  guard let that command through. A worktree registers its branch in the main
+  `.git` and breaks `git checkout` in the main folder. The messages now
+  recommend `git clone <remote> .solvers/<name>` (own `.git`, `.solvers/` in
+  `.gitignore`), and `git worktree add` is denied while the guard is on.
+
 ## [1.19.1]
 
 ### Fixed

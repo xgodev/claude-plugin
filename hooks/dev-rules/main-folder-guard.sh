@@ -2,7 +2,9 @@
 # dev-rules main-folder guard (OPT-IN, language-agnostic).
 # Enforces the isolated-workspace flow: when a project sets
 #   {"main_folder_guard": true} in .dev-rules.json
-# work must happen inside .solvers/<name>/ clones -- Edit/Write targeting
+# work must happen inside .solvers/<name>/ clones (git clone, own .git --
+# NEVER git worktree, which registers its branch in the main .git and breaks
+# checkouts there; `git worktree add` is denied) -- Edit/Write targeting
 # the MAIN working tree is denied, and so are bare mutating VCS commands
 # whose working tree is the main folder. Keyed off what the operation
 # TARGETS, never the session root. Reads/greps are never blocked.
@@ -44,20 +46,26 @@ case "$tool" in
     case "$rel" in
       .solvers/*|.dev-rules/*|.claude/*) exit 0 ;;
     esac
-    deny "An agent changing the MAIN working tree is not recommended (dev-rules main-folder guard). Do NOT decide alone -- ASK THE USER how to proceed: (a) RECOMMENDED: create the isolated clone yourself and edit there -- git worktree add .solvers/<name> -b <name>; name it issue-<n> when the work has a related issue, or a session/task slug when there is no related issue (e.g. sess-<yyyymmdd>-<short-task>); (b) the dev may disable this guard (\"main_folder_guard\": false in .dev-rules.json) or all dev-rules gates (touch .dev-rules/.off, or DEV_RULES_OFF=1)."
+    deny "An agent changing the MAIN working tree is not recommended (dev-rules main-folder guard). Do NOT decide alone -- ASK THE USER how to proceed: (a) RECOMMENDED: create the isolated clone yourself and edit there -- git clone <remote> .solvers/<name> (a clone with its own .git, NEVER git worktree), make sure .solvers/ is in .gitignore; name it issue-<n> when the work has a related issue, or a session/task slug when there is no related issue (e.g. sess-<yyyymmdd>-<short-task>); (b) the dev may disable this guard (\"main_folder_guard\": false in .dev-rules.json) or all dev-rules gates (touch .dev-rules/.off, or DEV_RULES_OFF=1)."
     ;;
   Bash)
     cmd="$(printf '%s' "$input" | jq -r '.tool_input.command // empty')"
     [ -n "$cmd" ] || exit 0
+    # Workspaces are clones, never worktrees -- checked before the .solvers/
+    # exemption because `git worktree add .solvers/x` names that path.
+    case " $cmd " in
+      *" git worktree add"*|*" git -"*" worktree add"*)
+        deny "git worktree is not allowed for isolated workspaces (dev-rules main-folder guard): a worktree registers its branch in the MAIN .git and breaks checkouts there. Use a clone with its own .git instead: git clone <remote> .solvers/<name> (keep .solvers/ in .gitignore), then work with git -C .solvers/<name> ..." ;;
+    esac
     # Anything explicitly aimed at a .solvers clone is the sanctioned flow.
     case "$cmd" in *".solvers/"*) exit 0 ;; esac
-    # Deny only bare MUTATING vcs subcommands (worktree/clone/status/log/diff/
+    # Deny only bare MUTATING vcs subcommands (clone/status/log/diff/
     # fetch stay allowed -- they set up or inspect, they do not mutate the tree).
     c=" $cmd "
     for sub in commit push merge rebase "reset" "checkout" switch restore cherry-pick revert apply stash am; do
       case "$c" in
         *" git $sub "*|*" git $sub"|*" git -"*" $sub "*)
-          deny "An agent mutating VCS in the MAIN working tree is not recommended (dev-rules main-folder guard). Do NOT decide alone -- ASK THE USER how to proceed: (a) RECOMMENDED: run git $sub inside a .solvers/<name>/ clone (git -C .solvers/<name> $sub ...); create it first if needed (git worktree add .solvers/<name> -b <name>; name it issue-<n> with a related issue, or a session/task slug like sess-<yyyymmdd>-<short-task> when there is no related issue); (b) the dev may disable this guard (\"main_folder_guard\": false in .dev-rules.json) or all dev-rules gates (touch .dev-rules/.off, or DEV_RULES_OFF=1)." ;;
+          deny "An agent mutating VCS in the MAIN working tree is not recommended (dev-rules main-folder guard). Do NOT decide alone -- ASK THE USER how to proceed: (a) RECOMMENDED: run git $sub inside a .solvers/<name>/ clone (git -C .solvers/<name> $sub ...); create it first if needed (git clone <remote> .solvers/<name> -- a clone with its own .git, NEVER git worktree; name it issue-<n> with a related issue, or a session/task slug like sess-<yyyymmdd>-<short-task> when there is no related issue); (b) the dev may disable this guard (\"main_folder_guard\": false in .dev-rules.json) or all dev-rules gates (touch .dev-rules/.off, or DEV_RULES_OFF=1)." ;;
       esac
     done
     exit 0

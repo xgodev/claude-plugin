@@ -120,14 +120,17 @@ checkout/...`) whose working tree is the main folder -- work happens inside
 `.solvers/<task-name>/` clones (`git -C .solvers/<name> ...` and any command
 referencing `.solvers/` pass). Keyed off what the operation TARGETS, so a
 session rooted in the main folder can still set up and drive the clone.
-Reads/greps, `git status/log/diff/fetch`, `git worktree add`/`clone`, and
+Reads/greps, `git status/log/diff/fetch`, `git clone`, and
 writes to `.dev-rules/`, `.claude/`, or outside the project are never
 blocked. Default: OFF (projects not using the `.solvers/` convention are
 unaffected).
 
 The guard never creates the clone itself -- it instructs the AGENT to
-create it (`git worktree add .solvers/<name> -b <name>`) after asking the
-user. **Clone naming:** `issue-<n>` when the work has a related issue;
+create it (`git clone <remote> .solvers/<name>`, with `.solvers/` in
+`.gitignore`) after asking the user. A workspace is always a CLONE with its
+own `.git`, never a worktree: `git worktree add` is denied, because a
+worktree registers its branch in the main `.git` and breaks `git checkout`
+there. **Clone naming:** `issue-<n>` when the work has a related issue;
 when there is none, a session/task slug (e.g. `sess-<yyyymmdd>-<short-task>`),
 so every session still gets its own isolated folder.
 
