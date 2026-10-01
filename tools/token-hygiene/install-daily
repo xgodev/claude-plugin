@@ -1,0 +1,101 @@
+#!/usr/bin/env bash
+# Responsibility: schedule (or unschedule) the daily hygiene run on this machine.
+set -euo pipefail
+
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LABEL="dev.xgodev.claude-hygiene"
+HOUR="${HYGIENE_HOUR:-9}"
+LOG="${HYGIENE_LOG:-$HOME/.claude/hygiene.log}"
+
+usage() {
+  cat <<'USAGE'
+install-daily [--uninstall] [--hour N]
+
+Schedules `hygiene` once a day and appends its report to the log. The report
+is a file, never a notification and never an agent session: reading it costs
+nothing, and a scheduled agent session would be the very expense this tool
+exists to prevent.
+
+  --hour N      Local hour to run at (default 9, or $HYGIENE_HOUR).
+  --uninstall   Remove the schedule. Leaves the log in place.
+
+Honours $HYGIENE_ROOTS, $HYGIENE_OWNERS and $HYGIENE_LOG from the environment
+at install time, baking them into the schedule.
+USAGE
+}
+
+uninstall=0
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --uninstall) uninstall=1; shift ;;
+    --hour) HOUR="$2"; shift 2 ;;
+    -h|--help) usage; exit 0 ;;
+    *) echo "install-daily: unknown option $1" >&2; exit 2 ;;
+  esac
+done
+
+plist="$HOME/Library/LaunchAgents/$LABEL.plist"
+unit_dir="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user"
+
+if [ "$uninstall" = "1" ]; then
+  if [ "$(uname)" = "Darwin" ]; then
+    launchctl bootout "gui/$(id -u)/$LABEL" 2>/dev/null || true
+    rm -f "$plist"
+  else
+    systemctl --user disable --now "$LABEL.timer" 2>/dev/null || true
+    rm -f "$unit_dir/$LABEL.timer" "$unit_dir/$LABEL.service"
+    systemctl --user daemon-reload 2>/dev/null || true
+  fi
+  echo "removed the daily schedule; the log stays at $LOG"
+  exit 0
+fi
+
+env_pairs=""
+for var in HYGIENE_ROOTS HYGIENE_OWNERS HYGIENE_RECENT_DAYS; do
+  [ -n "${!var:-}" ] && env_pairs="$env_pairs $var=${!var}"
+done
+
+if [ "$(uname)" = "Darwin" ]; then
+  mkdir -p "$(dirname "$plist")"
+  {
+    printf '<?xml version="1.0" encoding="UTF-8"?>\n'
+    printf '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n'
+    printf '<plist version="1.0"><dict>\n'
+    printf '  <key>Label</key><string>%s</string>\n' "$LABEL"
+    printf '  <key>ProgramArguments</key><array>\n'
+    printf '    <string>/bin/bash</string><string>-lc</string>\n'
+    printf '    <string>{ date; %s %s; echo; } &gt;&gt; %s 2&gt;&amp;1</string>\n' \
+      "$env_pairs" "$HERE/hygiene" "$LOG"
+    printf '  </array>\n'
+    printf '  <key>StartCalendarInterval</key><dict><key>Hour</key><integer>%s</integer><key>Minute</key><integer>0</integer></dict>\n' "$HOUR"
+    printf '  <key>RunAtLoad</key><false/>\n'
+    printf '</dict></plist>\n'
+  } > "$plist"
+  launchctl bootout "gui/$(id -u)/$LABEL" 2>/dev/null || true
+  launchctl bootstrap "gui/$(id -u)" "$plist"
+  echo "scheduled daily at ${HOUR}:00 -> $LOG"
+else
+  mkdir -p "$unit_dir"
+  cat > "$unit_dir/$LABEL.service" <<UNIT
+[Unit]
+Description=Claude Code token hygiene audit
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -lc '{ date; $env_pairs $HERE/hygiene; echo; } >> $LOG 2>&1'
+UNIT
+  cat > "$unit_dir/$LABEL.timer" <<UNIT
+[Unit]
+Description=Daily Claude Code token hygiene audit
+
+[Timer]
+OnCalendar=*-*-* $HOUR:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+UNIT
+  systemctl --user daemon-reload
+  systemctl --user enable --now "$LABEL.timer"
+  echo "scheduled daily at ${HOUR}:00 -> $LOG"
+fi

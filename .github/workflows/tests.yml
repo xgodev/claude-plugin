@@ -29,6 +29,8 @@ jobs:
             echo "== $t"
             bash "$t"
           done
+      - name: Token-hygiene tests
+        run: bash tools/token-hygiene/test/hygiene_test.sh
       - name: Skill reference integrity
         run: python3 scripts/verify_references.py
 

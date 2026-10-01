@@ -121,6 +121,24 @@ pay-per-use:
 | Hooks (PR gate, RED-first, main-folder, line-cap, issue reminder, mode prompt) | 0 | never (run as processes) |
 | MCP servers | 0 | none bundled |
 
+## Token hygiene
+
+An installation drifts: a plugin left enabled in one project re-arms the
+subagent-dispatch skills, an MCP server ends up declared three times, the
+memory index grows until it is charged on every request, and finished agent
+workspaces sit on disk by the gigabyte. `tools/token-hygiene/hygiene` audits
+all of that deterministically, in under a minute, read-only unless you pass
+`--fix`:
+
+```bash
+tools/token-hygiene/hygiene
+HYGIENE_OWNERS="myorg" tools/token-hygiene/install-daily --hour 9
+```
+
+The daily run appends plain text to `~/.claude/hygiene.log`. It is a file and
+not a scheduled agent session on purpose: an agent session is the expense the
+tool exists to prevent. See [`docs/token-hygiene.md`](docs/token-hygiene.md).
+
 ## Repository layout
 
 ```
@@ -135,6 +153,8 @@ hooks/                 hooks.json (merged registry) + test/; scripts grouped by 
                        clear-after-commit.sh, lib/}
 scripts/               verify_references.py (boost skill link checker)
                        verify_config_roots.py (boost config namespaces vs source)
+tools/token-hygiene/   hygiene (driver) + checks/ + install-daily:
+                       audits the installation for context and token waste
 docs/                  per-area docs (quality-gate, hooks, dev-rules, ...)
 ```
 
@@ -146,4 +166,4 @@ images. See [`docs/quality-gate.md`](docs/quality-gate.md).
 
 MIT -- see [LICENSE](LICENSE).
 
-- Version: 1.20.0
+- Version: 1.21.0

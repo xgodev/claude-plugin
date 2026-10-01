@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+# Responsibility: run every token-hygiene check and print one compact report.
+set -uo pipefail
+
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export HYGIENE_HOME="${CLAUDE_HOME:-$HOME/.claude}"
+export HYGIENE_FIX=0
+export HYGIENE_FINDINGS=0
+
+usage() {
+  cat <<'USAGE'
+hygiene [options] [check ...]
+
+Audits the Claude Code installation for things that silently inflate the
+context window or the token bill, and for work left in the wrong place.
+Read-only unless --fix is given.
+
+Options:
+  --roots A:B    Colon-separated dirs holding git checkouts to audit.
+                 Default: $CLAUDE_HYGIENE_ROOTS, else $HOME/Projetos.
+  --fix          Apply the safe repairs a check offers (never deletes).
+  --list         List the available checks and exit.
+  -h, --help     This text.
+
+With no check named, every check runs.
+USAGE
+}
+
+roots=""
+checks=()
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --roots) roots="$2"; shift 2 ;;
+    --roots=*) roots="${1#*=}"; shift ;;
+    --fix) HYGIENE_FIX=1; shift ;;
+    --list) basename -s .sh "$HERE"/checks/*.sh; exit 0 ;;
+    -h|--help) usage; exit 0 ;;
+    -*) echo "hygiene: unknown option $1" >&2; usage >&2; exit 2 ;;
+    *) checks+=("$1"); shift ;;
+  esac
+done
+
+export HYGIENE_ROOTS="${roots:-${CLAUDE_HYGIENE_ROOTS:-$HOME/Projetos}}"
+
+# A check reports through this; anything else it prints is detail, indented.
+finding() {
+  HYGIENE_FINDINGS=$((HYGIENE_FINDINGS + 1))
+  printf '  %s\n' "$*"
+}
+export -f finding
+
+if [ ${#checks[@]} -eq 0 ]; then
+  for f in "$HERE"/checks/*.sh; do checks+=("$(basename -s .sh "$f")"); done
+fi
+
+total=0
+for name in "${checks[@]}"; do
+  script="$HERE/checks/$name.sh"
+  if [ ! -x "$script" ]; then
+    echo "hygiene: no such check: $name" >&2
+    exit 2
+  fi
+  out="$("$script" 2>&1)"
+  count="$(printf '%s' "$out" | grep -c '^  ' || true)"
+  total=$((total + count))
+  if [ -n "$out" ]; then
+    printf '%s\n%s\n\n' "$name" "$out"
+  fi
+done
+
+if [ "$total" -eq 0 ]; then
+  echo "clean - nothing to do."
+else
+  printf '%s finding(s).\n' "$total"
+fi
+exit 0
