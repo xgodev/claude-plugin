@@ -6,9 +6,10 @@
 
 - **`tools/token-hygiene` -- a deterministic audit of what an installation
   wastes.** Six checks: an oversized agent memory index (it is injected into
-  every session, so it is charged on every request), settings that let a
-  session fan out into subagents (a `superpowers` plugin left enabled in a
-  project overrides the user-level off switch), an MCP server declared from
+  every session, so it is charged on every request), a project carrying the
+  subagent-dispatch plugin in every session without dispatching anything
+  (enabled is fine -- enabled and idle is the waste, and usage is read from
+  that project's own transcripts), an MCP server declared from
   more than one place (each copy loads its whole tool list), a plugin cache
   that drifted from the source version it claims to be (the cache is what
   loads, so a fix published without a version bump never arrives), finished

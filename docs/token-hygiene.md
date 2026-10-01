@@ -27,7 +27,7 @@ finding needs judgement.
 | Check | What it reports |
 |---|---|
 | `memory` | A per-project memory directory too big to carry every session. `MEMORY.md` is injected into **every** session, so its size is charged on every single request. |
-| `dispatch` | Settings that let a session fan out into subagents: a `superpowers` plugin left on in a project (project settings override the user level), or the dispatch skills not turned off at the user level. Each subagent runs its own requests and bills separately. |
+| `dispatch` | A project carrying the subagent-dispatch plugin in every session without dispatching anything. Fanning out is legitimate work when it is asked for — each subagent just runs its own requests and bills separately — so the defect is not "enabled", it is **enabled and idle**. Usage is read from that project's own session transcripts. |
 | `mcp` | An MCP server declared from more than one place. Every copy loads its whole tool list into every session — the duplicate is pure overhead. |
 | `plugin-cache` | An installed plugin whose cache drifted from the source version it claims to be. The cache is what loads; a source fix published without a version bump never reaches it. |
 | `workspaces` | Isolated agent workspaces (`.solvers/*` by default), split into the ones that are clean and fully pushed and the ones holding work the remote cannot give back. Each is a full clone, so a forgotten one costs gigabytes. |
@@ -43,6 +43,7 @@ as removable, and a person removes it once its issue is closed.
 |---|---|---|
 | `CLAUDE_HYGIENE_ROOTS` / `--roots` | `$HOME/Projetos` | Colon-separated directories holding the git checkouts to audit. |
 | `HYGIENE_OWNERS` | unset | Space-separated substrings a remote URL must contain. Without it, every vendored third-party clone under the roots is reported too. |
+| `HYGIENE_IDLE_DAYS` | `30` | How long a project may carry the dispatch plugin without dispatching anything before it is reported. |
 | `HYGIENE_RECENT_DAYS` | `14` | A dirty tree older than this is abandoned junk, not work in danger. Unpushed commits are reported at any age. |
 | `HYGIENE_MEMORY_INDEX_BYTES` | `4000` | Size at which `MEMORY.md` is worth trimming. |
 | `HYGIENE_MEMORY_DIR_BYTES` | `60000` | Size at which the whole memory directory is worth trimming. |

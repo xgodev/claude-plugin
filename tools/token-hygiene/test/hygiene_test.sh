@@ -20,9 +20,18 @@ mkdir -p "$home/projects/demo/memory" "$home/plugins/marketplaces/acme/.claude-p
 # An index far over the limit, carried into every session.
 head -c 9000 /dev/zero | tr '\0' 'x' > "$home/projects/demo/memory/MEMORY.md"
 
-# superpowers re-enabled by a project, overriding the user-level off switch.
-printf '{"enabledPlugins":{"superpowers@official":false}}' > "$home/settings.json"
+# superpowers on in a project that has not dispatched anything. Enabled is
+# fine; enabled and idle is the finding.
+printf '{}' > "$home/settings.json"
 printf '{"enabledPlugins":{"superpowers@official":true}}' > "$roots/app/.claude/settings.json"
+
+# ... and on in a project that uses it, which must stay silent.
+mkdir -p "$roots/busy/.claude"
+printf '{"enabledPlugins":{"superpowers@official":true}}' > "$roots/busy/.claude/settings.json"
+busy_slug="$(printf '%s' "$roots/busy" | tr -c 'A-Za-z0-9' '-')"
+mkdir -p "$home/projects/$busy_slug"
+printf '{"timestamp":"2099-01-01T00:00:00Z","message":{"content":[{"type":"tool_use","name":"Agent"}]}}\n' \
+  > "$home/projects/$busy_slug/s.jsonl"
 
 # The same MCP server declared by the user config and by a plugin.
 printf '{"mcpServers":{"dup":{"url":"x"}}}' > "$SBX/home/.claude.json"
@@ -42,8 +51,8 @@ echo dirty > "$roots/app/.solvers/issue-1/wip.txt"
 out="$(CLAUDE_HOME="$home" HYGIENE_OWNERS="" "$HYGIENE" --roots "$roots" 2>&1)"
 
 check "memory: oversized index"      "MEMORY.md is 9000B"              "$out"
-check "dispatch: project override"   "plugin superpowers@official is ON" "$out"
-check "dispatch: missing overrides"  "no skillOverrides=off"           "$out"
+check "dispatch: enabled and idle"   "app: superpowers@official is ON but nothing was dispatched" "$out"
+if grep -q "busy:" <<<"$out"; then echo "FAIL: a project that uses dispatch must not be reported"; fail=1; else echo "ok  : enabled and used is silent"; fi
 check "mcp: duplicate server"        "MCP server 'dup' declared 2x"    "$out"
 check "plugin-cache: drift"          "acme/acme 1.0.0"                 "$out"
 check "workspaces: holds work"       "issue-1 .*KEEP"                  "$out"
@@ -51,8 +60,7 @@ check "unpushed: local-only commit"  "app:.*uncommitted"               "$out"
 
 # A sandbox with nothing wrong must say so, or the report is noise nobody reads.
 clean="$SBX/clean"; mkdir -p "$clean/.claude/projects" "$clean/code"
-printf '{"skillOverrides":{"dispatching-parallel-agents":"off","subagent-driven-development":"off","using-superpowers":"off","workflow-authoring":"off"}}' \
-  > "$clean/.claude/settings.json"
+printf '{}' > "$clean/.claude/settings.json"
 out="$(CLAUDE_HOME="$clean/.claude" "$HYGIENE" --roots "$clean/code" 2>&1)"
 check "clean installation is silent" "^clean - nothing to do.$" "$out"
 

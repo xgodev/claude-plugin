@@ -1,16 +1,20 @@
 #!/usr/bin/env bash
-# Responsibility: report settings that let a session fan out into subagents.
+# Responsibility: report subagent dispatch left enabled where nobody is using it.
 set -uo pipefail
 
-# Each of these makes the agent spawn sessions that bill separately, and the
-# cost is invisible to the person who never asked for the fan-out.
-export HYGIENE_DISPATCHERS="${HYGIENE_DISPATCHERS:-dispatching-parallel-agents subagent-driven-development using-superpowers workflow-authoring}"
+# Fanning out into subagents is legitimate work when it is asked for -- each
+# one just bills separately, and the cost is invisible. So the defect is not
+# "enabled", it is "enabled and idle": a project that carries the dispatch
+# skills in every session and has not dispatched anything in weeks.
+export HYGIENE_IDLE_DAYS="${HYGIENE_IDLE_DAYS:-30}"
 
 python3 <<'PY'
-import json, os
+import json, os, re, time
 
 home = os.environ["HYGIENE_HOME"]
-dispatchers = os.environ["HYGIENE_DISPATCHERS"].split()
+idle_days = int(os.environ["HYGIENE_IDLE_DAYS"])
+cutoff = time.time() - idle_days * 86400
+dispatch_tools = {"Task", "Agent", "Workflow", "TaskOutput", "SendMessage"}
 
 def load(path):
     try:
@@ -19,15 +23,42 @@ def load(path):
     except Exception:
         return None
 
-def plugins_on(path, label):
-    data = load(path)
-    if not isinstance(data, dict):
-        return
-    for name, on in (data.get("enabledPlugins") or {}).items():
-        if on and "superpowers" in name:
-            print(f"  {label}: plugin {name} is ON - it ships the subagent-dispatch skills")
+def enabled(project_dir):
+    """True when any settings file under the project turns superpowers on."""
+    for name in ("settings.json", "settings.local.json"):
+        data = load(os.path.join(project_dir, ".claude", name))
+        if not isinstance(data, dict):
+            continue
+        for plugin, on in (data.get("enabledPlugins") or {}).items():
+            if on and "superpowers" in plugin:
+                return plugin
+    return None
 
-plugins_on(os.path.join(home, "settings.json"), "user settings")
+def last_dispatch(project_dir):
+    """When this project last actually spawned an agent, or None."""
+    slug = re.sub(r"[^A-Za-z0-9]", "-", project_dir)
+    sessions = os.path.join(home, "projects", slug)
+    if not os.path.isdir(sessions):
+        return None
+    newest = None
+    for entry in os.scandir(sessions):
+        if not entry.name.endswith(".jsonl"):
+            continue
+        # A transcript older than the window cannot carry a recent dispatch,
+        # and these files are large enough that skipping them matters.
+        if entry.stat().st_mtime < cutoff:
+            continue
+        try:
+            with open(entry.path) as fh:
+                for line in fh:
+                    if not any(f'"name":"{t}"' in line for t in dispatch_tools):
+                        continue
+                    stamp = json.loads(line).get("timestamp")
+                    if stamp and (newest is None or stamp > newest):
+                        newest = stamp
+        except Exception:
+            continue
+    return newest
 
 for root in os.environ["HYGIENE_ROOTS"].split(":"):
     for dirpath, dirnames, _ in os.walk(root):
@@ -38,16 +69,12 @@ for root in os.environ["HYGIENE_ROOTS"].split(":"):
                        if d not in (".git", "node_modules", "target", ".solvers", "dist", "build")]
         if ".claude" not in dirnames:
             continue
-        for name in ("settings.json", "settings.local.json"):
-            path = os.path.join(dirpath, ".claude", name)
-            if os.path.exists(path):
-                plugins_on(path, os.path.relpath(dirpath, root))
-
-# Turning the skills off at the user level covers every project, so the gap is
-# only worth reporting there.
-overrides = (load(os.path.join(home, "settings.json")) or {}).get("skillOverrides") or {}
-gaps = [s for s in dispatchers
-        if overrides.get(s) != "off" and overrides.get(f"superpowers:{s}") != "off"]
-if gaps:
-    print(f"  user settings: no skillOverrides=off for {', '.join(gaps)}")
+        plugin = enabled(dirpath)
+        if not plugin:
+            continue
+        used = last_dispatch(dirpath)
+        if used:
+            continue
+        print(f"  {os.path.relpath(dirpath, root)}: {plugin} is ON but nothing was"
+              f" dispatched in {idle_days} days - it costs context every session")
 PY
