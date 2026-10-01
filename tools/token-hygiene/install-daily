@@ -19,7 +19,7 @@ exists to prevent.
   --hour N      Local hour to run at (default 9, or $HYGIENE_HOUR).
   --uninstall   Remove the schedule. Leaves the log in place.
 
-Honours $HYGIENE_ROOTS, $HYGIENE_OWNERS and $HYGIENE_LOG from the environment
+Honours $CLAUDE_HYGIENE_ROOTS, $HYGIENE_OWNERS and $HYGIENE_LOG from the environment
 at install time, baking them into the schedule.
 USAGE
 }
@@ -51,8 +51,10 @@ if [ "$uninstall" = "1" ]; then
 fi
 
 env_pairs=""
-for var in HYGIENE_ROOTS HYGIENE_OWNERS HYGIENE_RECENT_DAYS; do
-  [ -n "${!var:-}" ] && env_pairs="$env_pairs $var=${!var}"
+for var in CLAUDE_HYGIENE_ROOTS HYGIENE_OWNERS HYGIENE_RECENT_DAYS; do
+  # Quoted: a value with spaces (several owners, several roots) otherwise
+  # becomes the next word of the command line.
+  [ -n "${!var:-}" ] && env_pairs="$env_pairs $var='${!var}'"
 done
 
 if [ "$(uname)" = "Darwin" ]; then
