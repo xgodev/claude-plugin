@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.20.0]
+
+### Changed
+
+- **LAW 13: the feature flow is batched per delivery, not per plan unit
+  (issue #27).** "A fresh RED per unit" led agents to turn every plan unit
+  into its own compile + test run + commit; on a large compiled workspace
+  that is minutes per run, hours per plan, and one full CI build per pushed
+  commit (each `feat(` commit also re-armed the gates, forcing a new cycle
+  per unit). The flow is now: write all the tests -> one compile + run, all
+  RED -> implement everything -> one run of the same targeted tests, all
+  GREEN -> one commit at the end (one per phase at most). Only the change's
+  targeted tests run locally; the full suite stays in CI. New red flag:
+  "I'll compile/test/commit after this unit to be safe". `docs/dev-rules.md`
+  updated to match; the hooks are unchanged.
+
 ## [1.19.2]
 
 ### Fixed

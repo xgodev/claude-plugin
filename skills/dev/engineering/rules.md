@@ -206,7 +206,16 @@ can change priorities, not the laws of correctness.
     brainstorming -> RED (write the failing test from the intended behavior,
     run it, see it fail) -> only THEN read the implementation and fix. A
     **feature/improvement** goes brainstorming -> `writing-plans` ->
-    `executing-plans` (a fresh RED per unit before that unit's code). "I'll
+    `executing-plans`, batched PER DELIVERY, never per plan unit: (1) write
+    ALL the tests of the change, no build; (2) ONE run -- compile + run them,
+    see them all fail (RED); (3) implement every unit, no build in between;
+    (4) ONE run of the same targeted tests, see them pass (GREEN); (5) ONE
+    commit at the end (a long plan may split into phases -- one commit per
+    phase, still never per unit). A plan unit is not a build point or a
+    commit point, even when the plan template lists a per-task test/commit
+    step: on a compiled workspace every extra run costs minutes and tokens of
+    build output, and every pushed commit a full CI build. Locally run only
+    the change's targeted tests; the full suite stays in CI. "I'll
     just code it, it's small" is the failure mode this LAW stops -- no
     triviality exception, same as LAW 1; the brainstorm can be three sentences
     and the plan three bullets, but understanding must precede code. The plugin
@@ -215,7 +224,8 @@ can change priorities, not the laws of correctness.
     (`.dev-rules/.red-first-unlocked`). Declaring the feature flow
     (`.dev-rules/.mode-feature`) lifts that lock -- red-first is the bug gate;
     features are governed by the plan (LAW), not by RED. A cycle-closing commit
-    (`fix(`/`feat(`/`bugfix(`/`Fix #`/`Fixes #`) re-arms both. The gates prove
+    (`fix(`/`feat(`/`bugfix(`/`Fix #`/`Fixes #`) re-arms both -- one more
+    reason the commit closes the delivery, not a unit. The gates prove
     order and existence, never quality -- a sound plan and a meaningful test
     stay your job (and the reviewer's).
 
@@ -360,6 +370,10 @@ rule it breaks. If you think it, stop and do the rule instead.
   code, not the intended behavior).
 - "I'll just start coding, the brainstorm/plan is obvious" -> LAW 13 (every
   change starts with brainstorming; bug -> RED, feature -> writing-plans).
+- "I'll compile/test/commit after this unit to be safe" -> LAW 13 (batch
+  it: all tests -> one RED run -> all code -> one GREEN run -> one commit;
+  a per-unit cycle on a compiled workspace burns hours and one CI build per
+  pushed commit).
 - "The fixture is right there in my home dir, I'll just point the test at
   it" -> LAW 14 (machine-independent tests; version it or generate it in a
   temp dir).

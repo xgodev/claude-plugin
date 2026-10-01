@@ -54,12 +54,16 @@ see it RED -> `touch .dev-rules/.red-first-unlocked` -> read code and fix.
 
 **Feature flow:** brainstorm -> `touch .dev-rules/.mode-feature` -> read code,
 plan (`writing-plans`), and write the code. Red-first is the bug gate, so feature
-mode unlocks edits too; TDD per unit is still expected, governed by the plan and
-review rather than the hook.
+mode unlocks edits too; TDD is still expected, governed by the plan and review
+rather than the hook, and batched per delivery, never per plan unit: write all
+the tests -> one compile + run, all RED -> implement everything -> one run of
+the same targeted tests, all GREEN -> one commit (LAW 13). The full suite stays
+in CI.
 
 A cycle-closing commit (`fix(`/`feat(`/`bugfix(`/`Fix #`/`Fixes #`) auto-clears
 both sentinels of the workspace it ran in, so the next cycle re-brainstorms
-and re-REDs.
+and re-REDs. That is why the commit closes the delivery: committing per plan
+unit would force a new cycle per unit.
 
 **Sentinel scope (per workspace).** A sentinel belongs to ONE workspace --
 the one the call targets -- and never unlocks or re-arms another:
