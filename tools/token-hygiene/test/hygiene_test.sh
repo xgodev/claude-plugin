@@ -41,22 +41,26 @@ printf '{"mcpServers":{"dup":{"url":"x"}}}' > "$home/plugins/cache/acme/acme/1.0
 printf '{"name":"acme","version":"1.0.0"}' > "$home/plugins/marketplaces/acme/.claude-plugin/plugin.json"
 printf '{"name":"acme","version":"1.0.0","extra":1}' > "$home/plugins/cache/acme/acme/1.0.0/.claude-plugin/plugin.json"
 
-# A repo with an unpushed commit, and an agent workspace cloned from it.
-git init -q "$roots/app" 2>/dev/null
-git -C "$roots/app" -c user.email=t@t -c user.name=t commit -q --allow-empty -m init
-mkdir -p "$roots/app/.solvers"
-git clone -q "$roots/app" "$roots/app/.solvers/issue-1" 2>/dev/null
-echo dirty > "$roots/app/.solvers/issue-1/wip.txt"
+# Today's spend: a main session with a huge context per request, plus a
+# subagent transcript that outweighs it. Streaming repeats one message on
+# several lines; it must be counted once.
+today="$(date -u +%Y-%m-%dT12:00:00Z)"
+mkdir -p "$home/projects/demo/s1/subagents"
+u='"usage":{"input_tokens":10,"cache_read_input_tokens":300000,"cache_creation_input_tokens":0}'
+printf '{"timestamp":"%s","message":{"id":"m1",%s}}\n' "$today" "$u" "$today" "$u" > "$home/projects/demo/s1.jsonl"
+printf '{"timestamp":"%s","isSidechain":true,"message":{"id":"a%s",%s}}\n' \
+  "$today" 1 "$u" "$today" 2 "$u" "$today" 3 "$u" > "$home/projects/demo/s1/subagents/agent-x.jsonl"
 
-out="$(CLAUDE_HOME="$home" HYGIENE_OWNERS="" "$HYGIENE" --roots "$roots" 2>&1)"
+out="$(CLAUDE_HOME="$home" "$HYGIENE" --roots "$roots" 2>&1)"
 
 check "memory: oversized index"      "MEMORY.md is 9000B"              "$out"
 check "dispatch: enabled and idle"   "app: superpowers@official is ON but nothing was dispatched" "$out"
 if grep -q "busy:" <<<"$out"; then echo "FAIL: a project that uses dispatch must not be reported"; fail=1; else echo "ok  : enabled and used is silent"; fi
 check "mcp: duplicate server"        "MCP server 'dup' declared 2x"    "$out"
 check "plugin-cache: drift"          "acme/acme 1.0.0"                 "$out"
-check "workspaces: holds work"       "issue-1 .*KEEP"                  "$out"
-check "unpushed: local-only commit"  "app:.*uncommitted"               "$out"
+check "usage: subagent share"      "subagents were 75% of"           "$out"
+check "usage: context per request"   "300k tokens of context per request" "$out"
+check "usage: streaming counted once" "1.2M tokens" "$out"
 
 # A sandbox with nothing wrong must say so, or the report is noise nobody reads.
 clean="$SBX/clean"; mkdir -p "$clean/.claude/projects" "$clean/code"

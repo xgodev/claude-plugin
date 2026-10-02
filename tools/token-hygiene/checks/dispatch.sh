@@ -66,7 +66,7 @@ for root in os.environ["HYGIENE_ROOTS"].split(":"):
             dirnames[:] = []
             continue
         dirnames[:] = [d for d in dirnames
-                       if d not in (".git", "node_modules", "target", ".solvers", "dist", "build")]
+                       if d not in (".git", "node_modules", "target", "dist", "build")]
         if ".claude" not in dirnames:
             continue
         plugin = enabled(dirpath)

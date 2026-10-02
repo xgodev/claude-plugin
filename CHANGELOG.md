@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.22.0]
+
+### Added
+
+- **`token-hygiene usage` -- reads the bill itself.** Per day, from the session
+  transcripts: subagents above 20% of the tokens, more than 200k of context per
+  request, a daily total over budget. Each streamed message is counted once.
+
+### Removed
+
+- **`token-hygiene workspaces` and `unpushed`.** Git state is not a token
+  problem; the tool no longer looks at clones or pushes.
+
 ## [1.21.0]
 
 ### Added
