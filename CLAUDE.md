@@ -69,9 +69,8 @@ repos. Read them before changing anything.
   bare (tracking the upstream marketplace's latest).
   ALWAYS smoke-test an install from a temp project before pushing a
   dependency change: a dependency with an invalid upstream manifest fails
-  the WHOLE claude-plugin install. Today the external dependencies are
-  `superpowers` (`claude-plugins-official`) and `code-craftsmanship` +
-  `systems-architecture` (`wondelai-skills`, untagged -- bare, no version
+  the WHOLE claude-plugin install. Today the only external dependency is
+  `superpowers` (`claude-plugins-official`, bare -- no version
   constraint); design content ships in the bundled `ux-ui` skill.
 - **Hooks live in `hooks/hooks.json` ONLY (auto-discovered).** Never also
   declare `"hooks"` in `plugin.json` -- the manifest key is only for
