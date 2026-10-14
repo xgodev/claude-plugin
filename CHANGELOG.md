@@ -37,6 +37,26 @@
   in the Go leaf.
 - `rules.md`: duplicated DDD/env red flags and rationalizations merged;
   the intro no longer claims the Quality Gate is bundled.
+- **`engineering/rules.md` is now an index of five groups.** One line per
+  rule and which group to open; the full LAWs, rationalizations and red
+  flags moved to `engineering/rules/{flow,design,testing,errors,
+  architecture}.md`. LAW numbers are unchanged (the language leaves cite
+  them). A session reads the index plus flow and design, then only the
+  groups its change touches.
+- Agnostic wording fixed: the equivalence list names "package"; LAW 7 no
+  longer names Go's error matching; LAW 20 defines the persistence layer
+  (every outbound adapter, datastores and clients); LAW 22 puts the
+  promised errors in the contract, has any creator (constructor, factory,
+  provider) hand back the contract type, and places a remote
+  implementation in persistence; LAW 25 drops retry budgets (LAW 19 owns
+  them); LAW 19 names retries and per-route timeouts as platform concerns.
+- Go leaf: `main.go` is `boost.Start()` + `fxfact.NewApp`; the contract's
+  errors get their own `errors.go`; the implementation switch exists only
+  with two or more implementations; an in-domain implementation's knobs
+  live in its fx module's `config.go`; a boost service wraps edge errors
+  with `bootsterrors.Wrap` (boost's `Classify` does not see through `%w`);
+  the handler's `New` may return `*Handler`; liveness is a static handler.
+- `docs/dev-rules.md` no longer calls the Quality Gate bundled.
 
 ## [1.22.0]
 

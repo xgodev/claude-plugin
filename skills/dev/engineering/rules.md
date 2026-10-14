@@ -3,354 +3,110 @@
 Methodology and decision rules for ANY code, in ANY language. Apply BEFORE
 writing, not after. This is the judgment a mechanical gate cannot measure:
 ownership, coupling, honesty of failure, TDD order, docs sync. The
-companion Quality Gate (Docker images run by the `gate.md` leaf) catches metric regressions
-(fmt/lint/build/test/complexity/coverage); this skill governs the
-decisions the gate cannot see. Use both -- they do not overlap.
+companion Quality Gate (Docker images run by the `gate.md` leaf) catches
+metric regressions (fmt/lint/build/test/complexity/coverage); this skill
+governs the decisions the gate cannot see. Use both -- they do not overlap.
 
 This is a discipline skill, not a reference. It is rigid on purpose. The
-LAWs below have no time-pressure exception, no authority exception, no
+LAWs have no time-pressure exception, no authority exception, no
 sunk-cost exception. "Just this once" is the failure mode this skill
 exists to stop.
-
-## STOP -- Check Before You Code
-
-Run this list before writing the first line. It is language-agnostic;
-"type", "id", "module", "file" mean the same in Go, Python, TypeScript,
-Rust, shell, anything.
-
-- **Data Ownership** -- Each fact is defined in its owner, read from
-  there, never inferred or duplicated. Never derive a type, brand,
-  category, or fee from string matching (`startsWith`, `contains`, prefix,
-  regex on an id). If you are pattern-matching an identifier to decide
-  behavior, the owning definition is missing -- create it.
-- **Separation of Concerns** -- Business logic vs presentation vs config
-  are separate. Visual settings, env reads, and I/O wiring never live
-  inside a business module. Reading `process.env` / `os.environ` deep in
-  core logic is a concern leak: take it as a parameter.
-- **Zero Coupling** -- No references to specific concrete IDs/brands/cases
-  in shared code. Adding a new case must not require editing unrelated
-  files. A consumer must not know a producer's internals. If "add a
-  provider" means "edit 3 functions", the design is wrong -- fix the
-  design, not add the 4th branch.
-- **Single Source of Truth** -- A value lives in exactly one place. A
-  string/number in 2+ places -> extract a named constant. Zero literals in
-  comparisons or branches -- compare against the constant. "It's just one
-  literal" is how the second copy is born.
-- **Naming** -- Intent-revealing. No encoded type prefixes leaking
-  implementation. Consistent across the codebase. A name that needs a
-  comment to explain it is the wrong name.
-- **No Trash** -- No dead or commented-out code, no legacy aliases, no
-  "keep it just in case", no workarounds left in. Renamed something? Update
-  ALL references now. "Someone might still call it" -> find out (grep); an
-  unknown caller is not a reason to keep dead code, it is a reason to
-  search.
-- **Impact Analysis** -- Before a change, list what depends on it: callers,
-  build scripts, config, data files, public signature consumers, docs.
-  Verify each. A signature change with unverified callers is a regression
-  waiting to ship.
-- **Safe Refactoring** -- One concern per commit. After changing a
-  struct/signature, update ALL constructors and callers in the same
-  change. Verify before commit -- do not mix a refactor with a feature.
-- **One Responsibility Per File (small units, parallel-safe)** -- If you
-  describe a file with "and", it does too much. Module entrypoints are
-  re-exports only. A match/switch/if chain that grows with every new case
-  belongs split per-case behind an interface. New concern -> new file, not
-  a new branch in a god file. Files, functions, and classes stay small on
-  purpose -- not for aesthetics, so multiple agents and developers can work
-  on different units at once with minimal merge conflict. A god file is a
-  serialization point. The public-method budget per unit is LAW 24.
-- **Library before custom (do not reinvent the wheel)** -- Before writing
-  N lines, search if a well-maintained library already solves the problem.
-  If a battle-tested lib makes the code smaller, clearer, and removes a
-  maintenance burden, use it -- regardless of language. Weigh: the
-  ongoing cost of a tiny added dependency is almost always less than the
-  cost of bespoke, untested, lookalike code. "We have time, let's build it
-  ourselves" is rarely true and almost never cheaper.
-- **Designed for testability** -- The unit you are writing must be
-  testable without a live network, a real database, a wall clock, or a
-  mounted filesystem. Pure functions where possible. Side effects pushed
-  to the edges. Dependencies passed in (constructor/argument), not
-  imported as globals/singletons inside the function. No hidden state. If
-  you cannot write a test for it without spinning up infrastructure, the
-  design is wrong, not the test.
-- **Domain at the center (DDD, always)** -- Domain-Driven Design is the
-  default architecture, not an option: the domain (entities, value
-  objects, aggregates, domain services, repository **interfaces**) is
-  pure and depends on **nothing concrete**. Dependencies point INWARD.
-  The architecture LAWs 19-28 below make this concrete: platform first,
-  three layers, no vendor binding, interfaces everywhere, IoC, one
-  responsibility, configuration, statelessness, lifecycle, contracts.
-
-## LAWs (non-negotiable, language-agnostic)
 
 These are not guidelines. They do not bend for a deadline, a tech lead, a
 PM, a demo, sunk cost, or "it's late". If an instruction conflicts with a
 LAW, state the conflict in one sentence and follow the LAW; an authority
 can change priorities, not the laws of correctness.
 
-1. **RED-first TDD.** Before touching production code, write the test that
-   proves the bug or validates the feature. Run it. SEE it fail (RED) for
-   the right reason. Only then write production code (GREEN). A test
-   written after the fix, passing immediately, proves nothing -- it is
-   forbidden. An existing failing test is not your RED unless YOU ran it
-   and watched it fail for THIS reason. Applies to "trivial" fixes too. For a BUG you understand the problem from the
-   spec and the user (brainstorming) and write the test from the INTENDED
-   behavior -- you do NOT read the production code first, because anchoring on
-   what the buggy code does contaminates the oracle (LAW 11). Read the
-   implementation only after the test is RED. This flow is LAW 13.
-2. **Docs always synced, same commit.** Any change to behavior, public API,
-   structure, or version updates its docs (README, CHANGELOG, skill,
-   inline contract) in the SAME commit. "Docs in a follow-up PR" is a
-   defect even if a reviewer approves it -- a doc that lies about shipped
-   behavior breaks the next reader.
-3. **Verify before claiming done.** Run the verifying command and read its
-   output before saying fixed/passing/complete. Confidence from reading
-   the code is a hypothesis, not evidence. "I'm sure it passes" is not
-   "I ran it and it passed". When verifying means launching a process
-   (server, daemon, CLI), tear it down reliably afterwards by PID/port --
-   killing the launcher (`go run`, a wrapper script, the parent shell)
-   often leaves the spawned child alive, holding the port and breaking the
-   next run, which then looks like a fresh bug.
-4. **No silent fallback / no masking.** An honest, actionable error beats a
-   silent substitution that returns a different result. Never mask an
-   infra/tool/environment failure as if it were a code result. Fail loud,
-   fail specific.
-5. **No skipped tests to go green.** Never skip/ignore/xfail/comment-out a
-   test, lower a threshold, or pass `--no-verify` to make a gate green.
-   Root-cause it or escalate with the real reason -- never disguise red as
-   green. A skipped test is dead documentation, not a passing test.
-6. **Secrets are never rendered.** No log line, config dump, diagnostic, or
-   error message prints a secret value (token, key, password). Redact at
-   the source -- mark the field hidden so the rendered value is `****`
-   while the in-memory value stays real. A secret in a log is a leak even
-   if the log is "private". Enable config/diagnostic visibility freely;
-   just make the secret fields self-mask.
-7. **Errors keep their classification to the edge.** Use typed/semantic
-   errors that the transport edge (HTTP/gRPC/GraphQL) maps to a code.
-   Never wrap an error in a way that erases the type the edge matches on
-   -- a generic string wrap that turns a NotFound into a 500 is a defect,
-   not a cosmetic one. Propagate the typed error; add context only with a
-   wrapper that preserves the classification (and the language's own
-   `Is`/`As`-style matching).
-8. **Local-runnable: no hard external dependency for dev.** Depend on a
-   port (interface), pick the implementation by config, and ship an
-   in-memory implementation so the service boots and runs with ZERO
-   external infra in dev. Dev default = in-memory; production overrides to
-   the real backend via env. The in-memory arm must wire nothing that
-   dials the network (no eager ping that blocks boot). A service that
-   can't start without a live DB/cache is a development-velocity defect.
-9. **Port against the live source of truth, not notes.** When porting or
-   reimplementing a contract (API rewrite, protocol reimpl, format mapping),
-   hit the LIVE source FIRST and build the new shape side-by-side with the
-   real response -- field presence, nullability, derivations, number formats.
-   Research notes / docs are a complement, never a substitute. Every observed
-   divergence becomes a fix + a TODO line, not a guess. A "derived" field
-   (computed by the original, not stored upstream) must be re-derived by
-   reading the original's formatter, not invented.
-   **Corollary -- prove the reference actually answered before trusting it.**
-   A missing/empty/error response from the live source is NOT a contract
-   value. If the port-forward, gateway, or auth wasn't returning, an empty
-   body is "no data", not "null". Before concluding `field == null` (or any
-   shape), assert a known non-empty field in the SAME response (e.g. an id,
-   a required flag) to prove the source responded; cross-check >= 2 records and
-   the introspected type. Concluding from a silent/broken reference is the
-   same guessing this LAW forbids -- it just hides behind a real-looking call.
-10. **Fix tooling at the source repo, never the cache.** When a skill, plugin,
-    or generated dependency is wrong, fix it in the cloned SOURCE repo (and
-    contribute upstream), never in the ephemeral plugin cache -- a cache edit
-    is overwritten on the next update and never becomes a real contribution.
-    Locate the source first; the cache is read-only in practice.
-11. **The test is the oracle -- never edit it to match the bug.** A failing
-    test is a finding, not an obstacle. NEVER change a test's expected value,
-    assertion, input, or tolerance so it passes against output you have not
-    proven correct -- that turns a loud, true failure into a silent lie signed
-    with your name, and hiding the error is the whole crime. "The expectation
-    looks stale, just align `want` to what the code returns" is the exact move
-    this forbids: matching the assertion to the OUTPUT hides the defect the
-    test caught. The one discriminator: am I changing the test to match the
-    SPEC, or to match the OUTPUT? You MAY change a test only when you can prove
-    the new expectation is the intended behavior from a source of truth (spec,
-    contract, the owner, a re-derivation) -- and that is a behavior change with
-    its own RED (LAW 1), not a quick green. Editing `want`, loosening `==` to
-    `>=`, deleting an assert, widening a tolerance, or narrowing the input
-    until it passes are all the same forbidden act. Disabling instead of
-    editing ("skip/xfail/quarantine just to unblock") is the same crime under
-    LAW 5. No deadline, incident, or waiting room changes this -- an honest red
-    beats a green that ships the defect.
-12. **Concurrency is a premise, not an optimization.** Any system that
-    processes independent work items (jobs, events, requests, files, URLs)
-    is designed AND shipped concurrent from line one: bounded worker pool or
-    async fan-out, parallel-safe units, no shared mutable state, idempotent
-    effects. A hard-coded sequential loop over independent items is a design
-    defect, not a simplification -- a serial architecture hard-codes an
-    assumption every later component silently depends on, and retrofitting
-    concurrency then is a rewrite, not a tune. "Low volume today" does not
-    buy a serial default. The trap to refuse explicitly: building a
-    "concurrency-ready" design and then defaulting the pool to 1 worker. A
-    concurrent path that is not the default is never exercised, never
-    tested, and rots until the day it is needed -- ship with a concurrent
-    default (N > 1) so the tested path IS the concurrent path. Sequential
-    execution is the exception and requires a stated, real constraint
-    (ordering dependency, transactional invariant, upstream rate limit) --
-    and even then it is bounded concurrency tuned DOWN to 1 on top of a
-    parallel-safe design, never an architecture that assumes a single
-    thread. Code that "would break if run concurrently" is not simpler; it
-    is hiding defects (shared state, non-idempotent writes) that running
-    concurrent from day one would have surfaced while the system was small.
-13. **Spec-driven flow: understand before you encode.** Every change starts
-    with `brainstorming` -- lock the problem and the intended behavior WITH the
-    user before touching production code. Then the path forks. A **bug** goes
-    brainstorming -> RED (write the failing test from the intended behavior,
-    run it, see it fail) -> only THEN read the implementation and fix. A
-    **feature/improvement** goes brainstorming -> `writing-plans` ->
-    `executing-plans`, batched PER DELIVERY, never per plan unit: (1) write
-    ALL the tests of the change, no build; (2) ONE run -- compile + run them,
-    see them all fail (RED); (3) implement every unit, no build in between;
-    (4) ONE run of the same targeted tests, see them pass (GREEN); (5) ONE
-    commit at the end (a long plan may split into phases -- one commit per
-    phase, still never per unit). A plan unit is not a build point or a
-    commit point, even when the plan template lists a per-task test/commit
-    step: on a compiled workspace every extra run costs minutes and tokens of
-    build output, and every pushed commit a full CI build. Locally run only
-    the change's targeted tests; the full suite stays in CI. "I'll
-    just code it, it's small" is the failure mode this LAW stops -- no
-    triviality exception, same as LAW 1; the brainstorm can be three sentences
-    and the plan three bullets, but understanding must precede code. The plugin
-    ships a hook that enforces the ORDER deterministically for the BUG flow:
-    production code is read- AND edit-locked until a failing test exists
-    (`.dev-rules/.red-first-unlocked`). Declaring the feature flow
-    (`.dev-rules/.mode-feature`) lifts that lock -- red-first is the bug gate;
-    features are governed by the plan (LAW), not by RED. A cycle-closing commit
-    (`fix(`/`feat(`/`bugfix(`/`Fix #`/`Fixes #`) re-arms both -- one more
-    reason the commit closes the delivery, not a unit. The gates prove
-    order and existence, never quality -- a sound plan and a meaningful test
-    stay your job (and the reviewer's).
+## How to read this
 
-14. **Tests are machine-independent.** A test must be reproducible on any
-    machine. A hardcoded machine path (`/Users/<name>/...`, `/home/<name>/...`,
-    `C:\Users\...`, `~/Library/...`, `%APPDATA%\...`) is a hard fail. Worse:
-    a test that reads the developer's REAL config/data as a fixture (a live
-    file under `$HOME`) changes result when the user edits unrelated things
-    and passes only on the author's box. Fixtures are either versioned in
-    the repo or generated in a temp dir (`mktemp`, `t.TempDir()`,
-    `tempfile`). If a test genuinely needs local
-    data, gate it behind an explicit env var and SKIP LOUDLY when absent --
-    never pass silently.
-15. **A test loosened to stay green is a lie.** The production fix must make
-    the UNCHANGED test pass (extends LAW 11). The loosening shapes, all
-    forbidden: a tolerance/epsilon widened ("generous", "robust") until a
-    wrong result fits inside the window; a success-only assert with no
-    assertion on the VALUE (proves the call didn't error, proves nothing
-    about behavior); a "golden"/regression test that compares the
-    implementation AGAINST ITSELF (two runs, assert they match -- proves
-    only determinism, passes even if behavior is completely wrong);
-    `ignore`/`skip` on a test that currently fails (silences a known
-    regression). Known-failing tests go to an **xfail list that fails the
-    build the day they start passing** -- so the fix is noticed -- never to
-    `ignore`. Any tolerance change in a test diff is a review item.
-16. **Every safety escape carries its written invariant.** An escape hatch
-    from the language's safety model (an unsafe block, an unchecked cast,
-    a type-checker suppression) transfers a proof obligation from the
-    compiler to YOU. Write the invariant that makes it sound in an
-    adjacent comment, or the obligation is silently lost -- the next
-    maintainer cannot tell whether a change breaks it. The most dangerous
-    form is the unaudited concurrency-safety promise: declaring a type
-    safe to share across threads by fiat, written by reflex to silence
-    the compiler, moving a data race from compile error to production
-    heisenbug. A blanket promise over ANY type parameter is a defect on
-    its face. A codebase with many escapes and few written invariants has
-    an unaudited core. The per-language shapes live in the language
-    leaves, not here.
-17. **sleep() is never synchronisation -- wait on the condition.** In tests
-    AND in production. A fixed `sleep(N)` to "let X finish" / "settle" /
-    "prevent a race" is a bet on timing, not a guarantee: too short on a
-    loaded CI, wasted time on a fast box, and it turns a deterministic
-    dependency into a probabilistic one. There is almost always a real
-    signal: a condvar, a join/waitpid, an epoch counter, a readiness check.
-    The right shape is `wait_until(condition, deadline)`; a bounded poll
-    with a deadline is acceptable; an unconditional fixed sleep is not. A
-    magic duration "that reliably works on the machines we tested" is the
-    same defect with tuning.
-18. **No swallowed errors; low layers return errors, they don't print.**
-    Discarding an error (a dropped result, an empty `catch {}`,
-    `except: pass`, `_ = err`) requires an adjacent
-    `// intentional: <reason>` comment -- without it, "swallowed defect" and
-    "deliberate discard" are indistinguishable in an audit, so the bare
-    form reads as a genuine smell. A library/core layer never uses
-    stdout/stderr prints as error handling -- it returns the typed error
-    (LAW 7) or emits structured logging, and the EDGE decides how to
-    surface it. A swallowed error turns a real failure into silent wrong
-    behavior discovered far away; a deep-layer print is unstructured and a
-    layering violation at once.
+This file is the index. Every rule below binds on every change; its line
+here is the rule, and its group file (under `rules/`, next to this file)
+holds the full text, the excuses agents use to dodge it, and the red
+flags. Before writing code, open `rules/flow.md` and `rules/design.md`
+(every change), plus every other group whose rules your change touches --
+unsure means open it. LAW numbers are global; the language leaves cite
+them.
 
-### Architecture LAWs (what to do; each language leaf says how)
+## Flow -- `rules/flow.md` (every change)
 
-19. **Platform before code.** The smallest codebase wins. A cross-cutting
-    concern the platform already provides -- authn/authz, mTLS, TLS
-    termination, retries, timeouts, rate limiting, routing -- is configured
-    there (service mesh, gateway, orchestrator), never re-implemented in the
-    app. Preference order: platform, then a maintained library, then bespoke
-    code. Every line the app owns is a line someone maintains. Before
-    writing any such concern in code, propose the platform option to the
-    user and let them decide; code it only on their explicit call.
-20. **Three layers, dependencies point inward.** Interaction (handlers: HTTP,
-    gRPC, events, CLI, MCP), business (entities, services, repository
-    interfaces) and persistence (datastores) are separate units -- separate
-    packages/modules, never one feature package holding all three. Business
-    does not know persistence exists: it calls a repository interface and
-    never imports a driver, a datastore, or a transport type. Interaction
-    converts its payload to an entity and calls business, never persistence.
-21. **Nothing bound to a vendor.** Observability (logs, traces, metrics, APM),
-    datastores, queues and clients are reached through a vendor-neutral
-    abstraction; the concrete vendor is chosen by config at the edge.
-    Swapping the APM or the database is config plus a new adapter, never an
-    edit to a handler or a service.
-22. **Every dependency is an interface; a contract lives alone.** Data access
-    is a `Repository` interface owned by the domain, implemented by a
-    `Datastore` in persistence. A service is an interface too. The contract
-    lives alone in its package; every implementation (in-process, HTTP,
-    gRPC, MCP, a database) lives in its own package named by how it
-    implements it -- never beside the contract. Constructors hand back the
-    contract, not the concrete type. Callers import only the contract, so
-    moving a service out of process is a new implementation plus wiring,
-    never an edit to a caller. A remote implementation is infrastructure: it
-    lives outside the domain (LAW 20).
-23. **Inversion of control.** A unit never builds its own dependencies: it
-    declares them in its constructor and a DI container (the composition
-    root) wires the graph at startup. The entrypoint holds only wiring.
-    Choosing an implementation (datastore, in-process service vs remote
-    client) is a wiring decision driven by config (LAW 25), never an `if` in
-    business code. No global or singleton reached from inside a unit.
-24. **One responsibility, one file, one public method.** A handler exposes
-    exactly one public operation; a service exposes exactly one (one use
-    case). A repository is the exception: its responsibility is ONE entity's
-    persistence, so it exposes several operations -- all about that entity,
-    none about another. One datastore implements one repository. A second
-    public operation on a handler or service means a second unit: new file,
-    new type.
-25. **Everything operable is configurable, by convention.** Every value an
-    operator may need to change in production -- URLs, timeouts, pool sizes,
-    retry budgets, collection/topic names, which implementation is wired,
-    feature toggles -- is a registered config key with a safe default
-    declared next to the code that owns it, overridable per environment with
-    no code change. Defaults run locally out of the box (LAW 8); production
-    only overrides. No operational literal in code and no ad-hoc environment
-    read: an unregistered knob is invisible to operators.
-26. **Stateless processes.** An instance keeps nothing in memory or on local
-    disk that must outlive a request. Sessions, shared caches and files live
-    in a backing service, so any instance can die or be replicated at any
-    time.
-27. **Operable lifecycle.** Every service exposes liveness and readiness.
-    Liveness never checks a downstream -- a dead dependency would restart
-    every instance at once; readiness checks only the backing services the
-    instance cannot serve without, each check bounded by a deadline. It
-    shuts down gracefully: on SIGTERM it stops taking work, drains in-flight
-    requests and messages within a deadline, then closes its connections.
-28. **Contract first.** Every interface the service exposes (HTTP, gRPC,
-    event, MCP) has a versioned, machine-readable contract in the repo
-    (OpenAPI, proto, AsyncAPI/JSON Schema), written before the handler, and
-    the server and its clients are tested against it. A breaking change is a
-    new version, never an in-place edit.
+- LAW 1 -- RED-first TDD: write the test, run it, see it fail for the right
+  reason, only then production code.
+- LAW 2 -- Docs synced in the same commit as the change they describe.
+- LAW 3 -- Verify before claiming done: run it, read the output, tear down
+  what you launched.
+- LAW 10 -- Fix tooling at the source repo, never the cache.
+- LAW 13 -- Spec-driven flow: understand with the user first; a bug goes to
+  RED, a feature to a plan, batched per delivery.
+
+## Design -- `rules/design.md` (every change)
+
+- Data Ownership -- each fact lives in its owner; never inferred from
+  string matching on an id.
+- Separation of Concerns -- business, presentation and config apart.
+- Zero Coupling -- adding a case never edits unrelated files.
+- Single Source of Truth -- a value in exactly one place; no literal in a
+  comparison.
+- Naming -- intent-revealing and consistent.
+- No Trash -- no dead code, aliases, or "just in case".
+- Impact Analysis -- list and verify everything that depends on a change.
+- Safe Refactoring -- one concern per commit; every caller updated in the
+  same change.
+- One Responsibility Per File -- small units; a growing switch is split
+  behind an interface.
+- Library before custom -- look for a maintained library first.
+- Designed for testability -- testable without network, database, wall
+  clock, or filesystem.
+- Domain at the center -- DDD always; the domain depends on nothing
+  concrete.
+
+## Testing -- `rules/testing.md` (writing, changing, or skipping a test)
+
+- LAW 5 -- No skipped tests to go green.
+- LAW 11 -- The test is the oracle: change it only to match the spec,
+  never the output.
+- LAW 14 -- Tests are machine-independent.
+- LAW 15 -- A test loosened to stay green is a lie.
+- LAW 17 -- sleep() is never synchronisation: wait on the condition.
+
+## Errors -- `rules/errors.md` (an error, a secret, a safety escape)
+
+- LAW 4 -- No silent fallback, no masking: fail loud, fail specific.
+- LAW 6 -- Secrets are never rendered.
+- LAW 7 -- Errors keep their classification to the edge.
+- LAW 16 -- Every safety escape carries its written invariant.
+- LAW 18 -- No swallowed errors; low layers return errors, they don't
+  print.
+
+## Architecture -- `rules/architecture.md` (a service, module, dependency, config key, or API)
+
+- LAW 8 -- Local-runnable: boots with zero external infra.
+- LAW 9 -- Port against the live source of truth, and prove it answered.
+- LAW 12 -- Concurrency is a premise, not an optimization.
+- LAW 19 -- Platform before code: propose the platform option to the user
+  before coding a cross-cutting concern.
+- LAW 20 -- Three layers, dependencies point inward.
+- LAW 21 -- Nothing bound to a vendor.
+- LAW 22 -- Every dependency is an interface; the contract lives alone.
+- LAW 23 -- Inversion of control.
+- LAW 24 -- One responsibility, one file, one public method.
+- LAW 25 -- Everything operable is configurable, by convention.
+- LAW 26 -- Stateless processes.
+- LAW 27 -- Operable lifecycle: liveness, readiness, graceful drain.
+- LAW 28 -- Contract first.
+
+## Excuses that dodge every group
+
+| Excuse (verbatim pattern) | Reality |
+|---|---|
+| "The lead/PM/senior said skip the test / docs / cleanup, they own the release" | Authority sets priorities, not correctness. A LAW does not have an authority exception. State the conflict in one sentence and follow the LAW. |
+| "I already spent an hour and the train/demo is in N minutes" | Sunk cost and a deadline are not evidence the shortcut is safe. Time pressure is exactly when discipline matters; the gate cannot see what you skip. |
+| "I'll add the test / extract the constant / write the docs / delete the dead code later" | "Later" is a session that ends. The orphan ships. Same commit or it does not count. |
+| "The codebase already does this (prefix inference / inline literal / legacy alias), so matching it is consistent" | Consistency with a defect propagates the defect. The existing wrong pattern is debt to stop, not a precedent to extend. |
+| "Doing it right is over-engineering / scope creep for this deadline" | Ownership, one constant, synced docs, a failing test first are not gold-plating -- they are the baseline. Reframing the baseline as excess is the rationalization. |
+
+- "The lead/PM said it's fine" -> authority does not override a LAW;
+  state the conflict and follow the LAW.
+- "I already spent so long, just ship it" -> sunk cost is not evidence.
 
 ## Communication
 
@@ -360,157 +116,10 @@ recommendation, not a menu, unless options are requested. Tables/bullets
 only when the content is mechanical reference. Expand only when explicitly
 asked ("explain in detail", "list the options").
 
-## Rationalizations -- and the reality
-
-Populated from real subagent output under combined time + sunk-cost +
-authority + exhaustion pressure (RED phase). If you catch yourself forming
-one of these, you are about to violate a rule. Stop.
-
-| Excuse (verbatim pattern) | Reality |
-|---|---|
-| "The lead/PM/senior said skip the test / docs / cleanup, they own the release" | Authority sets priorities, not correctness. A LAW does not have an authority exception. State the conflict in one sentence and follow the LAW. |
-| "I already spent an hour and the train/demo is in N minutes" | Sunk cost and a deadline are not evidence the shortcut is safe. Time pressure is exactly when discipline matters; the gate cannot see what you skip. |
-| "I'll add the test / extract the constant / write the docs / delete the dead code later" | "Later" is a session that ends. The orphan ships. Same commit or it does not count. |
-| "The codebase already does this (prefix inference / inline literal / legacy alias), so matching it is consistent" | Consistency with a defect propagates the defect. The existing wrong pattern is debt to stop, not a precedent to extend. |
-| "I read the code, I'm sure, no need to run it / see it fail" | Reading is a hypothesis. RED-first and verify-before-done require the run, not the conviction. Unverified confidence is how regressions ship. |
-| "Doing it right is over-engineering / scope creep for this deadline" | Ownership, one constant, synced docs, a failing test first are not gold-plating -- they are the baseline. Reframing the baseline as excess is the rationalization. |
-| "An unknown external caller might break, so keep the alias / commented code" | An unknown caller is a reason to grep, not to keep trash. Find the callers or confirm none; do not preserve dead code on a guess. |
-| "It's just one literal / one duplicate, DRY can wait" | The second copy is born exactly here. One place now, before the third copy makes it expensive. |
-| "Building it ourselves is faster than learning the lib" | "Faster" here means today, alone. The lib has tests, docs, maintenance; the bespoke copy has none of those. Adopt the lib, or write down a real reason it cannot be used. |
-| "Adding a dependency is bloat / scope creep" | A small, well-maintained dep that removes N lines of bespoke logic is the opposite of bloat. Treat the choice as a trade-off (size, surface, maintenance), not a reflex. |
-| "I'll add tests later, the design is fine" | Untestable design is a defect surfacing now. If you cannot test it without infra, the structure is wrong -- fix the structure, not the test plan. |
-| "Splitting into more files is over-engineering for this size" | Small units are not for aesthetics; they are how multiple agents/devs work in parallel without stepping on each other. A god file is a serialization point. |
-| "DDD / clean architecture is too much for this small thing" / "the domain can import this client, it's just convenience" | The cost of layering when it is small is tiny; the cost of pulling apart a domain that imported an HTTP client three months later is huge. One inward arrow is how the boundary dies (LAW 20). |
-| "The test expectation looks stale / the author left, just update `want` to what the code returns and unblock us" | Changing the assertion to match the OUTPUT asserts the output is correct -- a thing you have NOT proven. That is not fixing a stale test, it is signing off on the bug. Change a test only to match the SPEC (with proof + its own RED), never to match what the code happens to emit. |
-| "Editing the assertion is risky, so I'll just `t.Skip`/quarantine it to unblock the unrelated hotfix" | Reaching for skip under incident pressure is still disabling the oracle (LAW 5). A quarantined test is not green, it is silenced. Root-cause or escalate with the real reason; do not trade an assertion edit for a disable. |
-| "Concurrency now is premature optimization / speculation; volume today buys nothing measurable" | Concurrency is not an optimization, it is the execution model (LAW 12). A serial architecture hard-codes an assumption every later component depends on; undoing it is a rewrite. Design parallel-safe now and ship concurrent now; tune N, never retrofit the model. |
-| "I'll make it concurrency-READY but default to 1 worker; raising it later is a config change, not a redesign" | The path that is not the default is the path that is never run, never tested, and rots. A pool defaulted to 1 is a serial system wearing a config costume. Ship N > 1 so the exercised path IS the concurrent path; tune DOWN to 1 only for a stated, real constraint. |
-| "Concurrency adds untested failure modes (races, interleaving); sequential is safer" | Those failure modes already exist as latent defects -- shared mutable state, non-idempotent writes -- merely hidden by serial luck. Running concurrent from day one surfaces them while the system is small and cheap to fix; serial-by-default ships them. |
-| "The bug report points right at the [suspect] code -- I'll go straight there and read it, I get it in 30 seconds" | Reading the production code first makes your test assert what the code DOES, not what it SHOULD do. Both baseline agents went "straight to the coupon branch" and derived the expected value from the code they had just read. Lock the intended behavior WITH the user, encode it as a failing test, and open the implementation only after RED. |
-| "I traced it by hand and verified mentally, the fix is obviously correct -- a failing test is ceremony here" | Mental verification is not a RED (LAW 1), and the trace came from the suspect code, not the spec. A baseline agent shipped a fix having only "verified mentally" -- that is confidence, not evidence (LAW 3). |
-| "Brainstorming/a plan is ceremony for something this small" | The smallest changes are where unexamined assumptions waste the most work. The brainstorm can be three sentences and the plan three bullets, but understanding the intended behavior WITH the user must precede code. |
-| "It passes on my machine, the path/config is right there" | Green on the author's box and red (or vacuously skipped) everywhere else protects nothing (LAW 14). Version the fixture or generate it in a temp dir; a test reading your real `$HOME` config asserts your laptop, not the code. |
-| "I'll widen the tolerance a bit so it's robust / less flaky" | "Robust" here means "wide enough that a wrong result passes" (LAW 15). If the value is genuinely nondeterministic, assert the invariant that IS deterministic; do not grow the window until the bug fits. |
-| "It didn't error, that's what matters" | Not-erroring is not behavior (LAW 15). A success-only assert with no expected VALUE passes for a function that returns garbage successfully. |
-| "This test fails for a known reason, ignore it for now and track it" | `ignore` IS untracking (LAW 15, LAW 5): CI never runs it again and the regression is ratified. Put it on the xfail list that fails the build when it starts passing. |
-| "The checker is being conservative, suppressing it here is obviously fine" | "Obviously" is exactly what the missing written invariant was supposed to prove (LAW 16). An unaudited safety promise moves the defect from compile error to production heisenbug. |
-| "A short sleep here makes the test stable" | It makes the test stable on THIS machine at THIS load (LAW 17). Wait on the condition with a deadline; a sleep that "works" is a race you scheduled to lose later, slower. |
-| "Logging the error to stderr here IS handling it" | A deep layer printing to stderr is unstructured noise the caller cannot act on (LAW 18). Return the typed error; the edge decides presentation. |
-| "One package per feature (domain + adapter + handler + wiring) keeps it simple; the use case already depends on interfaces" | A baseline agent shipped exactly this. Interfaces inside one package are not layers: the next change edits the adapter and the handler in the same unit, and the package imports the driver and the transport (LAW 20). Separate units per layer. |
-| "Returning the concrete type is idiomatic / simpler" | The caller now names the implementation, so swapping it (another datastore, a remote client) edits every caller (LAW 22). Hand back the contract. |
-| "One repository can serve both collections, it's the same feature" | Two entities, two responsibilities, two repositories (LAW 24). A repository that grows a second entity becomes the god file. |
-| "I'll read the env var here and hardcode the timeout; swap in the real config loader later" | Both baseline agents did this. The literal ships; operators cannot see or change it (LAW 25). Register the key with its default now, next to its owner. |
-| "Copy the service over unchanged, implementation beside its interface" | The day it goes remote, the implementation's package is also the contract's package and every caller is coupled to it (LAW 22). Contract alone; each implementation in its own package. |
-| "Validating the token / retrying in code is safer than trusting the mesh" | Two layers doing the same job disagree on the edge cases and double the retries (LAW 19). Configure it on the platform; code only what the platform cannot do. |
-
-## Red Flags -- STOP
-
-First-person thoughts that mean you are mid-violation. Each maps to the
-rule it breaks. If you think it, stop and do the rule instead.
-
-- "I'll add the test after" / "this is too simple to test" -> LAW 1
-  (RED-first TDD).
-- "The existing test already covers it, re-running is enough" -> LAW 1
-  (you did not see YOUR RED fail).
-- "Docs/CHANGELOG can be a follow-up PR" / "I'll note it in the PR" ->
-  LAW 2 (docs synced, same commit).
-- "It probably passes" / "I'm confident, no need to run" -> LAW 3
-  (verify before claiming done).
-- "I'll fall back to a default so it doesn't error" -> LAW 4 (no silent
-  masking).
-- "Skip/ignore this one test and file a ticket" / "lower the threshold
-  for now" -> LAW 5 (no skipped tests to go green).
-- "Just align the expected value to what the code returns" / "loosen the
-  assert / widen the tolerance so it passes" -> LAW 11 (the test is the
-  oracle; match the spec, never the output).
-- "A simple for-loop over the items is enough for now" / "single-threaded
-  is simpler to reason about" -> LAW 12 (concurrency is a premise; a
-  serial loop over independent items is a design defect).
-- "I'll default the workers to 1 and we can raise it later" -> LAW 12
-  (the non-default path is never exercised; ship concurrent by default).
-- "Concurrency would be speculative at this volume" -> LAW 12 (it is the
-  execution model, not a tuning knob; retrofitting it is a rewrite).
-- "Let me go straight to the [buggy function/block] and see what it does" ->
-  LAW 13 (both baseline agents said exactly this -- "go straight to the coupon
-  branch"; diagnosing from the code first anchors your oracle on what the code
-  DOES, not what it should do -- read the implementation only after the test is
-  RED).
-- "I traced/verified it mentally, the fix is obviously right, no failing test
-  needed" -> LAW 13 + LAW 1 (a baseline agent shipped after "verify mentally
-  before shipping"; a mental trace is not a RED and it came from the suspect
-  code, not the intended behavior).
-- "I'll just start coding, the brainstorm/plan is obvious" -> LAW 13 (every
-  change starts with brainstorming; bug -> RED, feature -> writing-plans).
-- "I'll compile/test/commit after this unit to be safe" -> LAW 13 (batch
-  it: all tests -> one RED run -> all code -> one GREEN run -> one commit;
-  a per-unit cycle on a compiled workspace burns hours and one CI build per
-  pushed commit).
-- "The fixture is right there in my home dir, I'll just point the test at
-  it" -> LAW 14 (machine-independent tests; version it or generate it in a
-  temp dir).
-- "Widen the epsilon / assert success-only and move on / compare against
-  a previous run" -> LAW 15 (a test loosened to stay green is a lie).
-- "Suppress the checker, it is just being strict" -> LAW 16 (write the
-  invariant or you have an unaudited safety promise).
-- "sleep 100ms so the other thread finishes first" -> LAW 17 (wait on the
-  condition with a deadline, never on the clock).
-- "Discard the error and keep going, it can't really happen" -> LAW 18
-  (discards carry a written reason; errors that "can't happen" are the
-  ones that do).
-- "I'll write the auth/retry/TLS middleware myself" -> LAW 19 (propose the
-  platform to the user first).
-- "This feature package can hold the handler, the use case and the adapter"
-  -> LAW 20 (three layers, separate units).
-- "Import the vendor's tracer/client directly, it's what prod uses" -> LAW 21.
-- "Put the implementation next to the interface" / "return the concrete
-  type" -> LAW 22.
-- "I'll construct the client inside the service" / "a package-level
-  singleton is fine" -> LAW 23 (the container wires it).
-- "Add a second public method to this handler/service" -> LAW 24 (new unit).
-- "Hardcode it, nobody will change it" / "read the env var right here" ->
-  LAW 25 (registered key, default next to the owner).
-- "Keep it in a map in memory, it's only one instance" -> LAW 26.
-- "Kill on SIGTERM, the orchestrator restarts it" -> LAW 27 (drain first).
-- "Write the handler first, document the API after" -> LAW 28.
-- "I'll just infer it from the name/prefix/id" -> Data Ownership.
-- "Adding this case means editing those other files too, fine" -> Zero
-  Coupling.
-- "It's only one literal in the comparison" -> Single Source of Truth.
-- "Leave the old alias / commented block just in case" -> No Trash.
-- "The lead/PM said it's fine" -> authority does not override a LAW;
-  state the conflict and follow the LAW.
-- "I already spent so long, just ship it" -> sunk cost is not evidence.
-- "I'll just code it, the lib is overkill" -> Library before custom.
-- "I'll add the dependency once it grows" -> "once it grows" is a session
-  that ends with bespoke code; choose now.
-- "I'll write the test once I get it working" -> Testable design (and LAW
-  1). If you cannot test it without infra, the design is wrong.
-- "One big file is fine for now" -> Small units / parallel-safe. A god
-  file is a merge-conflict serialization point.
-- "The domain can just call this driver/HTTP/env directly" / "clean
-  architecture is over-engineering for this size" -> LAW 20.
-
-## Known limitations
-
-- This skill enforces order and ownership; it cannot judge whether a test
-  asserts the right behavior. Pair it with the mechanical gate and with
-  reviewer judgment on test semantics.
-- Under extreme combined pressure an agent may still comply in letter
-  (writes a trivially-passing test, syncs a one-line doc) while missing
-  intent. The Red Flags target the letter; semantic adequacy of the test
-  and the doc remains a review responsibility.
-- It does not cover language- or tool-specific idioms by design (no Cargo,
-  no Slint, no framework rules). Those belong in a language-specific skill,
-  not here.
-- The flow gates (LAW 13) prove a plan/test exists and that you unlocked in
-  order; they cannot judge whether the plan is sound or the test asserts the
-  right behavior. They also cannot tell a feature from a bug -- you declare the
-  flow by creating `.dev-rules/.mode-feature` (feature) or going straight to
-  RED (bug). Reviewer judgment still required.
-
 ## Living Document
 
 When the user corrects a methodology mistake: (1) identify the violated
-principle, (2) add the rule or anti-pattern HERE in the SAME turn, before
+principle, (2) add the rule or anti-pattern to the group file it belongs
+to -- and its line here if it is a new rule -- in the SAME turn, before
 closing, (3) commit the updated skill with its docs. Do not rely on
 memory; write it down. The same mistake must not recur.

@@ -11,7 +11,7 @@ Paths are relative to this directory (`skills/dev/`).
 
 | Context | Leaf |
 |---|---|
-| Writing, editing, or refactoring ANY code -- discipline, RED-first TDD, ownership, docs-synced commits | `engineering/rules.md` |
+| Writing, editing, or refactoring ANY code -- discipline, RED-first TDD, ownership, docs-synced commits | `engineering/rules.md` (an index; it says which `engineering/rules/` groups to open) |
 | Quality gate before a PR ("run QG", "check quality", "validate before PR") | `engineering/gate.md` |
 | Go code -- language discipline (architecture layout, errors, tests, //nolint, concurrency) AND github.com/xgodev/boost work | `golang/index.md` (the Go leaf; routes on to `golang/boost/` for the framework) |
 | Rust code -- unsafe/SAFETY:, Send/Sync impls, clippy suppression, Rust test shapes | `rust/rules.md` |

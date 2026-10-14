@@ -9,11 +9,14 @@ concurrency-first design) and the architecture LAWs 19-28 (platform before
 code, three layers, no vendor binding, contract alone with implementations
 apart, inversion of control, one public method per handler/service,
 configuration by convention, stateless processes, operable lifecycle,
-contract first). `rules.md` says WHAT; each language leaf
+contract first). `skills/dev/engineering/rules.md` is the index (one line
+per rule, which group to open); the full rules live in five groups under
+`skills/dev/engineering/rules/` (flow, design, testing, errors,
+architecture). Those say WHAT; each language leaf
 (`skills/dev/golang/index.md`, ...) says HOW in that language.
 
-It is the companion to the [Quality Gate](quality-gate.md) bundled in this
-same plugin: the gate catches mechanical metric regressions (fmt, lint,
+It is the companion to the [Quality Gate](quality-gate.md), whose Docker
+images this plugin runs: the gate catches mechanical metric regressions (fmt, lint,
 build, test, complexity, coverage); `dev-rules` governs the judgment the
 gate cannot see. Use them together, not interchangeably.
 

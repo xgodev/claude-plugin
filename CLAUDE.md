@@ -153,7 +153,7 @@ repos. Read them before changing anything.
   here. That repo is maintained by a different agent -- from this repo we only
   file issues there, never edit its code.
 
-### dev-rules (`skills/dev/engineering/rules.md`, `hooks/dev-rules/`)
+### dev-rules (`skills/dev/engineering/rules.md` + `rules/`, `hooks/dev-rules/`)
 
 - The hooks make RED-first deterministic: production edits blocked until a
   failing test exists (sentinels under `<workspace>/.dev-rules/`, scoped to the
@@ -164,17 +164,24 @@ repos. Read them before changing anything.
 
 ### dev skill leaves (`skills/dev/`)
 
-- **`engineering/rules.md` is language-agnostic BY LAW.** It loads for
-  EVERY code session in every language -- a Rust idiom there is a token
+- **`engineering/rules.md` and its groups (`engineering/rules/*.md`) are
+  language-agnostic BY LAW.** They load for EVERY code session in every
+  language -- a Rust idiom there is a token
   tax on a Java session. Language-specific shapes (unsafe/SAFETY:, clippy
   discipline, Go/boost, framework rules) live in their own leaf
   (`golang/`, `rust/`, `python/`, ... -- frameworks nest under their language, e.g. `golang/boost/`), routed by the `dev` door table, loaded ONLY
   when that language is in play. Adding a language-specific rule to
-  rules.md is a defect (1.12.0 -> 1.12.1 incident: Rust idioms in LAWs
+  them is a defect (1.12.0 -> 1.12.1 incident: Rust idioms in LAWs
   15/16/18 shipped to every session).
+- **`engineering/rules.md` is an index; the rules live in groups.** One
+  line per rule there, the full text + rationalizations + red flags in
+  its group file under `engineering/rules/` (flow, design, testing,
+  errors, architecture). A new LAW takes the next global number (the
+  language leaves cite by number -- never renumber), lands in one group,
+  and gets its index line in the same commit.
 - **Macro rules land in two places, owner-approved.** A cross-language rule
   the owner states (e.g. single responsibility) becomes a LAW in
-  `engineering/rules.md` saying WHAT (agnostic wording only -- no Go
+  `engineering/rules/` saying WHAT (agnostic wording only -- no Go
   package, library or idiom) AND its Go-concrete shape saying HOW
   in `golang/index.md` (same LAW number), illustrated with real examples
   from the owner's Go projects (no internal names -- see the proprietary

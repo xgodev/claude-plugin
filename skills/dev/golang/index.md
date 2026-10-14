@@ -16,18 +16,19 @@ language-agnostic BY LAW -- the Go idioms live here, not there.
 Layout -- one package per unit, contract and implementations apart:
 
 ```
-cmd/<app>/main.go                                          fx.New(modules...) only
+cmd/<app>/main.go                                          boost.Start() + fxfact.NewApp(modules...) only
 internal/app/<app>/<transport>/handler/<name>/handler.go   one Handle method
 internal/pkg/domain/model/entity/<entity>.go               entities, no driver/json tags
 internal/pkg/domain/repository/<entity>/repository.go      Repository interface ONLY
 internal/pkg/domain/service/<usecase>/service.go           Service interface ONLY, one method
+internal/pkg/domain/<repository|service>/<name>/errors.go  errors the contract promises (ErrNotFound, ...)
 internal/pkg/domain/service/<usecase>/local/service.go     in-process implementation
 internal/pkg/datastore/<entity>/<tech>/datastore.go        implements Repository (mongodb, memory, ...)
 internal/pkg/datastore/<entity>/<tech>/config.go           that implementation's knobs (collection, ...)
 internal/pkg/client/<usecase>/<tech>/client.go             same Service, remote (resty, grpc, mcp)
 internal/pkg/client/<usecase>/<tech>/config.go             that implementation's knobs (base URL, ...)
 internal/pkg/fx/modules/<mirrors the unit path>/module.go  wiring + implementation switch
-internal/pkg/fx/modules/<mirrors the unit path>/config.go  key: which implementation is wired
+internal/pkg/fx/modules/<mirrors the unit path>/config.go  which implementation is wired + in-domain impl knobs
 api/                                                       openapi.yaml, proto/, events/*.json
 ```
 
@@ -81,13 +82,14 @@ func Module() fx.Option {
   interface. This is deliberate and overrides Go's "accept interfaces,
   return structs": the caller must never be able to name the
   implementation. Mocks come from `mockery` via `//go:generate` on the
-  interface. The handler is the edge -- nothing injects it -- so
-  `NewHandler` may return `*Handler`.
+  interface. The handler is the edge -- nothing injects it -- so its
+  `New` may return `*Handler`.
 - **23** -- DI is uber fx through boost (`boost/references/fx/modules.md`),
   always, even for a small service. Each unit ships `Module() fx.Option`;
-  `main.go` only composes modules. No `init()` that builds a client, no
-  package-level client/singleton, no `New` called inside another unit's
-  logic.
+  `main.go` only composes modules. The implementation switch exists only
+  when two or more implementations exist; with one, the module provides it
+  directly. No `init()` that builds a client, no package-level
+  client/singleton, no `New` called inside another unit's logic.
 - **24** -- One handler package per operation (`handler/<name>/`, one
   `Handle`); one service package per use case (one interface method). A
   repository groups one entity's methods; one datastore implements one
@@ -97,7 +99,10 @@ func Module() fx.Option {
   = the package path in dots (`internal.pkg.client.quote.resty`) plus an
   accessor func. The owner of "which implementation" is the fx module that
   switches on it; the owner of one implementation's knob (base URL,
-  timeout, collection) is that implementation's package. The env override
+  timeout, collection) is that implementation's package -- except an
+  in-domain implementation (`service/<usecase>/local`), which cannot import
+  config (LAW 20): its knobs live in its fx module's `config.go` and reach
+  it through `New`. The env override
   is derived from the key (`boost/references/wrapper/config.md`). Read accessors in the fx module
   and pass values into constructors -- a service never calls `config.*` in
   its logic. `os.Getenv` in app code is a defect. Default datastore is
@@ -125,9 +130,14 @@ func Module() fx.Option {
 - Libraries return errors; they do not `fmt.Println`/`log.Fatal` as
   handling. `log.Fatal` in a library kills the caller's process --
   that decision belongs to `main`.
-- Wrap with `%w` so `errors.Is`/`errors.As` keep matching (LAW 7);
-  a `fmt.Errorf("failed: %v", err)` wrap erases the type the edge
-  matches on.
+- Plain Go: wrap with `%w` so `errors.Is`/`errors.As` keep matching
+  (LAW 7); a `fmt.Errorf("failed: %v", err)` wrap erases the type the
+  edge matches on.
+- boost service: an error that reaches the edge is wrapped with
+  `bootsterrors.Wrap`, never `fmt.Errorf` -- boost's `Classify` does not
+  see through `%w` (`boost/references/model-errors.md`). `fmt.Errorf`
+  stays fine for a boot-time error that never reaches the edge
+  (`fx.Error`).
 
 ## Tests (LAWs 14, 15, 17)
 
