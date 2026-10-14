@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.23.0]
+
 ### Added
 
 - **Architecture LAWs 19-28 in `engineering/rules.md`** (language-agnostic,
