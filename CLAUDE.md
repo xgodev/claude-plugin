@@ -172,6 +172,13 @@ repos. Read them before changing anything.
   when that language is in play. Adding a language-specific rule to
   rules.md is a defect (1.12.0 -> 1.12.1 incident: Rust idioms in LAWs
   15/16/18 shipped to every session).
+- **Macro rules land in two places, owner-approved.** A cross-language rule
+  the owner states (e.g. single responsibility) becomes a LAW in
+  `engineering/rules.md` (agnostic wording only) AND its Go-concrete shape
+  in `golang/index.md` (same LAW number), illustrated with real examples
+  from the owner's Go projects (no internal names -- see the proprietary
+  rule). The draft of both is shown to the owner in chat first; nothing is
+  written to `skills/` until the owner confirms it.
 
 ### skill-rules (`skills/skill-rules/`)
 
