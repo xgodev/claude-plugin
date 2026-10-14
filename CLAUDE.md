@@ -169,10 +169,12 @@ repos. Read them before changing anything.
   language -- a Rust idiom there is a token
   tax on a Java session. Language-specific shapes (unsafe/SAFETY:, clippy
   discipline, Go/boost, framework rules) live in their own leaf
-  (`golang/`, `rust/`, `python/`, ... -- frameworks nest under their language, e.g. `golang/boost/`), routed by the `dev` door table, loaded ONLY
+  (`golang/`, `rust/`, `python/`, `java/`, ... -- frameworks nest under their language, e.g. `golang/boost/`), routed by the `dev` door table, loaded ONLY
   when that language is in play. Adding a language-specific rule to
   them is a defect (1.12.0 -> 1.12.1 incident: Rust idioms in LAWs
-  15/16/18 shipped to every session).
+  15/16/18 shipped to every session). A selection table that names
+  languages or stores (LAWs 31, 32) is NOT a language-specific rule: the
+  choice is made before any language leaf loads, so it stays agnostic-side.
 - **`engineering/rules.md` is an index; the rules live in groups.** One
   line per rule there, the full text + rationalizations + red flags in
   its group file under `engineering/rules/` (flow, design, testing,

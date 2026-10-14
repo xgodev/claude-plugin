@@ -93,6 +93,11 @@ them.
 - LAW 26 -- Stateless processes.
 - LAW 27 -- Operable lifecycle: liveness, readiness, graceful drain.
 - LAW 28 -- Contract first.
+- LAW 29 -- The layout is the language's community standard.
+- LAW 30 -- Build on the market framework; extend it, never leave it.
+- LAW 31 -- The language fits the problem; propose it with its reason.
+- LAW 32 -- Persistence fits the access pattern; propose the store.
+- LAW 33 -- Many doors: one service, a thin adapter per protocol.
 
 ## Excuses that dodge every group
 

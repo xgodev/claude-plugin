@@ -120,6 +120,45 @@ Each language leaf says how these are written in that language.
     (OpenAPI, proto, AsyncAPI/JSON Schema), written before the handler, and
     the server and its clients are tested against it. A breaking change is a
     new version, never an in-place edit.
+29. **The layout is the language's community standard.** The repository
+    tree follows the most widely adopted layout convention of its language
+    and ecosystem, never one invented per repo. A directory the standard
+    names means what the standard says. Something the standard has no slot
+    for goes in its nearest slot, documented once in the README. In an
+    unfamiliar ecosystem, look the standard up before creating the first
+    directory.
+30. **Build on the market framework.** A service starts on the established
+    framework of its language -- the one that already gives wiring,
+    configuration, logging, health and adapters -- never on a hand-assembled
+    stack of loose libraries or an in-house mini-framework. What the
+    framework lacks is written as an extension in its idiom, and contributed
+    to the framework when the framework is yours to change. The language
+    leaf names the framework; when it names none, propose the dominant one
+    to the user before coding.
+31. **The language fits the problem.** Every new component picks its
+    language by its workload, not by habit: APIs and network services --
+    Go; anything that cannot afford garbage-collector pauses (hard
+    real-time, tight latency, embedded) -- Rust or C; a monolith with a
+    large domain -- Java; front end -- JavaScript/TypeScript; data, ML and
+    analytics -- Python. Propose the choice and its reason to the user
+    before the first file. The language the team already uses weighs in; it
+    does not decide alone.
+32. **Persistence fits the access pattern.** The store is chosen by how the
+    data is written and read, and proposed to the user before the datastore
+    is written: heavy multi-region writes -- a wide-column multi-master
+    store (Cassandra, ScyllaDB); simple records, cache, TTL -- a key-value
+    store (Redis); schema-free documents -- a document store (MongoDB);
+    full-text search -- a search engine (Elasticsearch/OpenSearch,
+    Typesense); transactions and joins -- a relational database
+    (PostgreSQL). One system may use several stores, each behind the
+    repository of its entity (LAW 22). A search index or a cache is a
+    projection rebuilt from the source of truth, never the source of truth.
+33. **Many doors to the outside world.** A system is ready to be reached
+    through several protocols -- REST, gRPC, MCP, events, CLI. Its logic is
+    exposed once, through the service interface; each protocol is a thin
+    adapter in the interaction layer (LAW 20) with its own contract
+    (LAW 28), switched on by config (LAW 25). Adding a protocol adds an
+    adapter and its wiring and touches no service.
 
 ## Rationalizations -- and the reality
 
@@ -138,6 +177,10 @@ one of these, you are about to violate a rule. Stop.
 | "One repository can serve both collections, it's the same feature" | Two entities, two responsibilities, two repositories (LAW 24). A repository that grows a second entity becomes the god file. |
 | "I'll read the env var here and hardcode the timeout; swap in the real config loader later" | Both baseline agents did this. The literal ships; operators cannot see or change it (LAW 25). Register the key with its default now, next to its owner. |
 | "Copy the service over unchanged, implementation beside its interface" | The day it goes remote, the implementation's package is also the contract's package and every caller is coupled to it (LAW 22). Contract alone; each implementation in its own package. |
+| "Go only: the team already has the Go leaf and the framework" | A baseline agent chose the language this way and never asked. Habit weighs in; the workload decides, and the user hears the choice and its reason before the first file (LAW 31). |
+| "Cassandra for writes, Redis for reads, a search engine for search" -- decided, then straight to the datastores | The baseline picked the right stores and still skipped the step: the store is PROPOSED to the user before the datastore is written (LAW 32). |
+| "The framework has no component for this protocol, so pull in a standalone SDK -- library before custom" | Library-before-custom is about not hand-writing what exists; it does not license leaving the framework. Write it as an extension in the framework's idiom and contribute it when the framework is yours (LAW 30). |
+| "Run REST, gRPC and MCP in the same process, always on" | A protocol nobody can switch off is a fixed deployment shape. Each adapter is enabled by config (LAW 33, LAW 25). |
 | "Validating the token / retrying in code is safer than trusting the mesh" | Two layers doing the same job disagree on the edge cases and double the retries (LAW 19). Configure it on the platform; code only what the platform cannot do. |
 
 ## Red Flags -- STOP
@@ -166,5 +209,15 @@ First-person thoughts that mean you are mid-violation. Each maps to the rule it 
 - "Keep it in a map in memory, it's only one instance" -> LAW 26.
 - "Kill on SIGTERM, the orchestrator restarts it" -> LAW 27 (drain first).
 - "Write the handler first, document the API after" -> LAW 28.
+- "I'll make up a folder structure that fits this repo" / "`src/` is
+  fine here" -> LAW 29 (the ecosystem's standard layout).
+- "The framework is heavy; plain libraries are lighter" / "a small
+  internal framework of our own" -> LAW 30.
+- "Use the language I'm fastest in" / "one language for the whole stack is
+  simpler" -> LAW 31 (workload decides; propose it).
+- "The relational database can do everything" / "search straight from the
+  primary store" / "the index is the data" -> LAW 32.
+- "REST is all we need" / "put the logic in the handler" / "a separate
+  service for the agent tool" -> LAW 33 (one service, many adapters).
 - "The domain can just call this driver/HTTP/env directly" / "clean
   architecture is over-engineering for this size" -> LAW 20.

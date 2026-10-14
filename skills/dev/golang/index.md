@@ -11,7 +11,7 @@ language-agnostic BY LAW -- the Go idioms live here, not there.
 |---|---|
 | github.com/xgodev/boost -- the Go service framework (any boost import, boot/wiring, factories, adapters) | `boost/index.md` (an index; its factory rows route on through group indexes -- follow them to the terminal reference) |
 
-## Architecture (LAWs 19-28)
+## Architecture (LAWs 19-33)
 
 Layout -- one package per unit, contract and implementations apart:
 
@@ -120,6 +120,23 @@ func Module() fx.Option {
   client requests against it (e.g. `github.com/getkin/kin-openapi`'s
   `openapi3filter` for OpenAPI). Server/client code may be generated from
   it; never the reverse.
+- **29** -- golang-standards/project-layout: `cmd/<app>/`, `internal/`
+  (`internal/app`, `internal/pkg`), `api/`, `configs/`, `deployments/`,
+  `scripts/`, `test/`, `docs/`; `pkg/` only for code another repo imports;
+  never `src/`. The layout above is that standard specialised.
+- **30** -- boost is the framework: boot and wiring (`boost.Start()` + fx),
+  config (`boost/wrapper/config`), logs (`boost/wrapper/log`), servers,
+  clients and datastores from its factories (`boost/index.md`). A factory
+  boost lacks is an issue or a contribution to `xgodev/boost`, never a
+  hand-rolled client or a standalone SDK wired around boost.
+- **32** -- one `datastore/<entity>/<tech>/` per store, built from its
+  boost factory (cassandra, redis, mongo, elasticsearch, pgx --
+  `boost/references/factory.md`); the wired store is chosen by config,
+  `memory` by default (LAW 8).
+- **33** -- one `internal/app/<app>/<transport>/` per protocol (`rest` on
+  echo, `grpc`, `mcp`, `cloudevents`, a CLI on cobra), each server from its
+  boost factory and switched on by config; every transport's handlers call
+  the same `Service`. A protocol boost has no factory for follows LAW 30.
 
 ## Errors (LAWs 18, 7, 4)
 

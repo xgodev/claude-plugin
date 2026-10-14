@@ -24,6 +24,24 @@
   switches on it (never under `domain/`, which must not import config),
   and an unknown value fails the boot (`fx.Error`) instead of falling back
   to a default implementation (LAW 4).
+- **Architecture LAWs 29-33** (agnostic): the repository follows the
+  language's community-standard layout (29); a service is built on the
+  market framework of its language and extends it instead of leaving it
+  (30); the language is chosen by the workload and proposed to the user
+  (31); the store is chosen by the access pattern and proposed to the user,
+  with caches and search indexes as projections of the source of truth
+  (32); one service is reached through many protocols, each a thin adapter
+  switched on by config (33). Baseline run without them: the agent picked
+  Go "because the team has the Go leaf", decided the stores without asking,
+  wired a standalone SDK around the framework for a missing protocol, and
+  ran every protocol always-on.
+- **Go shape of LAWs 29, 30, 32, 33**: golang-standards/project-layout,
+  boost as the framework (a missing factory is a contribution to boost),
+  one `datastore/<entity>/<tech>/` per store from its boost factory, one
+  `internal/app/<app>/<transport>/` per protocol.
+- **Java language leaf (`skills/dev/java/rules.md`), routed by the `dev`
+  door**: the Maven/Gradle standard layout (LAW 29) and Spring Boot as the
+  framework (LAW 30).
 
 ### Changed
 

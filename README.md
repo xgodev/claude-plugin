@@ -24,7 +24,9 @@ capability:
   (data ownership, zero coupling, RED-first TDD, docs-synced commits,
   verify-before-done) plus the architecture LAWs (platform first, layers,
   interfaces, IoC, one responsibility, configuration, statelessness,
-  lifecycle, contract first), with RED-first enforcement hooks. Each
+  lifecycle, contract first, standard layout, market framework, language
+  and store chosen by the problem, many protocols), with RED-first
+  enforcement hooks. Each
   language leaf says how a LAW is written in that language. See
   [`docs/dev-rules.md`](docs/dev-rules.md).
 - **`skill-rules`** -- skill-authoring discipline: every skill must be
