@@ -107,8 +107,8 @@ func Module() fx.Option {
   `boost/wrapper/cache` with a Redis driver; an in-process cache holds only
   data any instance can rebuild.
 - **27** -- Checkers via `boost/extra/health` (`health.Add`), served with
-  `restresponse.NewHealth`; liveness never depends on a downstream
-  (`boost/references/extra/health.md`). Anything you start (workers,
+  `restresponse.NewHealth` on the readiness route; liveness is a static
+  handler (`boost/references/extra/health.md`). Anything you start (workers,
   consumers) drains in an `fx.Lifecycle` `OnStop` hook bounded by its
   context.
 - **28** -- The spec lives in `api/`; tests validate handler responses and

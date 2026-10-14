@@ -3,7 +3,7 @@
 Methodology and decision rules for ANY code, in ANY language. Apply BEFORE
 writing, not after. This is the judgment a mechanical gate cannot measure:
 ownership, coupling, honesty of failure, TDD order, docs sync. The
-companion Quality Gate (bundled in this plugin) catches metric regressions
+companion Quality Gate (Docker images run by the `gate.md` leaf) catches metric regressions
 (fmt/lint/build/test/complexity/coverage); this skill governs the
 decisions the gate cannot see. Use both -- they do not overlap.
 
@@ -290,7 +290,9 @@ can change priorities, not the laws of correctness.
     termination, retries, timeouts, rate limiting, routing -- is configured
     there (service mesh, gateway, orchestrator), never re-implemented in the
     app. Preference order: platform, then a maintained library, then bespoke
-    code. Every line the app owns is a line someone maintains.
+    code. Every line the app owns is a line someone maintains. Before
+    writing any such concern in code, propose the platform option to the
+    user and let them decide; code it only on their explicit call.
 20. **Three layers, dependencies point inward.** Interaction (handlers: HTTP,
     gRPC, events, CLI, MCP), business (entities, services, repository
     interfaces) and persistence (datastores) are separate units -- separate
@@ -338,7 +340,10 @@ can change priorities, not the laws of correctness.
     disk that must outlive a request. Sessions, shared caches and files live
     in a backing service, so any instance can die or be replicated at any
     time.
-27. **Operable lifecycle.** Every service exposes liveness and readiness, and
+27. **Operable lifecycle.** Every service exposes liveness and readiness.
+    Liveness never checks a downstream -- a dead dependency would restart
+    every instance at once; readiness checks only the backing services the
+    instance cannot serve without, each check bounded by a deadline. It
     shuts down gracefully: on SIGTERM it stops taking work, drains in-flight
     requests and messages within a deadline, then closes its connections.
 28. **Contract first.** Every interface the service exposes (HTTP, gRPC,
@@ -375,8 +380,7 @@ one of these, you are about to violate a rule. Stop.
 | "Adding a dependency is bloat / scope creep" | A small, well-maintained dep that removes N lines of bespoke logic is the opposite of bloat. Treat the choice as a trade-off (size, surface, maintenance), not a reflex. |
 | "I'll add tests later, the design is fine" | Untestable design is a defect surfacing now. If you cannot test it without infra, the structure is wrong -- fix the structure, not the test plan. |
 | "Splitting into more files is over-engineering for this size" | Small units are not for aesthetics; they are how multiple agents/devs work in parallel without stepping on each other. A god file is a serialization point. |
-| "DDD / clean architecture is too much for this small thing" | The cost of layering when it is small is tiny; the cost of pulling apart a domain that imported an HTTP client three months later is huge. Domain stays pure from line one. |
-| "The domain can import this client/driver/env, it's just convenience" | One inward arrow is how the boundary dies. Move the dependency to an interface and inject it; the domain depends on nothing concrete -- always. |
+| "DDD / clean architecture is too much for this small thing" / "the domain can import this client, it's just convenience" | The cost of layering when it is small is tiny; the cost of pulling apart a domain that imported an HTTP client three months later is huge. One inward arrow is how the boundary dies (LAW 20). |
 | "The test expectation looks stale / the author left, just update `want` to what the code returns and unblock us" | Changing the assertion to match the OUTPUT asserts the output is correct -- a thing you have NOT proven. That is not fixing a stale test, it is signing off on the bug. Change a test only to match the SPEC (with proof + its own RED), never to match what the code happens to emit. |
 | "Editing the assertion is risky, so I'll just `t.Skip`/quarantine it to unblock the unrelated hotfix" | Reaching for skip under incident pressure is still disabling the oracle (LAW 5). A quarantined test is not green, it is silenced. Root-cause or escalate with the real reason; do not trade an assertion edit for a disable. |
 | "Concurrency now is premature optimization / speculation; volume today buys nothing measurable" | Concurrency is not an optimization, it is the execution model (LAW 12). A serial architecture hard-codes an assumption every later component depends on; undoing it is a rewrite. Design parallel-safe now and ship concurrent now; tune N, never retrofit the model. |
@@ -453,8 +457,8 @@ rule it breaks. If you think it, stop and do the rule instead.
 - "Discard the error and keep going, it can't really happen" -> LAW 18
   (discards carry a written reason; errors that "can't happen" are the
   ones that do).
-- "I'll write the auth/retry/TLS middleware myself" -> LAW 19 (the platform
-  does it).
+- "I'll write the auth/retry/TLS middleware myself" -> LAW 19 (propose the
+  platform to the user first).
 - "This feature package can hold the handler, the use case and the adapter"
   -> LAW 20 (three layers, separate units).
 - "Import the vendor's tracer/client directly, it's what prod uses" -> LAW 21.
@@ -469,8 +473,6 @@ rule it breaks. If you think it, stop and do the rule instead.
 - "Kill on SIGTERM, the orchestrator restarts it" -> LAW 27 (drain first).
 - "Write the handler first, document the API after" -> LAW 28.
 - "I'll just infer it from the name/prefix/id" -> Data Ownership.
-- "I'll read the env var right here, it's simpler" -> Separation of
-  Concerns.
 - "Adding this case means editing those other files too, fine" -> Zero
   Coupling.
 - "It's only one literal in the comparison" -> Single Source of Truth.
@@ -485,10 +487,8 @@ rule it breaks. If you think it, stop and do the rule instead.
   1). If you cannot test it without infra, the design is wrong.
 - "One big file is fine for now" -> Small units / parallel-safe. A god
   file is a merge-conflict serialization point.
-- "The domain can just call this driver/HTTP/env directly" -> DDD,
-  always: domain depends on NOTHING concrete; infra implements ports.
-- "Clean architecture is over-engineering for this size" -> the cost of
-  layering small is tiny; the cost of unwinding coupling later is huge.
+- "The domain can just call this driver/HTTP/env directly" / "clean
+  architecture is over-engineering for this size" -> LAW 20.
 
 ## Known limitations
 

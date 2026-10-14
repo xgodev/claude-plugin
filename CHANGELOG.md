@@ -30,6 +30,13 @@
 - **`boost/references/fx/modules.md`: fx is always used.** The "one binary
   -- wire by hand" recommendation contradicted LAW 23 and is gone.
 - README `- Version:` line had drifted to 1.21.0; it now matches.
+- LAW 19: before coding a cross-cutting concern, propose the platform
+  option to the user and code it only on their explicit call.
+- LAW 27 now says what each probe checks (liveness: no downstream;
+  readiness: required backing services, under a deadline) -- it was only
+  in the Go leaf.
+- `rules.md`: duplicated DDD/env red flags and rationalizations merged;
+  the intro no longer claims the Quality Gate is bundled.
 
 ## [1.22.0]
 
