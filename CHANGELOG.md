@@ -1,5 +1,36 @@
 # Changelog
 
+## [1.23.0]
+
+### Added
+
+- **Architecture LAWs 19-28 in `engineering/rules.md`** (language-agnostic,
+  what to do): platform before code, three layers with inward
+  dependencies, nothing bound to a vendor, every dependency an interface
+  with the contract alone in its package and each implementation
+  (in-process, HTTP, gRPC, MCP, database) in its own, inversion of control,
+  one public method per handler/service (a repository: one entity),
+  everything operable configurable by convention, stateless processes,
+  operable lifecycle (liveness/readiness, graceful drain), contract first.
+  Rationalizations and red flags come from a baseline run without them:
+  both agents put the implementation beside the interface, returned
+  concrete types, and hardcoded operational values behind a raw env read.
+- **Go shape of those LAWs in `golang/index.md`** (how): package layout
+  (`domain/service/<usecase>/service.go` contract only, `local/`
+  implementation, `internal/pkg/client/<usecase>/<tech>/` remote one,
+  `datastore/<entity>/<tech>/`), uber fx modules with the implementation
+  switch driven by `boost/wrapper/config`, boost health/cache/log, `api/`
+  specs. The "which implementation" key lives in the fx module that
+  switches on it (never under `domain/`, which must not import config),
+  and an unknown value fails the boot (`fx.Error`) instead of falling back
+  to a default implementation (LAW 4).
+
+### Changed
+
+- **`boost/references/fx/modules.md`: fx is always used.** The "one binary
+  -- wire by hand" recommendation contradicted LAW 23 and is gone.
+- README `- Version:` line had drifted to 1.21.0; it now matches.
+
 ## [1.22.0]
 
 ### Added

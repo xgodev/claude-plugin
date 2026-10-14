@@ -13,7 +13,7 @@ Paths are relative to this directory (`skills/dev/`).
 |---|---|
 | Writing, editing, or refactoring ANY code -- discipline, RED-first TDD, ownership, docs-synced commits | `engineering/rules.md` |
 | Quality gate before a PR ("run QG", "check quality", "validate before PR") | `engineering/gate.md` |
-| Go code -- language discipline (errors, tests, //nolint, concurrency) AND github.com/xgodev/boost work | `golang/index.md` (the Go leaf; routes on to `golang/boost/` for the framework) |
+| Go code -- language discipline (architecture layout, errors, tests, //nolint, concurrency) AND github.com/xgodev/boost work | `golang/index.md` (the Go leaf; routes on to `golang/boost/` for the framework) |
 | Rust code -- unsafe/SAFETY:, Send/Sync impls, clippy suppression, Rust test shapes | `rust/rules.md` |
 | Python code -- pyproject/uv toolchain, typing, noqa/type: ignore suppression, pytest shapes | `python/rules.md` |
 | UI/UX design -- palettes, styles, typography, charts, per-framework patterns, heuristics, a11y, design systems | `../ux-ui/index.md` (the ux-ui skill owns the design catalog + references) |

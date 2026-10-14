@@ -174,7 +174,8 @@ repos. Read them before changing anything.
   15/16/18 shipped to every session).
 - **Macro rules land in two places, owner-approved.** A cross-language rule
   the owner states (e.g. single responsibility) becomes a LAW in
-  `engineering/rules.md` (agnostic wording only) AND its Go-concrete shape
+  `engineering/rules.md` saying WHAT (agnostic wording only -- no Go
+  package, library or idiom) AND its Go-concrete shape saying HOW
   in `golang/index.md` (same LAW number), illustrated with real examples
   from the owner's Go projects (no internal names -- see the proprietary
   rule). The draft of both is shown to the owner in chat first; nothing is

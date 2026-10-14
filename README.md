@@ -22,7 +22,10 @@ capability:
   [`docs/quality-gate.md`](docs/quality-gate.md).
 - **`dev-rules`** -- macro, language-agnostic engineering-discipline skill
   (data ownership, zero coupling, RED-first TDD, docs-synced commits,
-  verify-before-done), with RED-first enforcement hooks. See
+  verify-before-done) plus the architecture LAWs (platform first, layers,
+  interfaces, IoC, one responsibility, configuration, statelessness,
+  lifecycle, contract first), with RED-first enforcement hooks. Each
+  language leaf says how a LAW is written in that language. See
   [`docs/dev-rules.md`](docs/dev-rules.md).
 - **`skill-rules`** -- skill-authoring discipline: every skill must be
   portable across all developers and machines. See
@@ -166,4 +169,4 @@ images. See [`docs/quality-gate.md`](docs/quality-gate.md).
 
 MIT -- see [LICENSE](LICENSE).
 
-- Version: 1.21.0
+- Version: 1.23.0

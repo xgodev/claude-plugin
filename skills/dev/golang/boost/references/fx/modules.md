@@ -2,11 +2,18 @@
 
 ## When to reach for fx
 
-| Service shape | Recommendation |
+Always. Inversion of control is a LAW (`engineering/rules.md` LAW 23, Go
+shape in `golang/index.md`): every service is wired by fx, even a one-binary
+service with two handlers -- hand-wiring in `main` is the global-construction
+the LAW forbids, and it is what makes the in-process -> remote swap an edit
+instead of a config change. Each unit ships its own `Module() fx.Option`;
+`main.go` only composes modules.
+
+| Service shape | Module layout |
 |---|---|
-| 1 main.go with handlers + dependencies wired by hand | Don't use fx -- manual wiring is clearer |
-| Multiple binaries sharing the same DB / pubsub / cache wiring | Extract those into fx modules; reuse across binaries |
-| 5+ services in a monorepo with the same boost-startup boilerplate | Use fx modules; standardize the boilerplate |
+| One binary | One module per unit (handler, service, repository + its implementation switch); `main.go` composes them |
+| Multiple binaries sharing the same DB / pubsub / cache wiring | The shared wiring becomes modules reused across binaries |
+| 5+ services in a monorepo with the same boost-startup boilerplate | Shared modules live in one core repo; every service composes them |
 
 A multi-service platform typically follows the latter pattern: shared modules (DB, Pub/Sub client, publisher, logger) live in one shared core repo and every service composes them via `fx.Options(core.PubsubModule(), core.DBModule(), ...).Run()`.
 
@@ -118,7 +125,7 @@ If no module provides `*publisher.Publisher`, `FunctionDeps.Publisher` is nil an
 |---|---|
 | Hand-writing an fx module for a component boost already ships one for (Echo, Resty, Redis, Mongo, gRPC server, Elasticsearch, Kafka, Goka, NATS, Pub/Sub, BigQuery, FreeCache, Ants, Datadog, publisher + drivers, multiserver, function + middlewares/adapters) | Import the shipped module from `fx/modules/**` -- run `find fx/modules -name module.go` before writing one |
 | Annotating a provider into an invented group tag (`group:"bootstrap.function.middleware"`) | Only `boostrap.function.adapters` and `extra.multiserver.servers` exist; middlewares are a plain slice argument to `bootstrap/function.Module[T]` |
-| Single-binary service with 200-line main.go using fx | Strip fx; manual wiring is clearer |
+| Single-binary service wired by hand in `main` ("fx is overkill here") | Wire it with fx -- IoC is a LAW (rules.md LAW 23); split the 200-line main into per-unit modules |
 | `fx.New(...).Run()` called BEFORE `boost.Start()` | `boost.Start()` is always first |
 | Constructor returning a concrete type when consumers need an interface | Return the interface so swapping implementations doesn't break the graph |
 | `fx.Invoke` doing real business logic | Use `fx.Invoke` only for wiring (route registration, lifecycle hooks); business logic lives in the constructed types |

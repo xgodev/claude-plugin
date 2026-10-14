@@ -58,7 +58,7 @@ Rust, shell, anything.
   a new branch in a god file. Files, functions, and classes stay small on
   purpose -- not for aesthetics, so multiple agents and developers can work
   on different units at once with minimal merge conflict. A god file is a
-  serialization point.
+  serialization point. The public-method budget per unit is LAW 24.
 - **Library before custom (do not reinvent the wheel)** -- Before writing
   N lines, search if a well-maintained library already solves the problem.
   If a battle-tested lib makes the code smaller, clearer, and removes a
@@ -76,13 +76,10 @@ Rust, shell, anything.
 - **Domain at the center (DDD, always)** -- Domain-Driven Design is the
   default architecture, not an option: the domain (entities, value
   objects, aggregates, domain services, repository **interfaces**) is
-  pure and depends on **nothing concrete** -- no framework, no DB driver,
-  no HTTP client, no env. Application layer orchestrates use cases.
-  Infrastructure (DB, HTTP, queues, files, clocks) lives on the edge and
-  implements the domain's ports. Dependencies point INWARD (dependency
-  inversion). If an `import` in the domain layer reaches into an infra
-  package, the boundary is broken -- fix it now, before the coupling
-  spreads.
+  pure and depends on **nothing concrete**. Dependencies point INWARD.
+  The architecture LAWs 19-28 below make this concrete: platform first,
+  three layers, no vendor binding, interfaces everywhere, IoC, one
+  responsibility, configuration, statelessness, lifecycle, contracts.
 
 ## LAWs (non-negotiable, language-agnostic)
 
@@ -286,6 +283,70 @@ can change priorities, not the laws of correctness.
     behavior discovered far away; a deep-layer print is unstructured and a
     layering violation at once.
 
+### Architecture LAWs (what to do; each language leaf says how)
+
+19. **Platform before code.** The smallest codebase wins. A cross-cutting
+    concern the platform already provides -- authn/authz, mTLS, TLS
+    termination, retries, timeouts, rate limiting, routing -- is configured
+    there (service mesh, gateway, orchestrator), never re-implemented in the
+    app. Preference order: platform, then a maintained library, then bespoke
+    code. Every line the app owns is a line someone maintains.
+20. **Three layers, dependencies point inward.** Interaction (handlers: HTTP,
+    gRPC, events, CLI, MCP), business (entities, services, repository
+    interfaces) and persistence (datastores) are separate units -- separate
+    packages/modules, never one feature package holding all three. Business
+    does not know persistence exists: it calls a repository interface and
+    never imports a driver, a datastore, or a transport type. Interaction
+    converts its payload to an entity and calls business, never persistence.
+21. **Nothing bound to a vendor.** Observability (logs, traces, metrics, APM),
+    datastores, queues and clients are reached through a vendor-neutral
+    abstraction; the concrete vendor is chosen by config at the edge.
+    Swapping the APM or the database is config plus a new adapter, never an
+    edit to a handler or a service.
+22. **Every dependency is an interface; a contract lives alone.** Data access
+    is a `Repository` interface owned by the domain, implemented by a
+    `Datastore` in persistence. A service is an interface too. The contract
+    lives alone in its package; every implementation (in-process, HTTP,
+    gRPC, MCP, a database) lives in its own package named by how it
+    implements it -- never beside the contract. Constructors hand back the
+    contract, not the concrete type. Callers import only the contract, so
+    moving a service out of process is a new implementation plus wiring,
+    never an edit to a caller. A remote implementation is infrastructure: it
+    lives outside the domain (LAW 20).
+23. **Inversion of control.** A unit never builds its own dependencies: it
+    declares them in its constructor and a DI container (the composition
+    root) wires the graph at startup. The entrypoint holds only wiring.
+    Choosing an implementation (datastore, in-process service vs remote
+    client) is a wiring decision driven by config (LAW 25), never an `if` in
+    business code. No global or singleton reached from inside a unit.
+24. **One responsibility, one file, one public method.** A handler exposes
+    exactly one public operation; a service exposes exactly one (one use
+    case). A repository is the exception: its responsibility is ONE entity's
+    persistence, so it exposes several operations -- all about that entity,
+    none about another. One datastore implements one repository. A second
+    public operation on a handler or service means a second unit: new file,
+    new type.
+25. **Everything operable is configurable, by convention.** Every value an
+    operator may need to change in production -- URLs, timeouts, pool sizes,
+    retry budgets, collection/topic names, which implementation is wired,
+    feature toggles -- is a registered config key with a safe default
+    declared next to the code that owns it, overridable per environment with
+    no code change. Defaults run locally out of the box (LAW 8); production
+    only overrides. No operational literal in code and no ad-hoc environment
+    read: an unregistered knob is invisible to operators.
+26. **Stateless processes.** An instance keeps nothing in memory or on local
+    disk that must outlive a request. Sessions, shared caches and files live
+    in a backing service, so any instance can die or be replicated at any
+    time.
+27. **Operable lifecycle.** Every service exposes liveness and readiness, and
+    shuts down gracefully: on SIGTERM it stops taking work, drains in-flight
+    requests and messages within a deadline, then closes its connections.
+28. **Contract first.** Every interface the service exposes (HTTP, gRPC,
+    event, MCP) has a versioned, machine-readable contract in the repo
+    (OpenAPI, proto, AsyncAPI/JSON Schema), written before the handler, and
+    the server and its clients are tested against it. A breaking change is a
+    new version, never an in-place edit.
+
 ## Communication
 
 Default reply: 1-3 sentences. Problem before solution. No greeting, no
@@ -331,6 +392,12 @@ one of these, you are about to violate a rule. Stop.
 | "The checker is being conservative, suppressing it here is obviously fine" | "Obviously" is exactly what the missing written invariant was supposed to prove (LAW 16). An unaudited safety promise moves the defect from compile error to production heisenbug. |
 | "A short sleep here makes the test stable" | It makes the test stable on THIS machine at THIS load (LAW 17). Wait on the condition with a deadline; a sleep that "works" is a race you scheduled to lose later, slower. |
 | "Logging the error to stderr here IS handling it" | A deep layer printing to stderr is unstructured noise the caller cannot act on (LAW 18). Return the typed error; the edge decides presentation. |
+| "One package per feature (domain + adapter + handler + wiring) keeps it simple; the use case already depends on interfaces" | A baseline agent shipped exactly this. Interfaces inside one package are not layers: the next change edits the adapter and the handler in the same unit, and the package imports the driver and the transport (LAW 20). Separate units per layer. |
+| "Returning the concrete type is idiomatic / simpler" | The caller now names the implementation, so swapping it (another datastore, a remote client) edits every caller (LAW 22). Hand back the contract. |
+| "One repository can serve both collections, it's the same feature" | Two entities, two responsibilities, two repositories (LAW 24). A repository that grows a second entity becomes the god file. |
+| "I'll read the env var here and hardcode the timeout; swap in the real config loader later" | Both baseline agents did this. The literal ships; operators cannot see or change it (LAW 25). Register the key with its default now, next to its owner. |
+| "Copy the service over unchanged, implementation beside its interface" | The day it goes remote, the implementation's package is also the contract's package and every caller is coupled to it (LAW 22). Contract alone; each implementation in its own package. |
+| "Validating the token / retrying in code is safer than trusting the mesh" | Two layers doing the same job disagree on the edge cases and double the retries (LAW 19). Configure it on the platform; code only what the platform cannot do. |
 
 ## Red Flags -- STOP
 
@@ -386,6 +453,21 @@ rule it breaks. If you think it, stop and do the rule instead.
 - "Discard the error and keep going, it can't really happen" -> LAW 18
   (discards carry a written reason; errors that "can't happen" are the
   ones that do).
+- "I'll write the auth/retry/TLS middleware myself" -> LAW 19 (the platform
+  does it).
+- "This feature package can hold the handler, the use case and the adapter"
+  -> LAW 20 (three layers, separate units).
+- "Import the vendor's tracer/client directly, it's what prod uses" -> LAW 21.
+- "Put the implementation next to the interface" / "return the concrete
+  type" -> LAW 22.
+- "I'll construct the client inside the service" / "a package-level
+  singleton is fine" -> LAW 23 (the container wires it).
+- "Add a second public method to this handler/service" -> LAW 24 (new unit).
+- "Hardcode it, nobody will change it" / "read the env var right here" ->
+  LAW 25 (registered key, default next to the owner).
+- "Keep it in a map in memory, it's only one instance" -> LAW 26.
+- "Kill on SIGTERM, the orchestrator restarts it" -> LAW 27 (drain first).
+- "Write the handler first, document the API after" -> LAW 28.
 - "I'll just infer it from the name/prefix/id" -> Data Ownership.
 - "I'll read the env var right here, it's simpler" -> Separation of
   Concerns.

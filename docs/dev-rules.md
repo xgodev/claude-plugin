@@ -5,7 +5,12 @@ plugin. It encodes how to write, edit, and refactor code well in any
 language -- the methodology and decision rules a mechanical gate cannot
 measure (data ownership, zero coupling, single source of truth, RED-first
 TDD, docs-synced commits, honest failure, verify-before-done,
-concurrency-first design).
+concurrency-first design) and the architecture LAWs 19-28 (platform before
+code, three layers, no vendor binding, contract alone with implementations
+apart, inversion of control, one public method per handler/service,
+configuration by convention, stateless processes, operable lifecycle,
+contract first). `rules.md` says WHAT; each language leaf
+(`skills/dev/golang/index.md`, ...) says HOW in that language.
 
 It is the companion to the [Quality Gate](quality-gate.md) bundled in this
 same plugin: the gate catches mechanical metric regressions (fmt, lint,
