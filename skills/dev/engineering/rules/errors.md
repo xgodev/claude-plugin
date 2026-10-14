@@ -22,7 +22,11 @@ time-pressure, authority, or sunk-cost exception.
    -- a generic string wrap that turns a NotFound into a 500 is a defect,
    not a cosmetic one. Propagate the typed error; add context only with a
    wrapper that preserves the classification (and the language's own
-   error matching -- type checks, unwrap chains).
+   error matching -- type checks, unwrap chains). When the service runs on
+   a framework (LAW 30), the classification is the framework's error
+   model: a contract promises its kinds, never a parallel set of errors of
+   its own. An error the app declares exists only when no kind fits, and
+   it is registered in the framework so every edge still maps it.
 16. **Every safety escape carries its written invariant.** An escape hatch
     from the language's safety model (an unsafe block, an unchecked cast,
     a type-checker suppression) transfers a proof obligation from the
@@ -58,6 +62,7 @@ one of these, you are about to violate a rule. Stop.
 |---|---|
 | "The checker is being conservative, suppressing it here is obviously fine" | "Obviously" is exactly what the missing written invariant was supposed to prove (LAW 16). An unaudited safety promise moves the defect from compile error to production heisenbug. |
 | "Logging the error to stderr here IS handling it" | A deep layer printing to stderr is unstructured noise the caller cannot act on (LAW 18). Return the typed error; the edge decides presentation. |
+| "Declare `ErrNotFound`/`ErrAlreadyExists` beside the contract, simple like the stdlib" | The baseline agent did exactly this on a framework that already classifies. A parallel error set duplicates the framework's model and drifts from it (LAW 7). Return the framework's kind; callers test it with the framework's predicate. |
 
 ## Red Flags -- STOP
 
@@ -67,6 +72,9 @@ First-person thoughts that mean you are mid-violation. Each maps to the rule it 
   masking).
 - "Suppress the checker, it is just being strict" -> LAW 16 (write the
   invariant or you have an unaudited safety promise).
+- "I'll put the errors this contract promises in their own file" ->
+  LAW 7 (the framework's kinds are the promise; declare one only when no
+  kind fits, and register it).
 - "Discard the error and keep going, it can't really happen" -> LAW 18
   (discards carry a written reason; errors that "can't happen" are the
   ones that do).

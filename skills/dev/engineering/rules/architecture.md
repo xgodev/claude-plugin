@@ -75,8 +75,8 @@ Each language leaf says how these are written in that language.
 22. **Every dependency is an interface; a contract lives alone.** Data access
     is a `Repository` interface owned by the domain, implemented by a
     `Datastore` in persistence. A service is an interface too. The contract
-    -- the interface plus the errors it promises -- lives alone in its
-    package; every implementation (in-process, HTTP,
+    -- the interface, its doc naming the framework error kind each method
+    returns (LAW 7) -- lives alone in its package; every implementation (in-process, HTTP,
     gRPC, MCP, a database) lives in its own package named by how it
     implements it -- never beside the contract. Whatever creates an
     implementation (constructor, factory, provider) hands back the contract

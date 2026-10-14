@@ -21,7 +21,6 @@ internal/app/<app>/<transport>/handler/<name>/handler.go   one Handle method
 internal/pkg/domain/model/entity/<entity>.go               entities, no driver/json tags
 internal/pkg/domain/repository/<entity>/repository.go      Repository interface ONLY
 internal/pkg/domain/service/<usecase>/service.go           Service interface ONLY, one method
-internal/pkg/domain/<repository|service>/<name>/errors.go  errors the contract promises (ErrNotFound, ...)
 internal/pkg/domain/service/<usecase>/local/service.go     in-process implementation
 internal/pkg/datastore/<entity>/<tech>/datastore.go        implements Repository (mongodb, memory, ...)
 internal/pkg/datastore/<entity>/<tech>/config.go           that implementation's knobs (collection, ...)
@@ -150,8 +149,20 @@ func Module() fx.Option {
 - Plain Go: wrap with `%w` so `errors.Is`/`errors.As` keep matching
   (LAW 7); a `fmt.Errorf("failed: %v", err)` wrap erases the type the
   edge matches on.
+- boost service: the error package is boost's
+  `github.com/xgodev/boost/model/errors`, imported unaliased as
+  `errors` -- never `bootsterrors` or any alias. It exports `Is`, `New`,
+  `Errorf`, `Wrap`, `Cause`, so it takes the stdlib one's place; alias the
+  stdlib (`stderrors`) only where `As`/`Unwrap` is needed.
+- boost service: a contract promises boost kinds (LAW 7), never sentinels
+  of its own -- no `errors.go` beside the interface. The interface doc
+  names the kind, the implementation returns it
+  (`errors.NotFoundf("order %s", id)`, `errors.AlreadyExistsf(...)`), a
+  caller tests `errors.IsNotFound(err)`. Only an error no kind fits is
+  declared, registered with `errors.Register(ErrX, errors.KindConflict)`
+  at boot (`boost/references/model-errors.md`).
 - boost service: an error that reaches the edge is wrapped with
-  `bootsterrors.Wrap`, never `fmt.Errorf` -- boost's `Classify` does not
+  `errors.Wrap`, never `fmt.Errorf` -- boost's `Classify` does not
   see through `%w` (`boost/references/model-errors.md`). `fmt.Errorf`
   stays fine for a boot-time error that never reaches the edge
   (`fx.Error`).

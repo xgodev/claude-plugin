@@ -1,17 +1,45 @@
 ## Typed errors
 
-```go
-import bootsterrors "github.com/xgodev/boost/model/errors"
+Import the package unaliased, as boost itself does -- it is `package errors`
+and also exports `Is`, `New`, `Errorf`, `Wrap` and `Cause`, so it takes the
+stdlib one's place in the file. It has no `As`/`Unwrap`; when one is needed,
+the stdlib package is the one aliased (`stderrors "errors"`).
 
-return bootsterrors.NewBadRequest(err, "invalid payload")        // wraps upstream err
-return bootsterrors.BadRequestf("field %q is required", "id")    // standalone
-return bootsterrors.NewNotFound(err, "order not found")
-return bootsterrors.NewConflict(err, "duplicate order id")
-return bootsterrors.NewForbidden(err, "missing permission")
-return bootsterrors.NewInternal(err, "downstream call failed")
-return bootsterrors.NotValidf("invalid event data")              // KindNotValid -> HTTP 400
-return bootsterrors.Wrap(err, bootsterrors.NotValidf("..."))     // wrap + classify
+```go
+import "github.com/xgodev/boost/model/errors"
+
+return errors.NewBadRequest(err, "invalid payload")        // wraps upstream err
+return errors.BadRequestf("field %q is required", "id")    // standalone
+return errors.NotFoundf("order %s", id)                    // standalone
+return errors.NewNotFound(err, "order not found")
+return errors.AlreadyExistsf("order %s", id)               // KindAlreadyExists -> HTTP 409
+return errors.NewConflict(err, "duplicate order id")
+return errors.NewForbidden(err, "missing permission")
+return errors.NewInternal(err, "downstream call failed")
+return errors.NotValidf("invalid event data")              // KindNotValid -> HTTP 400
+return errors.Wrap(err, errors.NotValidf("..."))           // wrap + classify
 ```
+
+## A contract promises these kinds, not errors of its own
+
+A repository or service contract returns the catalog above -- it never
+declares a parallel set of sentinels (`ErrNotFound`, `ErrAlreadyExists`) in an
+`errors.go` beside the interface. The interface doc names the kind each method
+returns; the implementation returns it; a caller tests it with the predicate:
+
+```go
+// GetByID returns the order, or a NotFound error (errors.IsNotFound).
+GetByID(ctx context.Context, id string) (*entity.Order, error)
+
+// in the datastore
+return nil, errors.NotFoundf("order %s", id)
+
+// in a caller that needs its own branch (the edge needs none: Classify maps it)
+if errors.IsNotFound(err) { ... }
+```
+
+Only an error no kind fits is declared by the app, and it is registered
+against a `Kind` at boot (see **Registering custom errors** below).
 
 ## Routing on the error is what makes them useful
 
@@ -25,7 +53,7 @@ The constructors return **unexported** structs (`notFound`, `badRequest`, `notVa
 `fmt.Errorf("%w", err)` defeats the HTTP side: `Classify` walks boost's `Cause()` (the `causer` interface), and a stdlib `*fmt.wrapError` is **not** a `causer`, so the boost type underneath stays invisible. (The deadletter matcher walks stdlib `Unwrap`, so it still sees through -- but do not rely on that.) Never wrap a boost error with `fmt.Errorf` -- see **Wrapping & propagation** below.
 
 The HTTP (Echo + function/CloudEvents) and gRPC error handlers resolve the status
-via `bootsterrors.Classify(err) Kind` -- registered custom errors first, then the
+via `errors.Classify(err) Kind` -- registered custom errors first, then the
 built-in `Is*` catalog. The `Kind -> HTTP status` table lives in
 `model/restresponse` (`HTTPStatusFor`) and is shared by Echo and the function
 adapter; the `Kind -> gRPC code` table lives in the gRPC `server` package.
@@ -37,21 +65,21 @@ For an application error that is **not** a boost type, register it once at boot
 status and gRPC code across all three transports -- no per-transport wiring.
 
 ```go
-import bootsterrors "github.com/xgodev/boost/model/errors"
+import "github.com/xgodev/boost/model/errors"
 
 // "XptoError behaves like NotFound" -> HTTP 404 / gRPC NotFound, everywhere.
-bootsterrors.Register(ErrXpto, bootsterrors.KindNotFound)         // matches via errors.Is
+errors.Register(ErrXpto, errors.KindNotFound)         // matches via errors.Is
 
-bootsterrors.RegisterMatch(func(err error) bool {                // matches by type
-    _, ok := bootsterrors.Cause(err).(*MyTypedErr)               // Cause, like Is* does
+errors.RegisterMatch(func(err error) bool {                // matches by type
+    _, ok := errors.Cause(err).(*MyTypedErr)               // Cause, like Is* does
     return ok
-}, bootsterrors.KindConflict)
+}, errors.KindConflict)
 
 // Ignore: no opts == treat as success (HTTP 200 / gRPC OK) AND silence the log.
-bootsterrors.Ignore(ErrNoise)
-bootsterrors.Ignore(ErrAudit, bootsterrors.IgnoreSilenceLog)     // status normal, just no log
-bootsterrors.Ignore(ErrExpected, bootsterrors.IgnoreAsSuccess)   // 200/OK, still logged
-bootsterrors.Ignore(ErrBoth, bootsterrors.IgnoreAsSuccess, bootsterrors.IgnoreSilenceLog) // explicit both
+errors.Ignore(ErrNoise)
+errors.Ignore(ErrAudit, errors.IgnoreSilenceLog)     // status normal, just no log
+errors.Ignore(ErrExpected, errors.IgnoreAsSuccess)   // 200/OK, still logged
+errors.Ignore(ErrBoth, errors.IgnoreAsSuccess, errors.IgnoreSilenceLog) // explicit both
 ```
 
 Opts are OR-combined; passing none is equivalent to passing both. `Ignore` matches
@@ -74,7 +102,7 @@ boost **classification** (`Classify` / `Is*`) walks `Cause()` -- single-level --
 
 - `fmt.Errorf("ctx: %w", boostErr)` makes `IsServiceUnavailable(...)` / `Classify(...)` return the WRONG kind -- `Cause()` is single-level and a `*fmt.wrapError` isn't a `causer`, so the boost type underneath is invisible -> `KindInternal` / 500 leaks out the edge.
 
-Note: boost typed errors **do** implement stdlib `Unwrap()`, so `errors.Is` / `errors.As` traverse them -- `errors.Is(boostErr, context.Canceled)` works, and propagating or `Annotate`-ing a boost error keeps stdlib sentinel matching. Only boost's own `Cause()`-based **classification** is single-level, which is why `fmt.Errorf("%w")` still defeats the edge's kind mapping even though `errors.Is` would see through it.
+Note: boost typed errors **do** implement stdlib `Unwrap()`, so `errors.Is` (boost's delegates to the stdlib) and `stderrors.As` traverse them -- `errors.Is(boostErr, context.Canceled)` works, and propagating or `Annotate`-ing a boost error keeps stdlib sentinel matching. Only boost's own `Cause()`-based **classification** is single-level, which is why `fmt.Errorf("%w")` still defeats the edge's kind mapping even though `errors.Is` would see through it.
 
 So where `err` is already a boost error (app / use-case / propagating layers), **don't wrap -- propagate**:
 
@@ -100,6 +128,12 @@ Add classification only at the boundary where the cause is **non-boost** -- with
 The Echo / gRPC / function edges map boost errors to a code automatically. GraphQL (gqlgen) returns **HTTP 200** with the error inside the `errors[]` array, so the Echo `error_handler` never sees a resolver error. Wire the equivalent at the gqlgen layer -- the 4th transport over the same catalog:
 
 ```go
+import (
+    stderrors "errors" // only for Unwrap, which boost's package does not export
+
+    "github.com/xgodev/boost/model/errors"
+)
+
 srv.SetErrorPresenter(func(ctx context.Context, e error) *gqlerror.Error {
     gqlErr := graphql.DefaultErrorPresenter(ctx, e)
     if gqlErr.Extensions == nil {
@@ -107,15 +141,15 @@ srv.SetErrorPresenter(func(ctx context.Context, e error) *gqlerror.Error {
     }
     // Classify()/Is* use single-level Cause() and don't cross fmt.Errorf("%w");
     // walk the stdlib chain (boost errors implement Unwrap) and match each node.
-    for err := e; err != nil; err = errors.Unwrap(err) {
+    for err := e; err != nil; err = stderrors.Unwrap(err) {
         switch {
-        case bootsterrors.IsNotFound(err):
+        case errors.IsNotFound(err):
             gqlErr.Extensions["code"] = "NOT_FOUND"
-        case bootsterrors.IsServiceUnavailable(err):
+        case errors.IsServiceUnavailable(err):
             gqlErr.Extensions["code"] = "UPSTREAM_UNAVAILABLE"
-        case bootsterrors.IsForbidden(err), bootsterrors.IsConflict(err):
+        case errors.IsForbidden(err), errors.IsConflict(err):
             gqlErr.Extensions["code"] = "FORBIDDEN"
-        case bootsterrors.IsBadRequest(err), bootsterrors.IsNotValid(err):
+        case errors.IsBadRequest(err), errors.IsNotValid(err):
             gqlErr.Extensions["code"] = "BAD_USER_INPUT"
         default:
             continue
@@ -134,11 +168,13 @@ Same boost catalog as the other transports; only the public code strings differ.
 
 | Red flag | Fix |
 |---|---|
-| `fmt.Errorf("%w", err)` for an error that flows through Echo or function middleware | `bootsterrors.Wrap(err, bootsterrors.<Type>(...))` |
+| `fmt.Errorf("%w", err)` for an error that flows through Echo or function middleware | `errors.Wrap(err, errors.<Type>(...))` |
 | `fmt.Errorf("ctx: %w", boostErr)` to add a breadcrumb in app/use-case code | Propagate: `return X, err`. The boost kind + stdlib `errors.Is` survive; a breadcrumb isn't worth losing classification. |
 | `fmt.Errorf("%w", boostErr)` then expecting `Classify` / `Is*` to still classify it | They won't -- classification uses single-level `Cause()`, not stdlib unwrap, so the boost kind underneath is invisible. Propagate the boost error, or re-classify with a boost constructor. (stdlib `errors.Is` *would* see through, but the edge's kind->code mapping won't.) |
-| `echo.NewHTTPError(404, "...")` in a handler | `bootsterrors.NewNotFound(err, "...")` |
-| Returning a raw upstream error to a handler caller | Wrap with the right `bootsterrors.New<Type>` so the matcher can route it |
+| `echo.NewHTTPError(404, "...")` in a handler | `errors.NewNotFound(err, "...")` |
+| Returning a raw upstream error to a handler caller | Wrap with the right `errors.New<Type>` so the matcher can route it |
+| An `errors.go` of sentinels (`ErrNotFound`, `ErrAlreadyExists`) beside a contract | Delete it: the implementation returns `errors.NotFoundf(...)` / `errors.AlreadyExistsf(...)`, the interface doc names the kind, callers test `errors.IsNotFound(err)` |
+| `import bootsterrors "github.com/xgodev/boost/model/errors"` (or any alias) | Import it unaliased as `errors`, as boost does; alias the stdlib one (`stderrors`) only where `As`/`Unwrap` is needed |
 | Inventing a custom error struct for things `model/errors` already covers | Use the existing type -- extending the catalog needs an upstream PR, not a local workaround |
-| A genuinely app-specific error returning 500 because the handler doesn't know it | `bootsterrors.Register(err, Kind...)` / `RegisterMatch(...)` at boot so it maps to the right code in HTTP and gRPC |
+| A genuinely app-specific error returning 500 because the handler doesn't know it | `errors.Register(err, Kind...)` / `RegisterMatch(...)` at boot so it maps to the right code in HTTP and gRPC |
 | Editing the Echo/gRPC switch by hand to add a case for your error | Register it instead -- the switch is now a shared `Classify` + `Kind` table |

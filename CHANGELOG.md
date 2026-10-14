@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **A contract promises the framework's error kinds (LAWs 7 and 22).** No
+  parallel set of sentinels beside the interface: the interface doc names
+  the kind, the implementation returns it, and only an error no kind fits
+  is declared and registered in the framework. The Go leaf drops
+  `errors.go` from the layout and shows the boost shape
+  (`errors.NotFoundf`, `errors.IsNotFound`, `errors.Register`).
+- **boost's `model/errors` is imported unaliased as `errors`**, as boost
+  itself does, across the Go leaf and the boost references (`model-errors`,
+  `factory/echo`, `bootstrap/middleware`); the stdlib package is the one
+  aliased (`stderrors`) where `As`/`Unwrap` is needed.
+
 ## [1.23.0]
 
 ### Added

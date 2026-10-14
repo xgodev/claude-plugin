@@ -134,5 +134,5 @@ boot -- it works for HTTP and gRPC at once. See `references/model-errors.md`
 | `echo.New()` directly | `echoserver.NewServer(ctx, ...)` |
 | `error_handler.Register` before `restresponse.Register` | Reorder |
 | `srv.Serve(ctx)` called inline (not in a goroutine) followed by `<-ctx.Done()` | Wrap `Serve` in a goroutine |
-| `echo.NewHTTPError(...)` in a handler | Return `bootsterrors.<Type>(err, "...")` (see `references/model-errors.md`) |
+| `echo.NewHTTPError(...)` in a handler | Return `errors.<Type>(err, "...")` (see `references/model-errors.md`) |
 | `Shutdown(ctx)` reusing the cancelled parent context | Use a fresh `context.WithTimeout` |

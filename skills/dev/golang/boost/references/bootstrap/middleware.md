@@ -45,13 +45,13 @@ Return the typed error **directly**:
 
 ```go
 // Matched by the default list -> published to the deadletter subject
-return nil, bootsterrors.Internalf("downstream call failed")
+return nil, errors.Internalf("downstream call failed")
 
 // Not in the default list -> propagated to the caller, not published
-return nil, bootsterrors.NotValidf("invalid event data")
+return nil, errors.NotValidf("invalid event data")
 ```
 
-Do NOT use `bootsterrors.Wrap(err, bootsterrors.Internalf(...))`: `Wrap` stores the typed error in `cause` and sets `previous` to the other error (`model/errors/functions.go:130-137`), while `(*Err).Unwrap()` returns `previous` (`model/errors/error.go:101-103`). The typed error is never reachable from the chain the matcher walks. `fmt.Errorf("%w", err)` is fine -- `stderrors.Unwrap` traverses it. See `references/model-errors.md`.
+Do NOT use `errors.Wrap(err, errors.Internalf(...))`: `Wrap` stores the typed error in `cause` and sets `previous` to the other error (`model/errors/functions.go:130-137`), while `(*Err).Unwrap()` returns `previous` (`model/errors/error.go:101-103`). The typed error is never reachable from the chain the matcher walks. `fmt.Errorf("%w", err)` is fine -- `stderrors.Unwrap` traverses it. See `references/model-errors.md`.
 
 ## `ignore_errors` middleware
 
@@ -72,5 +72,5 @@ fn, _ := function.New[*cloudevents.Event](rec, imi, lmi, pmi)
 |---|---|
 | Chain ordered `publisher -> logger -> recovery` (or any permutation that violates outermost=recovery) | Reorder to `recovery -> logger -> publisher` |
 | Forgetting `recovery` middleware | Always include it -- production functions die otherwise |
-| `bootsterrors.Wrap(err, bootsterrors.<Type>(...))` for deadletter routing | Return the typed error directly -- `Wrap` hides it from the matcher |
+| `errors.Wrap(err, errors.<Type>(...))` for deadletter routing | Return the typed error directly -- `Wrap` hides it from the matcher |
 | Mixing `T = cloudevents.Event` and `T = *cloudevents.Event` across middlewares | All on `*cloudevents.Event` |
