@@ -87,6 +87,12 @@ the one the call targets -- and never unlocks or re-arms another:
   `git -C <dir>` when present, otherwise the hook input's `cwd` -- and any
   path token resolved against it (`cat .solvers/A/src/x.go` from the root
   uses A).
+- A path in NO workspace -- outside the project and outside every
+  `.solvers/<name>/` -- is not this project's file and is never gated: an
+  absolute token like `/src` (a path inside a container, as in the quality-gate
+  `docker run -v "$PWD:/src" -w /src ... >result.json`) is skipped, never
+  treated as production of the root. A `.solvers/<name>/` clone outside the
+  project still uses its own sentinels.
 - The cycle-closing commit clears only the committing workspace's sentinels.
 - The start-of-cycle prompt checks the session cwd's workspace. A root
   session with `.solvers/` workspaces present is told to create sentinels in

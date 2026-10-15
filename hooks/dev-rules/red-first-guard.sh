@@ -61,12 +61,14 @@ esac
 
 # Production implicated (and not a test file)? Each token resolves against the
 # effective cwd; its workspace (.solvers/<name>/ or the root) owns the sentinel,
-# and production_globs match the path relative to that workspace.
+# and production_globs match the path relative to that workspace. A path in no
+# workspace (outside the project and every .solvers/<name>/, e.g. /src inside a
+# container) is not this project's file: skipped, never root production (#28).
 prod_touched=""; ws=""
 for tok in $target; do
   case "$tok" in /*) abs="$tok" ;; *) abs="${base%/}/$tok" ;; esac
   w="$(dr_workspace "$abs")"
-  case "$abs" in "$w"/*) rel="${abs#"$w"/}" ;; *) rel="$tok" ;; esac
+  case "$abs" in "$w"/*) rel="${abs#"$w"/}" ;; *) continue ;; esac
   if dr_is_production "$rel" "$w"; then prod_touched="yes"; ws="$w"; break; fi
 done
 [ -n "$prod_touched" ] || exit 0

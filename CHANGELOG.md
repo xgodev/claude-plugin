@@ -70,6 +70,17 @@
   The baseline agent inferred the once from boost source, because the skill
   never mentioned it.
 
+### Fixed
+
+- **dev-rules: the red-first guard no longer denies the quality-gate run from
+  an unlocked workspace (#28).** A path token in no workspace (outside the
+  project and every `.solvers/<name>/`) fell back to its raw text, so `/src`
+  -- the container path in `docker run -v "$PWD:/src" -w /src ...
+  >result.json` -- matched the `src` production segment and was gated by the
+  root's sentinels, denying the call as "Production EDIT locked" even with
+  `.red-first-unlocked` in the clone. Such tokens are now skipped; paths inside
+  the project, and `.solvers/<name>/` clones anywhere, keep their gate.
+
 ## [1.23.0]
 
 ### Added

@@ -36,3 +36,6 @@ TEST*.xml
 
 # dev-rules runtime sentinels (never commit -- a committed sentinel disables the gate for everyone)
 .dev-rules/
+
+# Isolated task clones (git clone into .solvers/<name>/, never committed)
+.solvers/

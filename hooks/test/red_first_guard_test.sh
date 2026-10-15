@@ -149,6 +149,41 @@ out="$(run Bash "{\"tool_name\":\"Bash\",\"cwd\":\"$SBX\",\"tool_input\":{\"comm
 if denied "$out"; then echo "FAIL: cat .solvers/A/... must use A's sentinel"; fail=1; else echo "ok  : cat .solvers/A/... uses A's sentinel"; fi
 rm -rf "$SBX/.solvers"
 
+# 10. Issue #28: an absolute path token OUTSIDE the project (here /src, a path
+# inside a container) is not a project file, so it is never production of the
+# root workspace. The quality-gate run from an unlocked workspace passes; a
+# write to production INSIDE the project still blocks.
+bash_in() { # cwd, command -> hook-input JSON
+  jq -cn --arg cwd "$1" --arg cmd "$2" '{tool_name:"Bash",cwd:$cwd,tool_input:{command:$cmd}}'
+}
+reset; rm -rf "$SBX/.solvers"
+mkdir -p "$SBX/.solvers/A/.dev-rules" "$SBX/.solvers/A/src" "$SBX/.solvers/B/src"
+: >"$SBX/.solvers/A/.dev-rules/.red-first-unlocked"
+gate='docker run --rm --pull=always -v "$PWD:/src" -w /src ghcr.io/xgodev/quality-gate/go:latest --format json >"$LOG/result.json"'
+out="$(run Bash "$(bash_in "$SBX/.solvers/A" "$gate")")"
+if denied "$out"; then echo "FAIL: gate docker run from unlocked A must pass (issue #28)"; fail=1; else echo "ok  : gate docker run from unlocked A allowed"; fi
+out="$(run Bash "$(bash_in "$SBX" "cd .solvers/A && $gate")")"
+if denied "$out"; then echo "FAIL: cd .solvers/A && gate docker run must pass (issue #28)"; fail=1; else echo "ok  : cd .solvers/A && gate docker run allowed"; fi
+out="$(run Bash "$(bash_in "$SBX" 'echo x >/src/x.go')")"
+if denied "$out"; then echo "FAIL: write to /src outside the project is not root production (issue #28)"; fail=1; else echo "ok  : absolute token outside the project is not root production"; fi
+# Still blocking: production inside the project, relative or absolute.
+out="$(run Bash "$(bash_in "$SBX/.solvers/B" "$gate >src/x.go")")"
+if denied "$out"; then echo "ok  : redirect into B production denied"; else echo "FAIL: redirect into locked B production must block"; fail=1; fi
+out="$(run Bash "$(bash_in "$SBX/.solvers/A" "echo x >$SBX/.solvers/B/src/x.go")")"
+if denied "$out"; then echo "ok  : absolute write into B production denied from A"; else echo "FAIL: absolute write into locked B production must block"; fail=1; fi
+out="$(run Bash "$(bash_in "$SBX/.solvers/A" "echo x >$SBX/internal/x.go")")"
+if denied "$out"; then echo "ok  : absolute write into root production denied from A"; else echo "FAIL: absolute write into locked root production must block"; fail=1; fi
+rm -rf "$SBX/.solvers"
+# 10b. Same rule for Edit: a file outside the project and every workspace is not
+# root production, while a .solvers/<name>/ clone outside the project keeps its
+# own sentinel scope (locked without one).
+OUT="$(mktemp -d)"
+out="$(run Edit "{\"tool_name\":\"Edit\",\"tool_input\":{\"file_path\":\"$OUT/src/x.go\"}}")"
+if denied "$out"; then echo "FAIL: edit outside the project is not root production (issue #28)"; fail=1; else echo "ok  : edit outside the project not gated by the root"; fi
+out="$(run Edit "{\"tool_name\":\"Edit\",\"tool_input\":{\"file_path\":\"$OUT/.solvers/C/src/x.go\"}}")"
+if denied "$out"; then echo "ok  : edit in an outside .solvers/C without sentinel denied"; else echo "FAIL: an outside .solvers/C clone keeps its own lock"; fail=1; fi
+rm -rf "$OUT"
+
 # Malformed / empty stdin must not crash or block -- clean allow (exit 0, no deny).
 printf '%s' 'not-json' | bash "$GUARD" >/dev/null 2>&1; rc=$?
 if [ "$rc" = 0 ]; then echo "ok  : malformed stdin exits 0 (allow)"; else echo "FAIL: malformed stdin exit $rc"; fail=1; fi
