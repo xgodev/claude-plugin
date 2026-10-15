@@ -5,13 +5,15 @@ plugin. It encodes how to write, edit, and refactor code well in any
 language -- the methodology and decision rules a mechanical gate cannot
 measure (data ownership, zero coupling, single source of truth, RED-first
 TDD, docs-synced commits, honest failure, verify-before-done,
-concurrency-first design) and the architecture LAWs 19-33 (platform before
+concurrency-first design, 100% test coverage) and the architecture LAWs
+19-36 (platform before
 code, three layers, no vendor binding, contract alone with implementations
 apart, inversion of control, one public method per handler/service,
 configuration by convention, stateless processes, operable lifecycle,
 contract first, the ecosystem's standard layout, the market framework,
 the language and the store chosen by the problem, many protocols over one
-service). `skills/dev/engineering/rules.md` is the index (one line
+service, messaging as a contract with the broker proposed, observable by
+default, everything behind a feature flag). `skills/dev/engineering/rules.md` is the index (one line
 per rule, which group to open); the full rules live in five groups under
 `skills/dev/engineering/rules/` (flow, design, testing, errors,
 architecture). Those say WHAT; each language leaf

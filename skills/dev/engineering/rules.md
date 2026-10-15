@@ -67,6 +67,7 @@ them.
 - LAW 14 -- Tests are machine-independent.
 - LAW 15 -- A test loosened to stay green is a lie.
 - LAW 17 -- sleep() is never synchronisation: wait on the condition.
+- LAW 37 -- 100% test coverage, error paths and both flag states included.
 
 ## Errors -- `rules/errors.md` (an error, a secret, a safety escape)
 
@@ -98,6 +99,9 @@ them.
 - LAW 31 -- The language fits the problem; propose it with its reason.
 - LAW 32 -- Persistence fits the access pattern; propose the store.
 - LAW 33 -- Many doors: one service, a thin adapter per protocol.
+- LAW 34 -- Messaging is a contract; propose the broker.
+- LAW 35 -- Observable by default: traces, metrics, APM, logs everywhere.
+- LAW 36 -- Everything behind a feature flag.
 
 ## Excuses that dodge every group
 

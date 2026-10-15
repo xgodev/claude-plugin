@@ -11,7 +11,7 @@ language-agnostic BY LAW -- the Go idioms live here, not there.
 |---|---|
 | github.com/xgodev/boost -- the Go service framework (any boost import, boot/wiring, factories, adapters) | `boost/index.md` (an index; its factory rows route on through group indexes -- follow them to the terminal reference) |
 
-## Architecture (LAWs 19-33)
+## Architecture (LAWs 19-36)
 
 Layout -- one package per unit, contract and implementations apart:
 
@@ -26,6 +26,8 @@ internal/pkg/datastore/<entity>/<tech>/datastore.go        implements Repository
 internal/pkg/datastore/<entity>/<tech>/config.go           that implementation's knobs (collection, ...)
 internal/pkg/client/<usecase>/<tech>/client.go             same Service, remote (resty, grpc, mcp)
 internal/pkg/client/<usecase>/<tech>/config.go             that implementation's knobs (base URL, ...)
+internal/pkg/domain/publisher/<event>/publisher.go         Publisher interface ONLY, one method
+internal/pkg/publisher/<event>/boost/publisher.go          implements Publisher on boost wrapper/publisher
 internal/pkg/fx/modules/<mirrors the unit path>/module.go  wiring + implementation switch
 internal/pkg/fx/modules/<mirrors the unit path>/config.go  which implementation is wired + in-domain impl knobs
 api/                                                       openapi.yaml, proto/, events/*.json
@@ -88,7 +90,10 @@ func Module() fx.Option {
   `main.go` only composes modules. The implementation switch exists only
   when two or more implementations exist; with one, the module provides it
   directly. No `init()` that builds a client, no package-level
-  client/singleton, no `New` called inside another unit's logic.
+  client/singleton, no `New` called inside another unit's logic. Adding the
+  second implementation adds the switch in the same change: the config
+  key, the existing implementation as its default, and the boot failure on
+  an unknown value.
 - **24** -- One handler package per operation (`handler/<name>/`, one
   `Handle`); one service package per use case (one interface method). A
   repository groups one entity's methods; one datastore implements one
@@ -136,6 +141,36 @@ func Module() fx.Option {
   echo, `grpc`, `mcp`, `cloudevents`, a CLI on cobra), each server from its
   boost factory and switched on by config; every transport's handlers call
   the same `Service`. A protocol boost has no factory for follows LAW 30.
+- **34** -- The domain owns `domain/publisher/<event>.Publisher` (one
+  method, the entity in, `error` out). Its implementation builds the
+  CloudEvent and calls `github.com/xgodev/boost/wrapper/publisher`; the
+  per-broker implementations are boost's drivers (`confluentinc` Kafka,
+  `nats-io`, `cloud.google.com` Pub/Sub, `extra/noop`), each an fx module
+  under `boost/fx/modules/wrapper/publisher/driver/`. The app's fx module
+  switches on its own key and wires exactly one driver module, `noop` by
+  default (LAW 8). A consumer is a handler under
+  `internal/app/<app>/<transport>/` calling the service
+  (`boost/references/wrapper/publisher.md`).
+- **35** -- Every factory the service uses gets its observability plugins
+  (`boost/references/plugins.md` is the matrix), each with its own
+  `.enabled` key (`boost.factory.echo.plugins.prometheus.enabled`); config
+  turns on the metrics and ONE tracing vendor, OTel or Datadog, never both
+  (`boost/references/factory/datadog.md`). The OTel exporters come
+  from `factory/contrib/go.opentelemetry.io/otel/v1`
+  (`boost.factory.otel.trace.enabled`, `.metric.enabled`, `.endpoint`). A
+  component with no boost plugin (Kafka, NATS, Pub/Sub, the publish path's
+  trace) is instrumented at the call site with the OTel API: the publisher
+  injects the trace context into the event (`traceparent`) and the consumer
+  extracts it.
+- **36** -- A flag is `config.Add(root+".enabled", <default>, "...")` in the
+  owner's `config.go` with an `IsEnabled()` accessor, and the fx module
+  returns an empty `fx.Options()` when it is off -- the shape of boost's own
+  modules (`fx/modules/wrapper/publisher/driver/*/module.go`) -- so off
+  wires nothing. A capability another unit depends on (a publisher) is
+  turned off by its implementation switch instead: off is its no-op
+  implementation, one key, never an `.enabled` beside a driver key that can
+  disagree with it. The domain never reads a flag; a flag that changes
+  in-domain behavior reaches it through `New`, like any knob (LAW 25).
 
 ## Errors (LAWs 18, 7, 4)
 
@@ -167,7 +202,7 @@ func Module() fx.Option {
   stays fine for a boot-time error that never reaches the edge
   (`fx.Error`).
 
-## Tests (LAWs 14, 15, 17)
+## Tests (LAWs 14, 15, 17, 37)
 
 - Fixtures: versioned in the repo or created under `t.TempDir()` --
   never a path under the developer's `$HOME`, never the dev's real
@@ -181,6 +216,12 @@ func Module() fx.Option {
   VALUE too.
 - `t.Skip` on a currently-failing test silences a known regression --
   xfail list that alarms on pass, never a skip.
+- Coverage (LAW 37): `go test -race -covermode=atomic
+  -coverprofile=cover.out ./...` and `go tool cover -func=cover.out` totals
+  100.0% with generated code (mockery mocks, `*.pb.go`) dropped from the
+  profile. Each flagged module is tested on and off. The module list `main`
+  composes lives in one exported func, and a test passes it to
+  `fx.ValidateApp` -- that proves the graph, so `main.go` stays wiring only.
 
 ## Suppression and escapes (LAW 16)
 

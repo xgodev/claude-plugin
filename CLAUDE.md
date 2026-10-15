@@ -173,7 +173,7 @@ repos. Read them before changing anything.
   when that language is in play. Adding a language-specific rule to
   them is a defect (1.12.0 -> 1.12.1 incident: Rust idioms in LAWs
   15/16/18 shipped to every session). A selection table that names
-  languages or stores (LAWs 31, 32) is NOT a language-specific rule: the
+  languages, stores or brokers (LAWs 31, 32, 34) is NOT a language-specific rule: the
   choice is made before any language leaf loads, so it stays agnostic-side.
 - **`engineering/rules.md` is an index; the rules live in groups.** One
   line per rule there, the full text + rationalizations + red flags in

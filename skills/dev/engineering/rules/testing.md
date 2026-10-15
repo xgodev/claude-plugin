@@ -59,6 +59,14 @@ time-pressure, authority, or sunk-cost exception.
     with a deadline is acceptable; an unconditional fixed sleep is not. A
     magic duration "that reliably works on the machines we tested" is the
     same defect with tuning.
+37. **100% test coverage.** Every line of production code is covered --
+    and every branch where the language measures branches -- including
+    both states of every flag (LAW 36) and every error path. Coverage
+    without an assertion on the value does not count (LAW 15). Only
+    generated code (mocks, protobuf stubs) and the entrypoint are left out,
+    and the entrypoint holds only wiring (LAW 23), proven by a test that
+    builds the dependency graph. The gate measures it; "the gate only
+    checks for a drop" is not the target.
 
 ## Rationalizations -- and the reality
 
@@ -74,6 +82,7 @@ one of these, you are about to violate a rule. Stop.
 | "I'll widen the tolerance a bit so it's robust / less flaky" | "Robust" here means "wide enough that a wrong result passes" (LAW 15). If the value is genuinely nondeterministic, assert the invariant that IS deterministic; do not grow the window until the bug fits. |
 | "It didn't error, that's what matters" | Not-erroring is not behavior (LAW 15). A success-only assert with no expected VALUE passes for a function that returns garbage successfully. |
 | "This test fails for a known reason, ignore it for now and track it" | `ignore` IS untracking (LAW 15, LAW 5): CI never runs it again and the regression is ratified. Put it on the xfail list that fails the build when it starts passing. |
+| "The rules set no fixed number; the target is the gate's no-drop margin" / "test the happy path only" | A baseline agent set exactly this target. The target is 100%, error paths and both flag states included (LAW 37); the gate's margin only catches a regression. |
 | "A short sleep here makes the test stable" | It makes the test stable on THIS machine at THIS load (LAW 17). Wait on the condition with a deadline; a sleep that "works" is a race you scheduled to lose later, slower. |
 
 ## Red Flags -- STOP
@@ -92,3 +101,6 @@ First-person thoughts that mean you are mid-violation. Each maps to the rule it 
   a previous run" -> LAW 15 (a test loosened to stay green is a lie).
 - "sleep 100ms so the other thread finishes first" -> LAW 17 (wait on the
   condition with a deadline, never on the clock).
+- "Happy path is enough" / "coverage just must not drop" / "this branch is
+  too hard to reach" -> LAW 37 (100%; inject the boundary that makes it
+  reachable).

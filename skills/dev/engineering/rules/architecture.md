@@ -159,6 +159,32 @@ Each language leaf says how these are written in that language.
     adapter in the interaction layer (LAW 20) with its own contract
     (LAW 28), switched on by config (LAW 25). Adding a protocol adds an
     adapter and its wiring and touches no service.
+34. **Messaging is a contract; the broker fits the delivery need.**
+    Publishing is an interface owned by the domain (LAW 22), with one
+    implementation per broker, the broker picked by config (LAW 25) and a
+    no-infra one as the local default (LAW 8). The broker is chosen by the
+    delivery need and proposed to the user with its reason before the
+    publisher is written: an ordered, replayable, partitioned log -- Kafka;
+    lightweight pub/sub or request-reply -- NATS; a managed cloud queue --
+    the cloud's pub/sub. Consuming is a door (LAW 33): a listener adapter in
+    the interaction layer that calls the service. A publish failure reaches
+    the caller (LAW 4); a driver that drops it is a defect to fix at its
+    source (LAW 10).
+35. **Observable by default.** Every door (a request served, a message
+    consumed) and every dependency call (a datastore, a client, a publisher)
+    emits a trace span -- the context propagated across processes, message
+    headers included -- and rate/error/duration metrics (a Prometheus
+    endpoint, OTLP), reaches the APM, and logs structured lines carrying the
+    trace id. "No time for metrics" ships a service nobody can operate. Each
+    signal and each exporter is switched on and off by config (LAW 36), and
+    the vendor is config too (LAW 21).
+36. **Everything behind a feature flag.** Every capability -- a feature, a
+    door, an integration, an observability signal or exporter -- is turned
+    on and off by a config flag with a default (LAW 25), never by a code
+    change or a redeploy of new code. Off means fully off: nothing wired,
+    nothing half-running. Both states are tested (LAW 37). A release flag is
+    deleted once its feature is permanent; an operational flag (a kill
+    switch) stays.
 
 ## Rationalizations -- and the reality
 
@@ -180,6 +206,9 @@ one of these, you are about to violate a rule. Stop.
 | "Go only: the team already has the Go leaf and the framework" | A baseline agent chose the language this way and never asked. Habit weighs in; the workload decides, and the user hears the choice and its reason before the first file (LAW 31). |
 | "Cassandra for writes, Redis for reads, a search engine for search" -- decided, then straight to the datastores | The baseline picked the right stores and still skipped the step: the store is PROPOSED to the user before the datastore is written (LAW 32). |
 | "The framework has no component for this protocol, so pull in a standalone SDK -- library before custom" | Library-before-custom is about not hand-writing what exists; it does not license leaving the framework. Write it as an extension in the framework's idiom and contribute it when the framework is yours (LAW 30). |
+| "No time for metrics or tracing; skipping them breaks no rule" | A baseline agent said exactly this and wired nothing. Every door and every dependency call is traced and measured from the first commit (LAW 35); the deadline does not change what operators need at 3 a.m. |
+| "The event publishing is always on, we'll never turn it off" | Every capability has its flag (LAW 36). The day the broker is down, the flag is the difference between a config change and an emergency deploy. |
+| "The team said Kafka, so I wire Kafka" | When the user named the broker, that is the choice. When nobody did, the broker is PROPOSED with its reason before the publisher is written (LAW 34). |
 | "Run REST, gRPC and MCP in the same process, always on" | A protocol nobody can switch off is a fixed deployment shape. Each adapter is enabled by config (LAW 33, LAW 25). |
 | "Validating the token / retrying in code is safer than trusting the mesh" | Two layers doing the same job disagree on the edge cases and double the retries (LAW 19). Configure it on the platform; code only what the platform cannot do. |
 
@@ -219,5 +248,10 @@ First-person thoughts that mean you are mid-violation. Each maps to the rule it 
   primary store" / "the index is the data" -> LAW 32.
 - "REST is all we need" / "put the logic in the handler" / "a separate
   service for the agent tool" -> LAW 33 (one service, many adapters).
+- "Call the broker client straight from the service" / "Kafka is fine,
+  nobody asked" -> LAW 34 (publisher contract; broker proposed).
+- "Metrics and tracing can come later" -> LAW 35 (observable by default).
+- "This one is always on, no flag needed" -> LAW 36 (every capability has
+  its flag).
 - "The domain can just call this driver/HTTP/env directly" / "clean
   architecture is over-engineering for this size" -> LAW 20.

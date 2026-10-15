@@ -2,6 +2,34 @@
 
 ## [Unreleased]
 
+### Added
+
+- **LAW 34 -- messaging is a contract; the broker fits the delivery need.**
+  Publishing is a domain interface with one implementation per broker,
+  picked by config, no-infra by default; the broker is proposed to the user
+  with its reason (Kafka for an ordered replayable log, NATS for lightweight
+  pub/sub, the cloud's pub/sub for a managed queue); consuming is a door; a
+  publish failure reaches the caller.
+- **LAW 35 -- observable by default.** Every door and every dependency call
+  emits trace spans (context propagated through message headers too),
+  rate/error/duration metrics and structured logs carrying the trace id,
+  and reaches the APM; each signal and exporter is switched by config.
+- **LAW 36 -- everything behind a feature flag.** Every capability has a
+  config flag with a default; off wires nothing; both states are tested; a
+  release flag is deleted once permanent, a kill switch stays.
+- **LAW 37 -- 100% test coverage**, error paths and both flag states
+  included; coverage without a value assertion does not count; only
+  generated code and the wiring-only entrypoint are excluded.
+- Go leaf: the shapes of LAWs 34-37 on boost (`wrapper/publisher` with one
+  driver module wired by the app's switch, per-factory observability
+  plugins and the OTel exporter factory, `.enabled` flags returning an empty
+  `fx.Options()`, `go test -coverprofile` at 100% plus `fx.ValidateApp`),
+  and LAW 23 now says that adding a second implementation adds the switch
+  in the same change.
+- Baseline (RED) behavior these close: an agent called metrics and tracing
+  optional, set the gate's no-drop margin as its coverage target, and left
+  publishing on with no flag.
+
 ### Changed
 
 - **A contract promises the framework's error kinds (LAWs 7 and 22).** No
