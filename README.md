@@ -22,7 +22,8 @@ capability:
   [`docs/quality-gate.md`](docs/quality-gate.md).
 - **`dev-rules`** -- macro, language-agnostic engineering-discipline skill
   (data ownership, zero coupling, RED-first TDD, 100% coverage,
-  docs-synced commits, verify-before-done) plus the architecture LAWs (platform first, layers,
+  docs-synced commits, documented contracts, in-repo docs with diagrams,
+  verify-before-done) plus the architecture LAWs (platform first, layers,
   interfaces, IoC, one responsibility, configuration, statelessness,
   lifecycle, contract first, standard layout, market framework, language
   and store chosen by the problem, many protocols, messaging as a

@@ -223,6 +223,14 @@ func Module() fx.Option {
   composes lives in one exported func, and a test passes it to
   `fx.ValidateApp` -- that proves the graph, so `main.go` stays wiring only.
 
+## Documentation (LAWs 38, 39)
+
+- A godoc on every exported identifier, starting with its name; the
+  package doc lives in `doc.go`. Lint it with `revive`'s `exported` rule
+  (golangci-lint).
+- `docs/` is the project-layout slot (LAW 29); Mermaid diagrams go in `.md`
+  files there. Nothing else is Go-specific.
+
 ## Suppression and escapes (LAW 16)
 
 - `//nolint` is per-line, names the linter (`//nolint:errcheck`), and

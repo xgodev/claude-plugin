@@ -73,6 +73,30 @@ Rust, shell, anything.
   three layers, no vendor binding, interfaces everywhere, IoC, one
   responsibility, configuration, statelessness, lifecycle, contracts.
 
+## LAWs
+
+38. **Every exported unit documents its contract.** Every package and every
+    exported type, function and method carries a doc comment saying what it
+    promises: what it does, its inputs and outputs (with units), the error
+    kinds it returns (LAW 7), its side effects, and the invariants a caller
+    must keep. A comment inside a body says WHY (a decision, a constraint, a
+    workaround with its link), never WHAT the next line does. The doc is
+    part of the contract and changes in the same commit (LAW 2). A stale doc
+    is worse than none: the reader, human or AI agent, trusts it, and an
+    agent often sees only the signature and its doc, not the body.
+39. **Technical documentation lives in the repo, diagrams included, and
+    moves with the code.** `docs/` holds the architecture (the C4 context
+    and container views), a flowchart of each non-trivial flow, a sequence
+    diagram of each cross-service interaction (request, event, async), the
+    data model, and the decisions (ADRs: context, decision, consequences).
+    Diagrams are text (Mermaid, rendered by the code host), never a binary
+    image or an external board link that cannot be diffed or reviewed. A
+    change that alters a flow, a contract, a dependency or the data model
+    updates its diagram in the same commit (LAW 2); a diagram that disagrees
+    with the code is a defect. The README says what the service is, how to
+    run it locally with no infra (LAW 8), its config keys, and where the
+    docs live.
+
 ## Rationalizations -- and the reality
 
 Populated from real subagent output under combined time + sunk-cost +
@@ -86,6 +110,8 @@ one of these, you are about to violate a rule. Stop.
 | "Building it ourselves is faster than learning the lib" | "Faster" here means today, alone. The lib has tests, docs, maintenance; the bespoke copy has none of those. Adopt the lib, or write down a real reason it cannot be used. |
 | "Adding a dependency is bloat / scope creep" | A small, well-maintained dep that removes N lines of bespoke logic is the opposite of bloat. Treat the choice as a trade-off (size, surface, maintenance), not a reflex. |
 | "I'll add tests later, the design is fine" | Untestable design is a defect surfacing now. If you cannot test it without infra, the structure is wrong -- fix the structure, not the test plan. |
+| "The code is self-documenting, skip comments" / "a name that needs a comment is the wrong name" | A baseline agent found the Naming line read as backing exactly this. Naming governs names; a contract doc says what no name can -- error kinds, side effects, partial failure, invariants (LAW 38). |
+| "Docs and diagrams are a follow-up, nobody reads them anyway" / "no rule names diagrams, so the new flow needs none" | The next reader is an agent that codes against the doc and the diagram as written. A new flow gets its diagram, a changed flow its updated one, in the same commit (LAWs 2, 39). |
 | "Splitting into more files is over-engineering for this size" | Small units are not for aesthetics; they are how multiple agents/devs work in parallel without stepping on each other. A god file is a serialization point. |
 
 ## Red Flags -- STOP
@@ -104,3 +130,7 @@ First-person thoughts that mean you are mid-violation. Each maps to the rule it 
   1). If you cannot test it without infra, the design is wrong.
 - "One big file is fine for now" -> Small units / parallel-safe. A god
   file is a merge-conflict serialization point.
+- "The name says it all, no doc comment" -> LAW 38 (the contract: kinds,
+  side effects, invariants).
+- "I'll draw the diagram after the PR" / "the old diagram is close
+  enough" -> LAW 39 (the diagram moves with the code).

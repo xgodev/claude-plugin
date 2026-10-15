@@ -4,8 +4,9 @@ A single macro, **language-agnostic engineering-discipline** Claude Code
 plugin. It encodes how to write, edit, and refactor code well in any
 language -- the methodology and decision rules a mechanical gate cannot
 measure (data ownership, zero coupling, single source of truth, RED-first
-TDD, docs-synced commits, honest failure, verify-before-done,
-concurrency-first design, 100% test coverage) and the architecture LAWs
+TDD, docs-synced commits, every exported unit documenting its contract,
+technical docs with text diagrams kept in the repo, honest failure,
+verify-before-done, concurrency-first design, 100% test coverage) and the architecture LAWs
 19-36 (platform before
 code, three layers, no vendor binding, contract alone with implementations
 apart, inversion of control, one public method per handler/service,

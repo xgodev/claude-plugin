@@ -26,9 +26,22 @@
   `fx.Options()`, `go test -coverprofile` at 100% plus `fx.ValidateApp`),
   and LAW 23 now says that adding a second implementation adds the switch
   in the same change.
-- Baseline (RED) behavior these close: an agent called metrics and tracing
-  optional, set the gate's no-drop margin as its coverage target, and left
-  publishing on with no flag.
+- Baseline (RED) behavior LAWs 34-37 close: an agent called metrics and
+  tracing optional, set the gate's no-drop margin as its coverage target,
+  and left publishing on with no flag.
+- **LAW 38 -- every exported unit documents its contract** (what it does,
+  inputs/outputs with units, error kinds, side effects, invariants); body
+  comments say why, never what; the doc changes with the code.
+- **LAW 39 -- technical documentation lives in the repo, diagrams
+  included**: C4 context/container views, a flowchart per non-trivial
+  flow, a sequence diagram per cross-service interaction, the data model,
+  ADRs; diagrams as text (Mermaid), updated in the same commit; the README
+  covers what, how to run locally, config keys, and where the docs live.
+  Go leaf: godoc on every exported identifier, linted by `revive` `exported`,
+  package doc in `doc.go`, Mermaid under `docs/`. The baseline agent found
+  no rule for doc comments outside contract interfaces and none at all for
+  diagrams, and read the Naming line as backing "the code is
+  self-documenting".
 
 ### Changed
 

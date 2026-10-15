@@ -58,6 +58,9 @@ them.
   clock, or filesystem.
 - Domain at the center -- DDD always; the domain depends on nothing
   concrete.
+- LAW 38 -- Every exported unit documents its contract.
+- LAW 39 -- Technical docs live in the repo, diagrams as text, updated
+  with the code.
 
 ## Testing -- `rules/testing.md` (writing, changing, or skipping a test)
 
