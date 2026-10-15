@@ -134,9 +134,23 @@ dr_workspace() {
   printf '%s' "$proj"
 }
 
+# Issue #29: dr_expand_tilde <word> -> the word with a leading `~` or `~/`
+# replaced by $HOME, as the shell does for an unquoted word. A quoted `"~/x"`,
+# `~user` and an unset HOME stay literal.
+dr_expand_tilde() {
+  local home="${HOME:-}"
+  [ -n "$home" ] || { printf '%s' "$1"; return; }
+  home="${home%/}"
+  case "$1" in
+    "~") printf '%s' "${home:-/}" ;;
+    "~/"*) printf '%s' "$home/${1#"~/"}" ;;
+    *) printf '%s' "$1" ;;
+  esac
+}
+
 # dr_bash_cwd <command> <base-cwd> -> the directory a Bash command runs in:
-# the first `cd <dir>` or `-C <dir>` (git -C, make -C) target, resolved
-# against base-cwd; otherwise base-cwd itself.
+# the first `cd <dir>` or `-C <dir>` (git -C, make -C) target, tilde-expanded
+# and resolved against base-cwd; otherwise base-cwd itself.
 dr_bash_cwd() {
   local cmd="${1//$'\n'/ }" base="${2%/}" prev="" tok dir=""
   local -a toks
@@ -146,6 +160,7 @@ dr_bash_cwd() {
     prev="$tok"
   done
   dir="${dir%%[;&|)]*}"
+  dir="$(dr_expand_tilde "$dir")"   # before unquoting: "~/x" stays literal
   dir="${dir%\"}"; dir="${dir#\"}"; dir="${dir%\'}"; dir="${dir#\'}"
   case "$dir" in
     "") printf '%s' "$base" ;;

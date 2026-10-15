@@ -44,4 +44,13 @@ no dr_is_production "crates/project/build.rs"       # outside src -> globs are e
 ok dr_is_test_file  "crates/x/legacy/old.rs"        # matches config test_globs (** glob)
 rm -rf "$CFG2"; unset CLAUDE_PROJECT_DIR
 
+# Issue #29: a leading ~ is $HOME, as the shell expands an unquoted word.
+eq() { [ "$1" = "$2" ]; }
+ok eq "$(HOME=/h dr_expand_tilde '~')" /h
+ok eq "$(HOME=/h/ dr_expand_tilde '~/x/y')" /h/x/y
+ok eq "$(HOME=/h dr_expand_tilde '~user/x')" '~user/x'       # other user's home: left alone
+ok eq "$(HOME= dr_expand_tilde '~/x')" '~/x'                 # unset HOME: left alone
+ok eq "$(HOME=/h dr_bash_cwd 'cd ~/w && ls' /b)" /h/w
+ok eq "$(HOME=/h dr_bash_cwd 'cd "~/w" && ls' /b)" '/b/~/w'  # quoted: the shell keeps it literal
+
 exit $fail

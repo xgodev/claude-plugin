@@ -86,7 +86,9 @@ the one the call targets -- and never unlocks or re-arms another:
 - `Bash`: the effective cwd -- the target of `cd <dir> && ...` or
   `git -C <dir>` when present, otherwise the hook input's `cwd` -- and any
   path token resolved against it (`cat .solvers/A/src/x.go` from the root
-  uses A).
+  uses A). A leading `~` in the `cd`/`-C` target or a path token is `$HOME`,
+  as the shell expands it (`cd ~/repo/.solvers/A && ...` uses A); a quoted
+  `"~/x"` and `~user` stay literal.
 - A path in NO workspace -- outside the project and outside every
   `.solvers/<name>/` -- is not this project's file and is never gated: an
   absolute token like `/src` (a path inside a container, as in the quality-gate

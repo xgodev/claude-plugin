@@ -64,8 +64,10 @@ esac
 # and production_globs match the path relative to that workspace. A path in no
 # workspace (outside the project and every .solvers/<name>/, e.g. /src inside a
 # container) is not this project's file: skipped, never root production (#28).
+# A leading ~ is $HOME, as the shell expands it (#29).
 prod_touched=""; ws=""
 for tok in $target; do
+  tok="$(dr_expand_tilde "$tok")"
   case "$tok" in /*) abs="$tok" ;; *) abs="${base%/}/$tok" ;; esac
   w="$(dr_workspace "$abs")"
   case "$abs" in "$w"/*) rel="${abs#"$w"/}" ;; *) continue ;; esac

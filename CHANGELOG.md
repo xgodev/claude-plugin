@@ -80,6 +80,14 @@
   root's sentinels, denying the call as "Production EDIT locked" even with
   `.red-first-unlocked` in the clone. Such tokens are now skipped; paths inside
   the project, and `.solvers/<name>/` clones anywhere, keep their gate.
+- **dev-rules: a `~` path now expands to `$HOME` in the red-first guard and
+  the cycle-closing clear (#29).** The `cd`/`-C` target and path tokens were
+  taken literally, so `cd ~/<repo>/.solvers/<name> && cat ...` looked for the
+  sentinel under a `~/...` directory that does not exist and denied the read
+  as "Read-locked" even with `.red-first-unlocked` in the clone; a commit made
+  that way did not clear the clone's sentinels; and `cat ~/<repo>/internal/x.go`
+  from a cwd outside the project slipped past the gate. A leading `~` / `~/`
+  is now expanded as the shell does; a quoted `"~/x"` and `~user` stay literal.
 
 ## [1.23.0]
 

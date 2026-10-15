@@ -184,6 +184,28 @@ out="$(run Edit "{\"tool_name\":\"Edit\",\"tool_input\":{\"file_path\":\"$OUT/.s
 if denied "$out"; then echo "ok  : edit in an outside .solvers/C without sentinel denied"; else echo "FAIL: an outside .solvers/C clone keeps its own lock"; fail=1; fi
 rm -rf "$OUT"
 
+# 11. Issue #29: a leading ~ expands to $HOME, as the shell does, both in the
+# cd / git -C target and in a path token. HOME is the sandbox here, and .cwd is
+# outside it, so an unexpanded ~ can never land on the right workspace.
+run_home() { printf '%s' "$1" | HOME="$SBX" bash "$GUARD"; }
+reset; rm -rf "$SBX/.solvers"
+mkdir -p "$SBX/.solvers/A/.dev-rules" "$SBX/.solvers/A/src" "$SBX/.solvers/B/src"
+: >"$SBX/.solvers/A/.dev-rules/.red-first-unlocked"
+out="$(run_home "$(bash_in / 'cd ~/.solvers/A && cat src/x.go')")"
+if denied "$out"; then echo "FAIL: cd ~/.solvers/A must use A's sentinel (issue #29)"; fail=1; else echo "ok  : cd ~/.solvers/A uses A's sentinel"; fi
+out="$(run_home "$(bash_in / 'cd ~ && cat .solvers/A/src/x.go')")"
+if denied "$out"; then echo "FAIL: cd ~ && cat .solvers/A/... must use A's sentinel (issue #29)"; fail=1; else echo "ok  : cd ~ resolves to \$HOME"; fi
+out="$(run_home "$(bash_in / 'git -C ~/.solvers/A grep foo src/')")"
+if denied "$out"; then echo "FAIL: git -C ~/.solvers/A must use A's sentinel (issue #29)"; fail=1; else echo "ok  : git -C ~/.solvers/A uses A's sentinel"; fi
+out="$(run_home "$(bash_in / 'cat ~/.solvers/A/src/x.go')")"
+if denied "$out"; then echo "FAIL: cat ~/.solvers/A/... must use A's sentinel (issue #29)"; fail=1; else echo "ok  : ~ path token resolves to \$HOME"; fi
+# Still blocking: the expanded target is the locked B or the locked root.
+out="$(run_home "$(bash_in / 'cd ~/.solvers/B && cat src/x.go')")"
+if denied "$out"; then echo "ok  : cd ~/.solvers/B denied"; else echo "FAIL: cd ~/.solvers/B must not borrow A's sentinel"; fail=1; fi
+out="$(run_home "$(bash_in / 'cat ~/internal/x.go')")"
+if denied "$out"; then echo "ok  : cat ~/internal/x.go (root production) denied"; else echo "FAIL: ~ path token into locked root production must block (issue #29)"; fail=1; fi
+rm -rf "$SBX/.solvers"
+
 # Malformed / empty stdin must not crash or block -- clean allow (exit 0, no deny).
 printf '%s' 'not-json' | bash "$GUARD" >/dev/null 2>&1; rc=$?
 if [ "$rc" = 0 ]; then echo "ok  : malformed stdin exits 0 (allow)"; else echo "FAIL: malformed stdin exit $rc"; fail=1; fi

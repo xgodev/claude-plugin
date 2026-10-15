@@ -50,6 +50,11 @@ if none .solvers/A && has .solvers/B && intact; then echo "ok  : .cwd A commit c
 
 armall; fire "$(cjc "$SBX" 'git commit -m \"feat(x): y\"')"
 if cleared && has .solvers/A && has .solvers/B; then echo "ok  : root commit leaves workspaces"; else echo "FAIL: root commit must not touch .solvers sentinels"; fail=1; fi
+
+# Issue #29: a ~ cd target expands to $HOME (the sandbox here) before the
+# workspace is resolved; .cwd is outside the sandbox.
+armall; cjc / 'cd ~/.solvers/A && git commit -m \"feat(x): y\"' | HOME="$SBX" bash "$HOOK" >/dev/null
+if none .solvers/A && has .solvers/B && intact; then echo "ok  : cd ~/.solvers/A commit clears only A"; else echo "FAIL: cd ~/.solvers/A commit must clear A only (issue #29)"; fail=1; fi
 rm -rf "$SBX/.solvers"
 
 exit $fail
