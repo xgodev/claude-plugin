@@ -55,6 +55,20 @@
   itself does, across the Go leaf and the boost references (`model-errors`,
   `factory/echo`, `bootstrap/middleware`); the stdlib package is the one
   aliased (`stderrors`) where `As`/`Unwrap` is needed.
+- **Go: the fx module pattern (LAW 23).** `boost/references/fx/modules.md` and
+  the Go leaf teach boost's own shape: every `Module()` is guarded by a
+  package `sync.Once` and includes the modules of everything its
+  constructors receive. The implementation switch runs inside the once
+  through an unexported `module(impl)`, and an unknown value fails with
+  `errors.NotValidf`. A boost factory built with the app's plugins gets a
+  module under `fx/modules/lib/boost/factory/<factory>/`, and each server
+  is a door module that contributes to the multiserver group. `main` lists
+  only the doors, then `multiserver.Module()`. Also added: how to test a
+  once-guarded module (one app per test binary, the `module(v)` seam,
+  shared modules captured in a package var) and red-flag rows. The
+  reference's old `main` example, with `fx.Provide` of services, is gone.
+  The baseline agent inferred the once from boost source, because the skill
+  never mentioned it.
 
 ## [1.23.0]
 

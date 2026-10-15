@@ -16,7 +16,7 @@ language-agnostic BY LAW -- the Go idioms live here, not there.
 Layout -- one package per unit, contract and implementations apart:
 
 ```
-cmd/<app>/main.go                                          boost.Start() + fxfact.NewApp(modules...) only
+cmd/<app>/main.go                                          boost.Start() + fxfact.NewApp(Modules()...): doors, multiserver
 internal/app/<app>/<transport>/handler/<name>/handler.go   one Handle method
 internal/pkg/domain/model/entity/<entity>.go               entities, no driver/json tags
 internal/pkg/domain/repository/<entity>/repository.go      Repository interface ONLY
@@ -30,6 +30,8 @@ internal/pkg/domain/publisher/<event>/publisher.go         Publisher interface O
 internal/pkg/publisher/<event>/boost/publisher.go          implements Publisher on boost wrapper/publisher
 internal/pkg/fx/modules/<mirrors the unit path>/module.go  wiring + implementation switch
 internal/pkg/fx/modules/<mirrors the unit path>/config.go  which implementation is wired + in-domain impl knobs
+internal/pkg/fx/modules/lib/boost/factory/<factory>/module.go          a boost factory with this app's plugins
+internal/pkg/fx/modules/lib/boost/factory/<factory>/<door>/module.go   a server: plugins, routes, multiserver group
 api/                                                       openapi.yaml, proto/, events/*.json
 ```
 
@@ -53,14 +55,22 @@ type Repository interface {
 }
 
 // fx/modules/domain/service/quote/module.go -- IoC + config pick the implementation
+var once sync.Once
+
 func Module() fx.Option {
-	switch v := Implementation(); v { // this package's config.go, default "local"
+	options := fx.Options()
+	once.Do(func() { options = module(Implementation()) }) // this package's config.go, default "local"
+	return options
+}
+
+func module(impl string) fx.Option { // the test's seam
+	switch impl {
 	case Local:
 		return localquote.Module()
 	case Resty:
 		return restyquote.Module()
 	default: // LAW 4: an unknown value fails the boot, never falls back
-		return fx.Error(fmt.Errorf("%s: unknown implementation %q", implementationKey, v))
+		return fx.Error(errors.NotValidf("%s: unknown implementation %q", implementationKey, impl))
 	}
 }
 ```
@@ -86,10 +96,16 @@ func Module() fx.Option {
   interface. The handler is the edge -- nothing injects it -- so its
   `New` may return `*Handler`.
 - **23** -- DI is uber fx through boost (`boost/references/fx/modules.md`),
-  always, even for a small service. Each unit ships `Module() fx.Option`;
-  `main.go` only composes modules. The implementation switch exists only
-  when two or more implementations exist; with one, the module provides it
-  directly. No `init()` that builds a client, no package-level
+  always, even for a small service. Each unit ships `Module() fx.Option` in
+  boost's module pattern: a package `sync.Once`, so the options come out on
+  the first call only and any number of dependents can include it. A
+  module includes the modules of everything its constructors receive
+  (handler -> service -> repository -> factory, `contextfx.Module()` for the
+  context) and provides only its own unit. `main.go` lists only the doors
+  (server modules), then `multiserver.Module()`. The implementation switch
+  exists only when two or more implementations exist; with one, the module
+  provides it directly. The switch runs inside the once, through an
+  unexported `module(impl)` that the test calls once per value. No `init()` that builds a client, no package-level
   client/singleton, no `New` called inside another unit's logic. Adding the
   second implementation adds the switch in the same change: the config
   key, the existing implementation as its default, and the boot failure on
@@ -216,12 +232,14 @@ func Module() fx.Option {
   VALUE too.
 - `t.Skip` on a currently-failing test silences a known regression --
   xfail list that alarms on pass, never a skip.
-- Coverage (LAW 37): `go test -race -covermode=atomic
+- Coverage (LAW 37): `go test -race -covermode=atomic -coverpkg=./...
   -coverprofile=cover.out ./...` and `go tool cover -func=cover.out` totals
   100.0% with generated code (mockery mocks, `*.pb.go`) dropped from the
   profile. Each flagged module is tested on and off. The module list `main`
   composes lives in one exported func, and a test passes it to
   `fx.ValidateApp` -- that proves the graph, so `main.go` stays wiring only.
+  `-coverpkg` is what credits that test with every `Module()` wrapper; how
+  to test a once-guarded module is in `boost/references/fx/modules.md`.
 
 ## Documentation (LAWs 38, 39)
 
