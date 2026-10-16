@@ -105,6 +105,11 @@
   backticks split as commands, heredoc bodies skipped as stdin data, `$VAR`
   left literal. A word with `:` is checked part by part, so the quality-gate
   `-v "$PWD:/src"` stays a volume spec from a locked workspace too.
+- **CI: the `tests` workflow is green again (#32).** Its `quality-gate` job
+  ran bats suites from `tools/quality-gate/tests`, removed when the gate
+  moved to `xgodev/quality-gate`, so it failed before running anything on
+  every push. The job is gone; the PR-gate hook and token hygiene stay
+  covered by the `plugin` job, the image by `gate-integration`.
 
 ## [1.23.0]
 
