@@ -206,6 +206,38 @@ out="$(run_home "$(bash_in / 'cat ~/internal/x.go')")"
 if denied "$out"; then echo "ok  : cat ~/internal/x.go (root production) denied"; else echo "FAIL: ~ path token into locked root production must block (issue #29)"; fail=1; fi
 rm -rf "$SBX/.solvers"
 
+# 12. Issue #30: a Read/Edit/Write file_path is ONE path, never word-split. A
+# workspace whose absolute path has a space (a clone on an external disk,
+# outside the project) resolves to that workspace and its own sentinels.
+file_in() { # tool, file_path -> hook-input JSON
+  jq -cn --arg t "$1" --arg f "$2" '{tool_name:$t,tool_input:{file_path:$f}}'
+}
+reset; SPD="$(mktemp -d)"; SP="$SPD/MY DISK/ws"
+mkdir -p "$SP/.solvers/A/.dev-rules" "$SP/.solvers/A/src" "$SP/.solvers/B/src"
+: >"$SP/.solvers/A/.dev-rules/.red-first-unlocked"
+out="$(run Read "$(file_in Read "$SP/.solvers/A/src/x.go")")"
+if denied "$out"; then echo "FAIL: read in unlocked A under a spaced path must pass (issue #30)"; fail=1; else echo "ok  : read in unlocked A under a spaced path allowed"; fi
+out="$(run Edit "$(file_in Edit "$SP/.solvers/A/src/x.go")")"
+if denied "$out"; then echo "FAIL: edit in unlocked A under a spaced path must pass (issue #30)"; fail=1; else echo "ok  : edit in unlocked A under a spaced path allowed"; fi
+# Still blocking: the locked B under the same spaced path, with the full sentinel path in the hint.
+out="$(run Read "$(file_in Read "$SP/.solvers/B/src/x.go")")"
+if denied "$out"; then echo "ok  : read in locked B under a spaced path denied"; else echo "FAIL: read in locked B under a spaced path must block"; fail=1; fi
+if grep -qF "$SP/.solvers/B/.dev-rules/.red-first-unlocked" <<<"$out"; then
+  echo "ok  : deny hint names B's full sentinel path"
+else
+  echo "FAIL: deny hint must name $SP/.solvers/B/.dev-rules/.red-first-unlocked (issue #30)"; fail=1
+fi
+out="$(run Edit "$(file_in Edit "$SP/.solvers/B/src/x.go")")"
+if denied "$out"; then echo "ok  : edit in locked B under a spaced path denied"; else echo "FAIL: edit in locked B under a spaced path must block"; fail=1; fi
+# 12b. A project root whose own path has a space: its sentinel governs its files.
+SPROJ="$SBX/MY PROJ"; mkdir -p "$SPROJ/internal"
+out="$(printf '%s' "$(file_in Read "$SPROJ/internal/x.go")" | CLAUDE_PROJECT_DIR="$SPROJ" bash "$GUARD")"
+if denied "$out"; then echo "ok  : read in locked spaced root denied"; else echo "FAIL: read in locked spaced root must block"; fail=1; fi
+mkdir -p "$SPROJ/.dev-rules"; : >"$SPROJ/.dev-rules/.red-first-unlocked"
+out="$(printf '%s' "$(file_in Read "$SPROJ/internal/x.go")" | CLAUDE_PROJECT_DIR="$SPROJ" bash "$GUARD")"
+if denied "$out"; then echo "FAIL: read in unlocked spaced root must pass (issue #30)"; fail=1; else echo "ok  : read in unlocked spaced root allowed"; fi
+rm -rf "$SPD" "$SPROJ"
+
 # Malformed / empty stdin must not crash or block -- clean allow (exit 0, no deny).
 printf '%s' 'not-json' | bash "$GUARD" >/dev/null 2>&1; rc=$?
 if [ "$rc" = 0 ]; then echo "ok  : malformed stdin exits 0 (allow)"; else echo "FAIL: malformed stdin exit $rc"; fail=1; fi

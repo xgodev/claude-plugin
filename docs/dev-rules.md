@@ -82,7 +82,9 @@ unit would force a new cycle per unit.
 the one the call targets -- and never unlocks or re-arms another:
 
 - `Read`/`Edit`/`Write`/`Grep`/`Glob`: the nearest `.solvers/<name>/`
-  ancestor of the path, otherwise the project root.
+  ancestor of the path, otherwise the project root. The tool's `file_path`
+  (or `path` / `glob`) is one path, never split on spaces, so a clone under
+  `/Volumes/MY DISK/...` uses its own sentinels.
 - `Bash`: the effective cwd -- the target of `cd <dir> && ...` or
   `git -C <dir>` when present, otherwise the hook input's `cwd` -- and any
   path token resolved against it (`cat .solvers/A/src/x.go` from the root

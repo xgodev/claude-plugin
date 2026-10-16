@@ -88,6 +88,12 @@
   that way did not clear the clone's sentinels; and `cat ~/<repo>/internal/x.go`
   from a cwd outside the project slipped past the gate. A leading `~` / `~/`
   is now expanded as the shell does; a quoted `"~/x"` and `~user` stay literal.
+- **dev-rules: a `Read`/`Edit`/`Write` path with a space keeps its workspace in
+  the red-first guard (#30).** The tool's `file_path` was word-split, so a read
+  in an unlocked clone under `/Volumes/MY DISK/...` resolved the workspace from
+  the `DISK/...` fragment and was denied as "Read-locked", with a hint naming a
+  sentinel path that does not exist. A tool's `file_path` (and `Grep`/`Glob`
+  `path` and `glob`) is now one path; only a `Bash` command splits into tokens.
 
 ## [1.23.0]
 

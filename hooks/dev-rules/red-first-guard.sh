@@ -34,12 +34,19 @@ base="$(printf '%s' "$input" | jq -r '.cwd // empty')"; base="${base:-$proj}"
 dr_enabled || exit 0
 
 
-# Classify intent (read vs write) and gather the target path(s).
-intent="read"; target=""
+# Classify intent (read vs write) and gather the target path(s). A tool's
+# file_path / path / glob is ONE path each, never word-split, so a path with a
+# space keeps its workspace (#30); only a Bash command splits into tokens.
+intent="read"; toks=()
+fp="$(printf '%s' "$input" | jq -r '.tool_input.file_path // empty')"
 case "$tool" in
-  Read)  target="$(printf '%s' "$input" | jq -r '.tool_input.file_path // empty')" ;;
-  Grep|Glob) target="$(printf '%s' "$input" | jq -r '(.tool_input.path // "") + " " + (.tool_input.glob // "")')" ;;
-  Edit|Write) intent="write"; target="$(printf '%s' "$input" | jq -r '.tool_input.file_path // empty')" ;;
+  Read)  [ -z "$fp" ] || toks=("$fp") ;;
+  Grep|Glob)
+    for k in path glob; do
+      v="$(printf '%s' "$input" | jq -r --arg k "$k" '.tool_input[$k] // empty')"
+      [ -z "$v" ] || toks+=("$v")
+    done ;;
+  Edit|Write) intent="write"; [ -z "$fp" ] || toks=("$fp") ;;
   Bash)
     cmd="$(printf '%s' "$input" | jq -r '.tool_input.command // empty')"
     base="$(dr_bash_cwd "$cmd" "$base")"   # cd <dir> && ... / git -C <dir>
@@ -54,10 +61,11 @@ case "$tool" in
         target="$(printf '%s' "$cmd" | tr '>' ' ')" ;;
       *" grep "*|*" rg "*|*" cat "*|*" sed "*|*" awk "*|*" head "*|*" tail "*|*" less "*|*" nl "*|*" ls "*|*" find "*|*" tree "*) intent="read"; target="$cmd" ;;
       *) exit 0 ;;
-    esac ;;
+    esac
+    toks=($target) ;;   # whitespace-delimited command tokens
   *) exit 0 ;;
 esac
-[ -n "$target" ] || exit 0
+[ "${#toks[@]}" -gt 0 ] || exit 0
 
 # Production implicated (and not a test file)? Each token resolves against the
 # effective cwd; its workspace (.solvers/<name>/ or the root) owns the sentinel,
@@ -66,7 +74,7 @@ esac
 # container) is not this project's file: skipped, never root production (#28).
 # A leading ~ is $HOME, as the shell expands it (#29).
 prod_touched=""; ws=""
-for tok in $target; do
+for tok in "${toks[@]}"; do
   tok="$(dr_expand_tilde "$tok")"
   case "$tok" in /*) abs="$tok" ;; *) abs="${base%/}/$tok" ;; esac
   w="$(dr_workspace "$abs")"
