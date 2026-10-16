@@ -36,33 +36,40 @@ dr_enabled || exit 0
 
 # Classify intent (read vs write) and gather the target path(s). A tool's
 # file_path / path / glob is ONE path each, never word-split, so a path with a
-# space keeps its workspace (#30); only a Bash command splits into tokens.
+# space keeps its workspace (#30); a Bash command splits into shell words,
+# quotes honored, so a quoted path with a space is one word too (#31).
+# A leading ~ is $HOME, as the shell expands it (#29).
 intent="read"; toks=()
 fp="$(printf '%s' "$input" | jq -r '.tool_input.file_path // empty')"
+[ -z "$fp" ] || fp="$(dr_expand_tilde "$fp")"
 case "$tool" in
   Read)  [ -z "$fp" ] || toks=("$fp") ;;
   Grep|Glob)
     for k in path glob; do
       v="$(printf '%s' "$input" | jq -r --arg k "$k" '.tool_input[$k] // empty')"
-      [ -z "$v" ] || toks+=("$v")
+      [ -z "$v" ] || toks+=("$(dr_expand_tilde "$v")")
     done ;;
   Edit|Write) intent="write"; [ -z "$fp" ] || toks=("$fp") ;;
   Bash)
     cmd="$(printf '%s' "$input" | jq -r '.tool_input.command // empty')"
-    base="$(dr_bash_cwd "$cmd" "$base")"   # cd <dir> && ... / git -C <dir>
     c=" $cmd "   # pad so a leading/trailing command token still matches the spaced arms;
                  # ">"[!&] catches file redirects (> >> >file) but NOT 2>&1 / &> -- so a
                  # read that merely redirects stderr is not misclassified as a write.
     case "$c" in
-      *">"[!\&]*|*" sed -i"*|*" tee "*|*" dd "*)
-        intent="write"
-        # Normalize: replace > with a space so tight redirects like "echo x>file"
-        # split into separate whitespace-delimited tokens for hits_prod scanning.
-        target="$(printf '%s' "$cmd" | tr '>' ' ')" ;;
-      *" grep "*|*" rg "*|*" cat "*|*" sed "*|*" awk "*|*" head "*|*" tail "*|*" less "*|*" nl "*|*" ls "*|*" find "*|*" tree "*) intent="read"; target="$cmd" ;;
+      *">"[!\&]*|*" sed -i"*|*" tee "*|*" dd "*) intent="write" ;;
+      *" grep "*|*" rg "*|*" cat "*|*" sed "*|*" awk "*|*" head "*|*" tail "*|*" less "*|*" nl "*|*" ls "*|*" find "*|*" tree "*) intent="read" ;;
       *) exit 0 ;;
     esac
-    toks=($target) ;;   # whitespace-delimited command tokens
+    # Shell words (redirects split off, tilde expanded). A word with `:` names
+    # several paths (docker -v "$PWD:/src", PATH-like lists): each part on its own.
+    dr_shell_words "$cmd"
+    base="$(dr_words_cwd "$base")"   # cd <dir> && ... / git -C <dir>
+    for word in ${DR_WORDS[@]+"${DR_WORDS[@]}"}; do
+      while :; do
+        [ -z "${word%%:*}" ] || toks+=("${word%%:*}")
+        case "$word" in *:*) word="${word#*:}" ;; *) break ;; esac
+      done
+    done ;;
   *) exit 0 ;;
 esac
 [ "${#toks[@]}" -gt 0 ] || exit 0
@@ -72,10 +79,8 @@ esac
 # and production_globs match the path relative to that workspace. A path in no
 # workspace (outside the project and every .solvers/<name>/, e.g. /src inside a
 # container) is not this project's file: skipped, never root production (#28).
-# A leading ~ is $HOME, as the shell expands it (#29).
 prod_touched=""; ws=""
 for tok in "${toks[@]}"; do
-  tok="$(dr_expand_tilde "$tok")"
   case "$tok" in /*) abs="$tok" ;; *) abs="${base%/}/$tok" ;; esac
   w="$(dr_workspace "$abs")"
   case "$abs" in "$w"/*) rel="${abs#"$w"/}" ;; *) continue ;; esac

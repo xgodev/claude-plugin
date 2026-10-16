@@ -148,20 +148,104 @@ dr_expand_tilde() {
   esac
 }
 
+# Issue #31: dr_shell_words <command> -> the DR_WORDS array (bash 3.2 has no
+# namerefs): the command split into words the way the shell splits it, without
+# running anything. Whitespace inside '...' or "..." or after a backslash does
+# not end a word, and the quotes are removed; each run of unquoted ; & | < >
+# and each ( ) is a word of its own; an unquoted leading ~ or ~/ is $HOME.
+# $(...) and `...`, inside "..." too, are split as the command they are. A
+# heredoc body is stdin data, not words: skipped. $VAR is not expanded.
+dr_shell_words() {
+  local LC_ALL=C   # byte-wise: O(1) indexing, any UTF-8 path survives intact
+  local s="$1" n=${#1} i=0 c nx q="" w="" qq=0 stk="" hd="" hdl="" d line rest
+  DR_WORDS=()
+  _dr_sw_emit() { # qq: a quoted char among the first two -> no tilde expansion
+    case "$w" in "~"|"~/"*) [ "$qq" = 1 ] || w="$(dr_expand_tilde "$w")" ;; esac
+    if [ -n "$hd" ] && [ -n "$w" ]; then hdl="$hdl$hd$w"$'\n'; hd=""; fi
+    [ -z "$w" ] || DR_WORDS[${#DR_WORDS[@]}]="$w"
+    w=""; qq=0
+  }
+  _dr_sw_pop() { # leave a $( or ` level: back to the quoting it started in
+    case "${stk: -1}" in P|B) q='"' ;; *) q="" ;; esac
+    stk="${stk%?}"
+  }
+  while [ "$i" -lt "$n" ]; do
+    c="${s:i:1}"
+    case "$q" in
+      "")
+        case "$c" in
+          [A-Za-z0-9/._,:=+@%^~-]) w="$w$c" ;;   # hot path: plain word bytes
+          ' '|$'\t') _dr_sw_emit ;;
+          $'\n')
+            _dr_sw_emit
+            while [ -n "$hdl" ]; do   # skip each pending heredoc body
+              d="${hdl%%$'\n'*}"; hdl="${hdl#*$'\n'}"
+              while [ "$i" -lt "$n" ]; do
+                rest="${s:i+1}"; line="${rest%%$'\n'*}"; i=$((i+1+${#line}))
+                [ "${d%"${d#?}"}" = - ] && line="${line#"${line%%[!$'\t']*}"}"
+                [ "$line" = "${d#?}" ] && break
+              done
+            done ;;
+          "'") q="'" ;;
+          '"') q='"' ;;
+          \\) nx="${s:i+1:1}"; i=$((i+1))
+              if [ "$nx" != $'\n' ]; then w="$w$nx"; [ ${#w} -gt 2 ] || qq=1; fi ;;
+          '`') _dr_sw_emit
+               case "${stk: -1}" in b|B) _dr_sw_pop ;; *) stk="${stk}b" ;; esac ;;
+          '$') if [ "${s:i+1:1}" = "(" ]; then _dr_sw_emit; stk="${stk}p"; i=$((i+1))
+               else w="$w$c"; fi ;;
+          '(') _dr_sw_emit; stk="${stk}p"; DR_WORDS[${#DR_WORDS[@]}]="(" ;;
+          ')') _dr_sw_emit; case "${stk: -1}" in p|P) _dr_sw_pop ;; esac
+               DR_WORDS[${#DR_WORDS[@]}]=")" ;;
+          ';'|'&'|'|'|'<'|'>')
+            _dr_sw_emit
+            while :; do
+              w="$w$c"
+              case "${s:i+1:1}" in ';'|'&'|'|'|'<'|'>') i=$((i+1)); c="${s:i:1}" ;; *) break ;; esac
+            done
+            case "$w" in
+              *'<<<'*) ;;
+              *'<<') hd=" "; [ "${s:i+1:1}" = - ] && { hd=-; i=$((i+1)); } ;;
+            esac
+            DR_WORDS[${#DR_WORDS[@]}]="$w"; w="" ;;
+          *) w="$w$c" ;;
+        esac ;;
+      "'")
+        if [ "$c" = "'" ]; then q=""; else w="$w$c"; [ ${#w} -gt 2 ] || qq=1; fi ;;
+      *)   # inside "..."
+        case "$c" in
+          '"') q=""; [ ${#w} -gt 2 ] || qq=1 ;;
+          \\) nx="${s:i+1:1}"
+              case "$nx" in
+                '$'|'`'|'"'|\\) w="$w$nx"; i=$((i+1)) ;;
+                $'\n') i=$((i+1)) ;;
+                *) w="$w$c" ;;
+              esac
+              [ ${#w} -gt 2 ] || qq=1 ;;
+          '`') _dr_sw_emit; stk="${stk}B"; q="" ;;
+          '$') if [ "${s:i+1:1}" = "(" ]; then _dr_sw_emit; stk="${stk}P"; q=""; i=$((i+1))
+               else w="$w$c"; [ ${#w} -gt 2 ] || qq=1; fi ;;
+          *) w="$w$c"; [ ${#w} -gt 2 ] || qq=1 ;;
+        esac ;;
+    esac
+    i=$((i+1))
+  done
+  _dr_sw_emit
+}
+
 # dr_bash_cwd <command> <base-cwd> -> the directory a Bash command runs in:
-# the first `cd <dir>` or `-C <dir>` (git -C, make -C) target, tilde-expanded
-# and resolved against base-cwd; otherwise base-cwd itself.
-dr_bash_cwd() {
-  local cmd="${1//$'\n'/ }" base="${2%/}" prev="" tok dir=""
-  local -a toks
-  read -ra toks <<<"$cmd"
-  for tok in ${toks[@]+"${toks[@]}"}; do
-    case "$prev" in cd|"(cd"|-C) dir="$tok"; break ;; esac
+# the first `cd <dir>` or `-C <dir>` (git -C, make -C) target -- one shell
+# word, quotes honored and tilde-expanded (#31) -- resolved against base-cwd;
+# otherwise base-cwd itself. dr_words_cwd <base-cwd> does the same on the
+# DR_WORDS a dr_shell_words call already filled.
+dr_bash_cwd() { dr_shell_words "$1"; dr_words_cwd "$2"; }
+dr_words_cwd() {
+  local base="${1%/}" prev="" tok dir=""
+  for tok in ${DR_WORDS[@]+"${DR_WORDS[@]}"}; do
+    case "$prev" in cd|-C) dir="$tok"; break ;; esac
     prev="$tok"
   done
-  dir="${dir%%[;&|)]*}"
-  dir="$(dr_expand_tilde "$dir")"   # before unquoting: "~/x" stays literal
-  dir="${dir%\"}"; dir="${dir#\"}"; dir="${dir%\'}"; dir="${dir#\'}"
+  case "$dir" in [\;\&\|\(\)\<\>]*) dir="" ;; esac   # `cd && ...`: no target
   case "$dir" in
     "") printf '%s' "$base" ;;
     /*) printf '%s' "$dir" ;;

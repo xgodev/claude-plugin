@@ -53,4 +53,17 @@ ok eq "$(HOME= dr_expand_tilde '~/x')" '~/x'                 # unset HOME: left 
 ok eq "$(HOME=/h dr_bash_cwd 'cd ~/w && ls' /b)" /h/w
 ok eq "$(HOME=/h dr_bash_cwd 'cd "~/w" && ls' /b)" '/b/~/w'  # quoted: the shell keeps it literal
 
+# Issue #31: shell words, quotes honored (joined with | for comparison).
+words() { dr_shell_words "$1"; printf '%s|' ${DR_WORDS[@]+"${DR_WORDS[@]}"}; }
+ok eq "$(words 'cat "/a b/x" '\''c d'\'' e\ f')" 'cat|/a b/x|c d|e f|'
+ok eq "$(words 'echo x>"o p"&&ls 2>&1')" 'echo|x|>|o p|&&|ls|2|>&|1|'
+ok eq "$(words 'echo "a$(cat "s r/x" b)c"')" 'echo|a|cat|s r/x|b|)|c|'
+ok eq "$(words 'echo "a\"b" `ls x`')" 'echo|a"b|ls|x|'
+ok eq "$(HOME=/h words 'ls ~/x "~/y" ~u')" 'ls|/h/x|~/y|~u|'
+ok eq "$(HOME=/h words 'echo "$(~/b ~"/c" "")"')" 'echo|/h/b|~/c|)|'
+ok eq "$(words "$(printf "cat <<-'E' >o\n\tdon't x\n\tE\nls y")")" "cat|<<|E|>|o|ls|y|"
+ok eq "$(words 'cat "unterminated x')" 'cat|unterminated x|'
+ok eq "$(dr_bash_cwd 'cd "/m y/w" && ls' /b)" '/m y/w'
+ok eq "$(dr_bash_cwd 'cd && ls' /b)" /b
+
 exit $fail

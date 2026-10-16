@@ -88,7 +88,15 @@ the one the call targets -- and never unlocks or re-arms another:
 - `Bash`: the effective cwd -- the target of `cd <dir> && ...` or
   `git -C <dir>` when present, otherwise the hook input's `cwd` -- and any
   path token resolved against it (`cat .solvers/A/src/x.go` from the root
-  uses A). A leading `~` in the `cd`/`-C` target or a path token is `$HOME`,
+  uses A). The command is split into words the way the shell splits it:
+  a quoted or backslash-escaped space does not end a word, so
+  `cd "/Volumes/MY DISK/.../.solvers/A" && cat src/x.go` and
+  `cat "/Volumes/MY DISK/.../.solvers/A/src/x.go"` both use A; quotes are
+  removed; `; & | ( ) < >` split off; `$(...)` and backticks (inside `"..."`
+  too) are split as the commands they are; a heredoc body is stdin data, not
+  words; `$VAR` is not expanded and stays literal text. A word with `:` is
+  checked part by part (`-v "$PWD:/src"` is a volume spec, not production).
+  A leading `~` in the `cd`/`-C` target or a path token is `$HOME`,
   as the shell expands it (`cd ~/repo/.solvers/A && ...` uses A); a quoted
   `"~/x"` and `~user` stay literal.
 - A path in NO workspace -- outside the project and outside every

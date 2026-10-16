@@ -94,6 +94,17 @@
   the `DISK/...` fragment and was denied as "Read-locked", with a hint naming a
   sentinel path that does not exist. A tool's `file_path` (and `Grep`/`Glob`
   `path` and `glob`) is now one path; only a `Bash` command splits into tokens.
+- **dev-rules: a quoted `Bash` path with a space keeps its workspace in the
+  red-first guard and the cycle-closing clear (#31).** The command was split on
+  whitespace with the quotes kept, so `cd "/Volumes/MY DISK/.../.solvers/A" &&
+  cat src/x.go` took `"/Volumes/MY` as the cwd: an unlocked clone read as
+  locked, a locked one slipped past, and the deny hint named a sentinel path
+  that does not exist; a quoted `cat "internal/x.go"` was not seen as
+  production at all. The command is now split into shell words: quotes and
+  backslashes honored and removed, `; & | ( ) < >` split off, `$(...)` and
+  backticks split as commands, heredoc bodies skipped as stdin data, `$VAR`
+  left literal. A word with `:` is checked part by part, so the quality-gate
+  `-v "$PWD:/src"` stays a volume spec from a locked workspace too.
 
 ## [1.23.0]
 

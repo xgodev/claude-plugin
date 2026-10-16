@@ -238,6 +238,51 @@ out="$(printf '%s' "$(file_in Read "$SPROJ/internal/x.go")" | CLAUDE_PROJECT_DIR
 if denied "$out"; then echo "FAIL: read in unlocked spaced root must pass (issue #30)"; fail=1; else echo "ok  : read in unlocked spaced root allowed"; fi
 rm -rf "$SPD" "$SPROJ"
 
+# 13. Issue #31: a Bash command is split the way the shell splits it. A quoted
+# (or backslash-escaped) path with a space is ONE word, both as the cd / git -C
+# target and as a path token, so it resolves to its real workspace.
+reset; SPD="$(mktemp -d)"; SP="$SPD/MY DISK/ws"
+mkdir -p "$SP/.solvers/A/.dev-rules" "$SP/.solvers/A/src" "$SP/.solvers/B/src"
+: >"$SP/.solvers/A/.dev-rules/.red-first-unlocked"
+out="$(run Bash "$(bash_in / "cd \"$SP/.solvers/A\" && cat src/x.go")")"
+if denied "$out"; then echo "FAIL: cd \"<spaced>/A\" && cat must use A's sentinel (issue #31)"; fail=1; else echo "ok  : cd into a quoted spaced A uses A's sentinel"; fi
+out="$(run Bash "$(bash_in / "cat \"$SP/.solvers/A/src/x.go\"")")"
+if denied "$out"; then echo "FAIL: cat \"<spaced>/A/...\" must use A's sentinel (issue #31)"; fail=1; else echo "ok  : double-quoted spaced path token uses A's sentinel"; fi
+out="$(run Bash "$(bash_in / "cat '$SP/.solvers/A/src/x.go'")")"
+if denied "$out"; then echo "FAIL: cat '<spaced>/A/...' must use A's sentinel (issue #31)"; fail=1; else echo "ok  : single-quoted spaced path token uses A's sentinel"; fi
+out="$(run Bash "$(bash_in / "cat $SPD/MY\\ DISK/ws/.solvers/A/src/x.go")")"
+if denied "$out"; then echo "FAIL: cat <MY\\ DISK>/A/... must use A's sentinel (issue #31)"; fail=1; else echo "ok  : backslash-escaped spaced path token uses A's sentinel"; fi
+out="$(run Bash "$(bash_in / "git -C \"$SP/.solvers/A\" grep foo src/")")"
+if denied "$out"; then echo "FAIL: git -C \"<spaced>/A\" must use A's sentinel (issue #31)"; fail=1; else echo "ok  : git -C a quoted spaced A uses A's sentinel"; fi
+# Still blocking: the locked B under the same spaced path, with the full sentinel path in the hint.
+out="$(run Bash "$(bash_in / "cd \"$SP/.solvers/B\" && cat src/x.go")")"
+if denied "$out"; then echo "ok  : cd into a quoted spaced B denied"; else echo "FAIL: cd into a quoted spaced B must block"; fail=1; fi
+if grep -qF "$SP/.solvers/B/.dev-rules/.red-first-unlocked" <<<"$out"; then
+  echo "ok  : deny hint names B's full sentinel path"
+else
+  echo "FAIL: deny hint must name $SP/.solvers/B/.dev-rules/.red-first-unlocked (issue #31)"; fail=1
+fi
+out="$(run Bash "$(bash_in / "cat \"$SP/.solvers/B/src/x.go\"")")"
+if denied "$out"; then echo "ok  : quoted spaced path token into B denied"; else echo "FAIL: quoted spaced path token into locked B must block"; fail=1; fi
+out="$(run Bash "$(bash_in "$SP/.solvers/A" "echo x >\"$SP/.solvers/B/src/x.go\"")")"
+if denied "$out"; then echo "ok  : quoted redirect into B production denied from A"; else echo "FAIL: quoted redirect into locked B production must block"; fail=1; fi
+out="$(run Bash "$(bash_in "$SBX" 'cat "internal/x.go"')")"
+if denied "$out"; then echo "ok  : quoted root production path denied"; else echo "FAIL: quoted root production path must block"; fail=1; fi
+out="$(run Bash "$(bash_in "$SBX" 'cat README.md && echo "$(cat internal/x.go)"')")"
+if denied "$out"; then echo "ok  : \$(...) inside double quotes still split"; else echo "FAIL: cat inside \"\$(...)\" must block"; fail=1; fi
+out="$(run Bash "$(bash_in "$SBX" "$(printf 'cat >internal/x.go <<EOF\npackage x\nEOF')")")"
+if denied "$out"; then echo "ok  : heredoc into root production denied"; else echo "FAIL: cat >internal/x.go <<EOF must block"; fail=1; fi
+out="$(run Bash "$(bash_in "$SBX" "$(printf "cat <<'EOF' >notes.md\ndon't\nEOF\ncat internal/x.go")")")"
+if denied "$out"; then echo "ok  : apostrophe in a heredoc body does not hide the next command"; else echo "FAIL: cat internal/x.go after a heredoc must block"; fail=1; fi
+# A heredoc body is stdin data, not shell words: a note naming a locked path is not a read of it.
+out="$(run Bash "$(bash_in "$SP/.solvers/A" "$(printf "cat >notes.md <<'EOF'\nsee \"%s/.solvers/B/src/x.go\"\nEOF" "$SP")")")"
+if denied "$out"; then echo "FAIL: a heredoc body naming B must not read as a touch of B"; fail=1; else echo "ok  : heredoc body is not shell words"; fi
+# The quality gate keeps running from a locked workspace (e.g. right after the
+# commit clears its sentinels): -v "$PWD:/src" is a volume spec, not production.
+out="$(run Bash "$(bash_in "$SP/.solvers/B" "$gate")")"
+if denied "$out"; then echo "FAIL: gate docker run from locked B must pass"; fail=1; else echo "ok  : gate docker run from locked B allowed"; fi
+rm -rf "$SPD"
+
 # Malformed / empty stdin must not crash or block -- clean allow (exit 0, no deny).
 printf '%s' 'not-json' | bash "$GUARD" >/dev/null 2>&1; rc=$?
 if [ "$rc" = 0 ]; then echo "ok  : malformed stdin exits 0 (allow)"; else echo "FAIL: malformed stdin exit $rc"; fail=1; fi
