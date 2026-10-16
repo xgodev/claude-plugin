@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.24.0]
+
 ### Added
 
 - **LAW 34 -- messaging is a contract; the broker fits the delivery need.**
