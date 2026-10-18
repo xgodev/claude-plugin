@@ -10,3 +10,4 @@ Factory HTTP/RPC client & server integrations. Read the linked leaf for detail.
 | net/http2 | `references/factory/net-http2.md` |
 | FTP | `references/factory/ftp.md` |
 | GraphQL | `references/factory/graphql.md` |
+| MCP (Model Context Protocol) | `references/factory/mcp.md` |

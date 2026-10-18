@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+## [1.24.2]
+
+### Added
+
+- boost `references/factory/mcp.md`: MCP server and client factory on
+  `modelcontextprotocol/go-sdk` (keys, log/otel plugins, fx modules,
+  testing, red flags), routed from the HTTP/RPC index.
+
+### Changed
+
+- boost `CONTRIBUTING.md`: env-reachability tests restore the key's default
+  on cleanup -- boost's global koanf keeps env values across `config.Load()`.
+
 ## [1.24.1]
 
 ### Added

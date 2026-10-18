@@ -211,7 +211,7 @@ Then call out the marked decisions in the PR description so reviewers know where
 - ❌ Code under `bootstrap/` for a wrapper-layer concern (or vice versa). Layering is enforced by directory.
 - ❌ A new top-level interface alongside an existing one (`Driver2` is a better `Driver`). Extend the existing one or open an RFC issue first.
 - ❌ A direct dependency on a third-party DI / config / log library. Use `wrapper/config`, `wrapper/log`, and `fx` modules.
-- ❌ Tests that `os.Setenv` to inject config -- use `config.Add` with explicit defaults.
+- ❌ Tests that `os.Setenv` to inject ordinary config -- build `Options` directly (`New<X>WithOptions`). The one env test worth having proves a key is env-reachable (`BOOST_FACTORY_<X>_<KEY>` lands on `<root>.<key>`): use `t.Setenv` and, on cleanup, set the env back to the key's default and `config.Load()` again. boost's koanf instance is global and a posflag default does not override a key an earlier `Load` already set, so the value leaks into later tests and `-shuffle=on` fails at random.
 - ❌ A driver that exposes its concrete type as the public return value of `New(...)`. Return the interface.
 - ❌ A `Close()` method on the `Driver` interface itself unless ALL existing implementations need it. Optional close = separate optional interface + feature-detect.
 
