@@ -12,6 +12,6 @@ When wiring or configuring any factory, read that factory's own "Plugins" sectio
 | Bootstrap (function/middleware/adapters) | `references/bootstrap.md` |
 | Extra (health/middleware/multiserver) | `references/extra.md` |
 | fx modules | `references/fx.md` |
-| Code generation from annotations -- `inject`/`builder` (`@Provide`, `@Inject`, `@REST`, `@GRPC`, `@Function`, `@Middleware`, `@Default`, `@Config`), generated doors, factory clients and `main.go` | `references/builder.md` |
+| Creating a new app (it is a builder app; layout and `<entity>/<agent>` naming in `../index.md`, Architecture); code generation from annotations -- `inject`/`builder` (`@Provide`, `@Inject`, `@REST`, `@GRPC`, `@Function`, `@Middleware`, `@Default`, `@Config`), generated doors, factory clients and `main.go` | `references/builder.md` |
 | Factory (`factory/contrib/*`, every integration) | `references/factory.md` |
 | Observability vendor coverage matrix (OTel/Datadog/Prometheus, which component has which) | `references/plugins.md` |

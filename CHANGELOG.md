@@ -2,6 +2,31 @@
 
 ## [Unreleased]
 
+## [1.25.0]
+
+### Changed
+
+- Go Architecture: a new boost app is a builder app -- the layout lists
+  annotated units and generated `gen/` + `cmd/<app>/main.go`, no
+  hand-written fx module but a factory inject does not build; LAWs 23-25
+  rewritten builder-first (`@Default` switch, `@Config` knobs).
+- Use-case naming: `<entity>/<agent>` -- `service/stock/reserver`,
+  `creator`, `finder`, `updater`, `remover`; handler and client mirror the
+  path. Never `service/reservestock` nor `service/stock/reserve`. builder.md
+  examples follow it and red-flag the old form.
+- boost `references/fx/modules.md`: multiserver and `bootstrap/function`
+  modules serve from `OnStart`/`OnStop` (boost #59) -- `Run()` is reached,
+  SIGTERM drains; module table lists the 56 shipped modules (#54, MCP,
+  pubsub v2).
+
+### Added
+
+- boost `references/wrapper/publisher.md`: `Publish` returns the joined
+  per-event error (#58); the Kafka driver waits for delivery reports
+  bounded by `ctx` (#64).
+- boost `references/factory/otel.md`: provider globals are OTel delegates,
+  safe before `Start*Provider` (#60).
+
 ## [1.24.7]
 
 ### Added

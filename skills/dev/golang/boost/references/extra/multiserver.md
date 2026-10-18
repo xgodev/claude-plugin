@@ -72,3 +72,4 @@ func Shutdown(ctx context.Context)        // calls Shutdown(ctx) on every regist
 | A server type that doesn't implement both `Serve(context.Context)` and `Shutdown(context.Context)` | Add an adapter type wrapping the underlying server/framework |
 | Calling `multiserver.New()` / `.WithServer()` / `ms.Run(ctx)` | That builder API doesn't exist -- the real entry points are the package-level `Serve`, `Check`, `Shutdown` functions |
 | Forgetting to wire `Shutdown` to the process signal context | Pass a `signal.NotifyContext` into `Serve` so SIGTERM drains every listener |
+| Calling `Serve`/`Shutdown` by hand in an fx app | `fx/modules/extra/multiserver` serves on `OnStart` and drains on `OnStop` (`references/fx/modules.md`) |

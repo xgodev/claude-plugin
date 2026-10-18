@@ -71,19 +71,19 @@ server plugins are a `[]boostecho.Plugin` / `[]server.Plugin` provided without
 ## `@Middleware` -- plugins around every method of a service
 
 ```go
-// domain/service/stock/service.go
+// domain/service/stock/reserver/service.go
 type Service interface {
-	Available(ctx context.Context, item string) (bool, error)
+	Reserve(ctx context.Context, sku string) error
 }
 
-// domain/service/stock/local/service.go
-// New provides the stock service.
+// domain/service/stock/reserver/local/service.go
+// New provides the stock reserver.
 // @Provide(index=0)
 // @Middleware(log, prometheus)
-func New() stock.Service { return &service{} }
+func New(repo stock.Repository) reserver.Service { return &service{repo: repo} }
 
-func (s *service) Available(ctx context.Context, item string) (bool, error) {
-	return item != "sold-out", nil // plain body: no wrapper here
+func (s *service) Reserve(ctx context.Context, sku string) error {
+	return s.repo.Take(ctx, sku) // plain body: no wrapper here
 }
 ```
 
@@ -102,7 +102,7 @@ func (s *service) Available(ctx context.Context, item string) (bool, error) {
   every consumer in the app receives it. `@Provide(name=x)` keeps the name;
   `group` is rejected.
 - Wrapper name per method: `<package>.<interface>.<method>`, lowercased
-  (`stock.service.available`) -- the hystrix command, span and metric name.
+  (`reserver.service.reserve`) -- the hystrix command, span and metric name.
   Config only turns a plugin off:
   `boost.factory.local.extra.middleware.plugins.<plugin>.<name>.enabled`
   (default `true`).
@@ -114,27 +114,27 @@ func (s *service) Available(ctx context.Context, item string) (bool, error) {
 ## `@Default` -- implementation switch by config
 
 ```go
-// internal/pkg/domain/service/quote/service.go
+// internal/pkg/domain/service/price/quoter/service.go
 type Service interface {
-	Quote(ctx context.Context, item string) (float64, error)
+	Quote(ctx context.Context, sku string) (float64, error)
 }
 
-// internal/pkg/domain/service/quote/local/service.go
+// internal/pkg/domain/service/price/quoter/local/service.go
 // @Provide(index=0)
 // @Default
-func New() quote.Service { return &service{} }
+func New() quoter.Service { return &service{} }
 
-// internal/pkg/domain/service/quote/resty/service.go
+// internal/pkg/client/price/quoter/resty/client.go
 // @Provide(index=0)
-func New(c *resty.Client) quote.Service { return &service{client: c} }
+func New(c *resty.Client) quoter.Service { return &client{http: c} }
 ```
 
 - Two or more `@Provide` of the same value (type and `name`, no `group`)
   with exactly one `@Default` form an implementation set. The
   implementation's name is its package name (`local`, `resty`).
 - Key: the type's package path relative to the Go module, in dots, plus
-  `implementation` (`internal.pkg.domain.service.quote.implementation`, env
-  `INTERNAL_PKG_DOMAIN_SERVICE_QUOTE_IMPLEMENTATION`); a named value adds its
+  `implementation` (`internal.pkg.domain.service.price.quoter.implementation`,
+  env `INTERNAL_PKG_DOMAIN_SERVICE_PRICE_QUOTER_IMPLEMENTATION`); a named value adds its
   name before `implementation`; a type outside the module uses its full
   import path. Default: the `@Default` package. The generated file registers
   the key.
@@ -158,7 +158,7 @@ func New(c *resty.Client) quote.Service { return &service{client: c} }
 ## `@Config` -- settings from a struct
 
 ```go
-// internal/pkg/client/quote/resty/options.go -- no wrapper/config import
+// internal/pkg/client/price/quoter/resty/options.go -- no wrapper/config import
 // @Config
 type Options struct {
 	BaseURL string        `default:"http://localhost" desc:"quote API base URL"`
@@ -166,9 +166,9 @@ type Options struct {
 	Token   string        `hide:"true" desc:"API token"`
 }
 
-// internal/pkg/client/quote/resty/client.go
+// internal/pkg/client/price/quoter/resty/client.go
 // @Provide(index=0)
-func New(o *Options) quote.Service { ... }
+func New(o *Options) quoter.Service { ... }
 ```
 
 - inject writes `gen/<import path>/options_module.go`: one
@@ -187,8 +187,8 @@ func New(o *Options) quote.Service { ... }
   `config.WithHide()` (secrets); `config:"name"` renames the segment
   (lowerCamel).
 - Key: the package path relative to the Go module in dots, plus the field's
-  words in lowerCamel: `internal.pkg.client.quote.resty.baseUrl`, env
-  `INTERNAL_PKG_CLIENT_QUOTE_RESTY_BASE__URL`. A `[]string` env value is
+  words in lowerCamel: `internal.pkg.client.price.quoter.resty.baseUrl`, env
+  `INTERNAL_PKG_CLIENT_PRICE_QUOTER_RESTY_BASE__URL`. A `[]string` env value is
   split by commas (`..._SOLD__OUT=book,pen`).
 - Generation fails on: a missing `desc`, a default that does not parse, an
   unsupported type, an embedded field, a tagged unexported field, a second
@@ -199,10 +199,10 @@ func New(o *Options) quote.Service { ... }
 ## Factory clients -- `@Inject(..., plugins=[...])`
 
 ```go
-// internal/pkg/client/quote/resty/client.go -- no factory module by hand
+// internal/pkg/client/price/quoter/resty/client.go -- no factory module by hand
 // @Provide(index=0)
 // @Inject(index=0, name=quote, plugins=[otel, prometheus])
-func New(c *resty.Client) quote.Service { ... }
+func New(c *resty.Client) quoter.Service { ... }
 ```
 
 - inject writes `gen/client/github.com/go-resty/resty/v2/quote_client.go`:
@@ -244,6 +244,8 @@ func New(c *resty.Client) quote.Service { ... }
 |---|---|
 | `wrapper.Exec(ctx, ...)` / `middleware.New*Wrapper` written in a service method | `@Middleware(...)` on the constructor; the method body stays plain |
 | Hand-written fx module, door module or `cmd/<app>/main.go` in a builder app | Annotate and `go generate ./...`; edit the source, never `gen/` |
+| A new app started with hand-written fx modules | A new app is a builder app from line one -- layout in `../../index.md` (Architecture) |
+| `service/reservestock`, `service/reserve`, `handler/reservestock` | `<entity>/<agent>`: `service/stock/reserver`, `handler/stock/reserver` (`creator`, `finder`, `updater`, `remover`) |
 | Hand-written switch module (`sync.Once` + `switch` on an `implementation` key) in a builder app | `@Provide(index=0)` on each implementation, `@Default` on the one wired when the key is unset |
 | `AlreadyExists` for two `@Provide` of the same value | They are implementations: mark one `@Default`; otherwise give each a `name` |
 | Hand-written `lib/boost/factory/<resty, redis, mongo>/module.go` in a builder app | `@Inject(index=N, name=<api>, plugins=[...])` on the client param |

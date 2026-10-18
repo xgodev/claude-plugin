@@ -25,6 +25,12 @@ pub := publisher.New(drv)
 | NATS | `wrapper/publisher/driver/contrib/nats-io/nats.go/v1` |
 | Lovoo Goka | `wrapper/publisher/driver/contrib/lovoo/goka/v1` |
 
+## Errors
+
+`pub.Publish(ctx, events)` returns an error when the driver fails or when any event fails: one `Internal` error joining every failed event's error, tagged with its event ID -- `errors.Is`/`errors.As` still reach each cause. Never read `[]PublishOutput` to find a failure the error already carries. Middlewares (prometheus) still receive the per-event outputs with a nil chain error; the aggregate is built after the chain.
+
+The Kafka driver (`confluentinc/confluent-kafka-go/v2`) returns only after every message has its delivery report, bounded by the `ctx` given to `Publish`: a failed delivery (`TopicPartition.Error`) or a `ctx` that ends first becomes that event's error. The reports go to a channel per `Publish` call, so they no longer reach the producer's `Events()` channel. Give `Publish` a context with a deadline.
+
 ## Republishing inside a function handler
 
 Wire `pub` into the function publisher middleware (see `references/bootstrap/middleware.md`):
@@ -53,5 +59,7 @@ Set the destination via `out.SetSubject("topic-name")` before returning from the
 | Red flag | Fix |
 |---|---|
 | Calling `pb.Topic("foo").Publish(ctx, ...)` directly inside a handler | Return `*cloudevents.Event` from the handler; let the publisher middleware drive `pub.Publish` |
+| `err == nil` read as "every event published", or failures dug out of `[]PublishOutput` | `Publish` returns the joined per-event error; check it |
+| Waiting for Kafka delivery on the producer's `Events()` channel | `Publish` already waits for each report, bounded by its `ctx` |
 | Building a publisher per request instead of once at startup | Construct `pub` in `main`, pass to handlers via deps |
 | Using a third-party publisher abstraction in parallel | Use `wrapper/publisher` as the only abstraction so middleware sees everything |

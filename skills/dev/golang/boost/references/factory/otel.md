@@ -24,6 +24,10 @@ reader, _ := otelfact.NewReader(opts, exp)
 
 `NewMeter(name, ...)` is a convenience over the global MeterProvider once it's set up.
 
+## Built before `Start*Provider`
+
+The package globals `TracerProvider` and `MeterProvider` start as OpenTelemetry's global delegates, which forward to the provider `StartTracerProvider`/`StartMeterProvider` registers. A component built before that (an fx-built `*sql.DB` with the otelsql plugin, a redis or mongo client) does not panic and reports to the real provider once it starts; `NewTracer`/`NewMeter` before `Start` are safe the same way.
+
 Configure `.endpoint`, `.protocol` (`http`/`grpc`), `.insecure`, `.tls.cert`, `.trace.enabled` / `.metric.enabled` / `.console.enabled`, `.env`, `.version`, `.attributes` and `.export.interval` / `.export.timeout` under `boost.factory.otel.*` (override `BOOST_FACTORY_OTEL_*`). There are no headers or compression keys. Standard OTel env vars (`OTEL_EXPORTER_OTLP_ENDPOINT`, etc.) are honored too via koanf.
 
 ## Red flags

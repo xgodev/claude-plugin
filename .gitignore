@@ -39,3 +39,7 @@ TEST*.xml
 
 # Isolated task clones (git clone into .solvers/<name>/, never committed)
 .solvers/
+
+# Local workspaces (isolated clones) and dev-rules sentinels
+.solvers/
+.dev-rules/
