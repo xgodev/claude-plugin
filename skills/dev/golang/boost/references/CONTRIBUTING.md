@@ -34,6 +34,117 @@ wrapper/cache/driver/contrib/aws/dynamodb/v1/
 
 Do **not** nest under the SDK module dir (`aws/aws-sdk-go-v2/v1/`). The umbrella SDK layout (`factory/contrib/aws/aws-sdk-go-v2/v1/client/<service>/`) is **exclusive to `factory/contrib/`** because factories ship clients that legitimately share an SDK version pin. Drivers don't.
 
+## Factory contrib shape -- server and client
+
+The shape every new `factory/contrib/` package takes. Build from this section
+instead of re-reading boost sources; open the gRPC factory
+(`factory/contrib/google.golang.org/grpc/v1/{server,client}`) and echo
+(`factory/contrib/labstack/echo/v4`) only to confirm a detail.
+
+```
+factory/contrib/<vendor>/<lib>/v<major>/
+  server/                      # package server -- when the lib serves
+    config.go                  # root, PluginsRoot, init() + ConfigAdd(path)
+    options.go                 # Options, NewOptions, NewOptionsWithPath
+    server.go                  # Plugin, Server, constructor trio, Serve, Shutdown
+    plugins/{native,contrib,local}/...   # same split as the echo plugin row above
+    README.md
+  client/                      # package client -- when the lib calls out
+    config.go  options.go  client.go  plugins/...  README.md
+fx/modules/factory/contrib/<vendor>/<lib>/v<major>/{server,client}/module.go
+```
+
+A lib with one side only keeps the files directly in `v<major>/`, package =
+short lib name (`echo`).
+
+```go
+// config.go
+const (
+	root        = "boost.factory.<lib>.server"
+	port        = ".port"
+	PluginsRoot = root + ".plugins" // each plugin package roots its keys here
+)
+
+func init() { ConfigAdd(root) }
+
+// ConfigAdd registers the keys under path (a second instance on another port).
+func ConfigAdd(path string) {
+	config.Add(path+port, 8080, "server port")
+}
+
+// options.go
+type Options struct{ Port int }
+
+func NewOptions() (*Options, error) { return config.NewOptionsWithPath[Options](root) }
+
+func NewOptionsWithPath(path string) (*Options, error) {
+	return config.NewOptionsWithPath[Options](root, path) // root defaults, path overrides
+}
+
+// server.go
+// Plugin customizes the server right after it is built.
+type Plugin func(context.Context, *Server) error
+
+type Server struct {
+	instance *upstream.Server
+	options  *Options
+}
+
+func NewServer(ctx context.Context, plugins ...Plugin) (*Server, error)
+func NewServerWithConfigPath(ctx context.Context, path string, plugins ...Plugin) (*Server, error)
+func NewServerWithOptions(ctx context.Context, o *Options, plugins ...Plugin) (*Server, error)
+
+func (s *Server) Instance() *upstream.Server // apps register their handlers on it
+func (s *Server) Serve(ctx context.Context)   // blocks until stopped
+func (s *Server) Shutdown(ctx context.Context)
+```
+
+- `Serve` + `Shutdown` with these exact signatures make the server an
+  `extra/multiserver.Server`; that is what lets it run beside echo and gRPC.
+- `Plugin`: if `github.com/xgodev/boost/factory` exports `Plugin[T]` in the
+  checkout, declare `type Plugin = factory.Plugin[*Server]` and run them with
+  `factory.ApplyPlugins`; otherwise the func type above (same signature, so the
+  later alias is not a break). Client side: `func(context.Context, *Client) error`.
+- Constructors return the error. No `panic`, no `log.Fatal` -- the gRPC
+  server's `Fatalf` on listen is legacy, do not copy it. `Serve` logs the
+  serve error through `log.FromContext(ctx)` and stays quiet on the
+  graceful-stop sentinel (`http.ErrServerClosed`).
+- A plugin package (`plugins/local/wrapper/log/`): `config.go` with
+  `root = server.PluginsRoot + ".log"`, `init() { ConfigAdd(root) }` and an
+  `.enabled` key; `options.go` as above; a package-level
+  `Register(ctx context.Context, srv *server.Server) error` that loads its
+  options, returns nil when disabled and returns the options error otherwise.
+  Observability plugins go under `plugins/contrib/<vendor>/<lib>/v<major>/`
+  (OTel, Datadog, Prometheus -- `references/plugins.md`).
+
+```go
+// fx/modules/factory/contrib/<vendor>/<lib>/v<major>/server/module.go
+import (
+	s "github.com/xgodev/boost/extra/multiserver"
+	"github.com/xgodev/boost/fx/modules/extra/multiserver"
+)
+
+type params struct {
+	fx.In
+	Plugins []server.Plugin `optional:"true"`
+}
+
+// inside the once-guarded Module() -- shape in references/fx/modules.md
+fx.Provide(
+	func(ctx context.Context, p params) (*server.Server, error) {
+		return server.NewServer(ctx, p.Plugins...)
+	},
+	fx.Annotated{
+		Group:  multiserver.ServersGroupKey,
+		Target: func(srv *server.Server) s.Server { return srv },
+	},
+)
+```
+
+The client module provides `*client.Client` the same way, without the group;
+a client holding a connection closes it with
+`lc.Append(fx.StopHook(cli.Close))` (gRPC client module).
+
 ## Constructor trio
 
 ```go
@@ -127,3 +238,4 @@ make v 2>/dev/null || go mod vendor   # if you added a dep
 - [ ] Every extrapolation marked with `// TODO(maintainer-review):` and called out in the PR.
 - [ ] Public API change: NONE on existing interfaces.
 - [ ] Mirror style matches the closest existing contrib.
+- [ ] Factory server: `Serve`/`Shutdown`, fx module in the multiserver group; client: fx module closes the connection on stop.

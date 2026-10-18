@@ -7,7 +7,7 @@ When wiring or configuring any factory, read that factory's own "Plugins" sectio
 | Boot sequence (`boost.Start()`) | `references/start.md` |
 | Typed error catalog (`model/errors`) | `references/model-errors.md` |
 | REST response envelope (`model/restresponse`) | `references/model-restresponse.md` |
-| Contributing a new component | `references/CONTRIBUTING.md` |
+| Contributing a new component -- a new factory (server/client shape), driver or adapter | `references/CONTRIBUTING.md` |
 | Wrapper (log/config/cache/publisher) | `references/wrapper.md` |
 | Bootstrap (function/middleware/adapters) | `references/bootstrap.md` |
 | Extra (health/middleware/multiserver) | `references/extra.md` |

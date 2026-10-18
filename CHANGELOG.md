@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [1.24.1]
+
+### Added
+
+- boost `CONTRIBUTING.md`: the factory contrib shape -- server/client layout,
+  `config.go`/`options.go`, `Plugin` type, constructor trio, `Serve`/`Shutdown`
+  for multiserver, plugin packages and the fx module -- so a new factory is
+  built from the skill instead of re-reading boost sources. The index row
+  now routes "new factory" there.
+
 ## [1.24.0]
 
 ### Added
