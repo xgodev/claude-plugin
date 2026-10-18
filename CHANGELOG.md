@@ -2,6 +2,22 @@
 
 ## [Unreleased]
 
+## [1.25.1]
+
+### Added
+
+- boost `references/builder.md`: the `@MCP` door -- a go-sdk
+  `mcp.ToolHandlerFor[In, Out]` handler becomes a tool on the boost MCP
+  server (`mcp` by default, `<app>.server.<name>` otherwise); tool name
+  defaults to the handler name in snake case, description is its doc
+  comment.
+
+### Changed
+
+- boost `index.md`, Go layout and LAW 23 list `@MCP` among the doors;
+  `references/factory/mcp.md` points builder apps to `@MCP` instead of a
+  hand-written `mcp.AddTool`.
+
 ## [1.25.0]
 
 ### Changed

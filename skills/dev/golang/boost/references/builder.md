@@ -2,7 +2,7 @@
 
 `github.com/xgodev/boost/inject` and `github.com/xgodev/boost/builder` generate
 the wiring from comment annotations: `inject` writes one fx module per
-constructor, `builder` writes the doors (REST, gRPC, event function), a
+constructor, `builder` writes the doors (REST, gRPC, MCP tool, event function), a
 `Modules()` per app, the `main` of every app and the `@Middleware`
 decorators; `inject` also writes the config switch of an implementation set
 (`@Default`), the config registration of a settings struct (`@Config`) and
@@ -14,7 +14,7 @@ or `main.go` for what the annotations cover.
 ## Canonical example (ships with boost)
 
 - `builder/examples/simple/` -- app `api` (REST on `rest` and `admin`, gRPC
-  health, a `stock.Service` implemented by `stock/memory` -- `@Default`,
+  health, the `check_stock` MCP tool on `mcp`, a `stock.Service` implemented by `stock/memory` -- `@Default`,
   `@Middleware(log, prometheus)` -- and `stock/unlimited`, chosen by
   `builder.examples.simple.stock.implementation`; `stock/memory` reads a
   `@Config Options{SoldOut []string}`) and app `worker` (cloudevents
@@ -40,7 +40,7 @@ gen/<import path>/<struct>_module.go                   one per @Config: config.A
 gen/implementation/<type import path>/<type>_implementation.go   <Type>ImplementationModule(): the @Default switch
 gen/client/<client type import path>/<name>_<type>.go           <Name>ClientModule(): a factory client asked by @Inject
 gen/builder/<app>/modules.go                           Modules(): doors, decorators, multiserverfx.Module()
-gen/builder/<app>/<server>_module.go                   one REST or gRPC server
+gen/builder/<app>/<server>_module.go                   one REST, gRPC or MCP server
 gen/builder/<app>/function_module.go                   the @Function handler and its adapter
 gen/builder/middleware/<import path>/<func>_middleware.go   Decorate<Func>(): the @Middleware decorator
 ```
@@ -58,15 +58,43 @@ generation instead of being overwritten.
 | `@Invoke` | func run on start | -- |
 | `@REST` | `func(echo.Context) error`, func or method | `method`, `path` (required), `server` (`rest`), `app` (`api`); repeatable |
 | `@GRPC` | constructor with one default `@Provide` | `register` (`pkg.RegisterXServer`, required), `server` (`grpc`), `app` |
+| `@MCP` | `func(context.Context, *mcp.CallToolRequest, In) (*mcp.CallToolResult, Out, error)`, func or method | `name` (snake case of the handler), `server` (`mcp`), `app` |
 | `@Function` | `func(context.Context, cloudevents.Event) (T, error)` | `adapter` (`cloudevents`, `kafka`, `nats`, `pubsub`), `app`; one per app |
 | `@Middleware` | constructor with one `@Provide` | plugin names, positional |
 | `@Default` | constructor with one `@Provide` of a value another constructor also provides | -- |
 | `@Config` | exported struct outside `main`, one per package | -- (field tags `default`, `desc`, `hide`, `config`) |
 
 A method handler needs its receiver provided by a default `@Provide`. A
-server other than `rest`/`grpc` is configured under `<app>.server.<name>`;
-server plugins are a `[]boostecho.Plugin` / `[]server.Plugin` provided without
+server other than `rest`/`grpc`/`mcp` is configured under
+`<app>.server.<name>`; one server name serves one kind of door. Server plugins
+are a `[]boostecho.Plugin` / `[]server.Plugin` (gRPC or MCP) provided without
 `name` (default server) or with `name=<server>`.
+
+## `@MCP` -- a handler as an MCP tool
+
+```go
+// internal/app/api/mcp/handler/stock/checker/handler.go
+// New provides the handler.
+// @Provide(index=0)
+func New(svc checker.Service) *Handler { return &Handler{svc: svc} }
+
+// CheckStock tells whether an item can be ordered.
+// @MCP
+func (h *Handler) CheckStock(ctx context.Context, req *mcp.CallToolRequest, in Input) (*mcp.CallToolResult, Output, error) { ... }
+```
+
+- The handler is a go-sdk `mcp.ToolHandlerFor[In, Out]`; the door calls
+  `mcp.AddTool` on the boost MCP server, which infers the input/output
+  schemas from `In`/`Out` and fills the result from `Out` (a nil
+  `*mcp.CallToolResult` is fine).
+- Tool name: `name`, default the handler name in snake case
+  (`check_stock`); letters, digits, `_`, `-`, `.`, up to 128. Description:
+  the handler's doc comment without its leading name.
+- `mcp` uses the shipped fx module (`boost.factory.mcp.server`); another
+  name is `<app>.server.<name>` with the `[]server.Plugin` named after it.
+- The handler is the app layer and calls the service; the service never
+  imports `mcp`. Generation fails on a tool name twice in one server or an
+  invalid name.
 
 ## `@Middleware` -- plugins around every method of a service
 
@@ -243,6 +271,7 @@ func New(c *resty.Client) quoter.Service { ... }
 | Red flag | Fix |
 |---|---|
 | `wrapper.Exec(ctx, ...)` / `middleware.New*Wrapper` written in a service method | `@Middleware(...)` on the constructor; the method body stays plain |
+| `mcp.AddTool(srv.Instance(), ...)` written by hand in a builder app | `@MCP` on the handler |
 | Hand-written fx module, door module or `cmd/<app>/main.go` in a builder app | Annotate and `go generate ./...`; edit the source, never `gen/` |
 | A new app started with hand-written fx modules | A new app is a builder app from line one -- layout in `../../index.md` (Architecture) |
 | `service/reservestock`, `service/reserve`, `handler/reservestock` | `<entity>/<agent>`: `service/stock/reserver`, `handler/stock/reserver` (`creator`, `finder`, `updater`, `remover`) |

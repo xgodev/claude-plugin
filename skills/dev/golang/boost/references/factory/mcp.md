@@ -34,6 +34,7 @@ defer cli.Close()
 res, err := cli.Session().CallTool(ctx, &mcp.CallToolParams{Name: "greet", Arguments: map[string]any{"name": "boost"}})
 ```
 
+- In a builder app a tool is never added by hand: `@MCP` on the handler generates the server and its `mcp.AddTool` (`references/builder.md`).
 - Server: `Instance()` (`*mcp.Server`, register tools on it), `Handler()` (streamable HTTP handler to mount on echo/net-http), `Serve`/`Shutdown` (a `multiserver.Server`).
 - Client: the constructor connects; `Session()` (`*mcp.ClientSession`), `Instance()`, `Close()`.
 - A second server/upstream: `NewServerWithConfigPath(ctx, "boost.factory.mcp.server.admin")` / `NewClientWithConfigPath(ctx, "boost.factory.mcp.client.github")` -- unset keys fall back to the root defaults.
