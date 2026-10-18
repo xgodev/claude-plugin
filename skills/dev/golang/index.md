@@ -37,7 +37,12 @@ api/                                                       openapi.yaml, proto/,
 
 In an inject/builder app the unit modules and switches above are generated
 into `gen/`, and each `config.go` of knobs is a `@Config` struct in the
-unit's own package (LAW 25).
+unit's own package (LAW 25). A resty, redis or mongo client is generated
+too: `@Inject(index=0, name=quote, plugins=[otel, prometheus])` on the
+client parameter of `client/quote/resty` or `datastore/<entity>/<tech>`
+builds it with its own config (`boost.factory.resty.clients.quote.*`), so
+`lib/boost/factory/<factory>/module.go` is written only for a factory
+inject does not build (pgx, ...) -- `boost/references/builder.md`.
 
 ```go
 // domain/service/quote/service.go -- the contract, alone
@@ -190,7 +195,10 @@ func module(impl string) fx.Option { // the test's seam
   injects the trace context into the event (`traceparent`) and the consumer
   extracts it. A service's own methods get log/hystrix/datadog/prometheus
   from `@Middleware(...)` on its constructor, never a hand-written
-  `wrapper.Exec` in the method body (`boost/references/builder.md`).
+  `wrapper.Exec` in the method body (`boost/references/builder.md`). In an
+  inject/builder app a resty/redis/mongo client's plugins are the list in
+  its `@Inject(..., plugins=[...])`, each with
+  `<client root>.plugins.<name>.enabled`.
 - **36** -- A flag is `config.Add(root+".enabled", <default>, "...")` in the
   owner's `config.go` with an `IsEnabled()` accessor, and the fx module
   returns an empty `fx.Options()` when it is off -- the shape of boost's own

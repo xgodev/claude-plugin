@@ -5,10 +5,11 @@ the wiring from comment annotations: `inject` writes one fx module per
 constructor, `builder` writes the doors (REST, gRPC, event function), a
 `Modules()` per app, the `main` of every app and the `@Middleware`
 decorators; `inject` also writes the config switch of an implementation set
-(`@Default`) and the config registration of a settings struct (`@Config`).
+(`@Default`), the config registration of a settings struct (`@Config`) and
+the factory clients (`*resty.Client`, redis, mongo) an `@Inject` asks for.
 The app writes handlers, plain services, settings structs and annotations --
-no hand-written fx module, switch module, `config.go`, door or `main.go` for
-what the annotations cover.
+no hand-written fx module, switch module, `config.go`, factory module, door
+or `main.go` for what the annotations cover.
 
 ## Canonical example (ships with boost)
 
@@ -37,6 +38,7 @@ gen/module.go                                          inject root module
 gen/<import path>/<func>_module.go                     one per @Provide/@Invoke
 gen/<import path>/<struct>_module.go                   one per @Config: config.Add per field + <Struct>Module()
 gen/implementation/<type import path>/<type>_implementation.go   <Type>ImplementationModule(): the @Default switch
+gen/client/<client type import path>/<name>_<type>.go           <Name>ClientModule(): a factory client asked by @Inject
 gen/builder/<app>/modules.go                           Modules(): doors, decorators, multiserverfx.Module()
 gen/builder/<app>/<server>_module.go                   one REST or gRPC server
 gen/builder/<app>/function_module.go                   the @Function handler and its adapter
@@ -52,7 +54,7 @@ generation instead of being overwritten.
 | Annotation | On | Keys |
 |---|---|---|
 | `@Provide` | constructor | `index` (required), `name` or `group` |
-| `@Inject` | param of a `@Provide`/`@Invoke` func | `index` (required), `name` or `group` (slice param) |
+| `@Inject` | param of a `@Provide`/`@Invoke` func | `index` (required), `name` or `group` (slice param); `plugins=[a, b]` on a factory client param |
 | `@Invoke` | func run on start | -- |
 | `@REST` | `func(echo.Context) error`, func or method | `method`, `path` (required), `server` (`rest`), `app` (`api`); repeatable |
 | `@GRPC` | constructor with one default `@Provide` | `register` (`pkg.RegisterXServer`, required), `server` (`grpc`), `app` |
@@ -194,6 +196,48 @@ func New(o *Options) quote.Service { ... }
   keys equal or one the parent of the other (configs and implementation
   keys alike).
 
+## Factory clients -- `@Inject(..., plugins=[...])`
+
+```go
+// internal/pkg/client/quote/resty/client.go -- no factory module by hand
+// @Provide(index=0)
+// @Inject(index=0, name=quote, plugins=[otel, prometheus])
+func New(c *resty.Client) quote.Service { ... }
+```
+
+- inject writes `gen/client/github.com/go-resty/resty/v2/quote_client.go`:
+  `init()` runs the factory's and each plugin's `ConfigAdd(path)`;
+  `QuoteClientModule()` provides `*resty.Client` `name:"quote"`, built by
+  `factory.NewClientWithConfigPath(ctx, root, otel.Register, ...)`. Every
+  consumer's module includes it; so does `gen.Module()`. fx builds it only
+  when a consumer is built (an implementation config did not choose never
+  builds its client).
+- Clients and plugin names:
+
+| Client type | Plugins |
+|---|---|
+| `*resty.Client` | `log`, `health`, `otel`, `datadog`, `prometheus`, `retry`, `requestid` |
+| `*redis.Client`, `*redis.ClusterClient` | `health`, `otel`, `datadog`, `prometheus` |
+| `*mongo.Conn` (boost mongo factory v1/v2) | `health`, `otel`, `datadog`, `prometheus` |
+
+- One client per `name`, each with its own config: `name=quote` lives under
+  `boost.factory.resty.clients.quote.*` (env
+  `BOOST_FACTORY_RESTY_CLIENTS_QUOTE_HOST`); no `name` is the factory's
+  default client (`boost.factory.resty.*`). Names are lowerCamel. Two
+  services calling two APIs are two names, never one shared client.
+- The annotation chooses the plugins; config only turns one off
+  (`...clients.quote.plugins.otel.enabled`, default `true`). Pick ONE tracing
+  vendor in the list (LAW 35).
+- Consumers of one name share the client; each may repeat `plugins` only
+  with the same list, or omit it.
+- An app `@Provide` of the same type and name wins and nothing is
+  generated; a client param without `@Inject` is left to the app.
+- Generation fails on: `plugins` on a non-client param, on an app-provided
+  client, with `group` or on `@Provide`; an unknown or repeated plugin;
+  different lists for one client; a non-lowerCamel name.
+- `*sql.DB` (pgx, godror) and other factories are not generated: keep the
+  hand-written `lib/boost/factory/<factory>/module.go` (`fx/modules.md`).
+
 ## Red flags
 
 | Red flag | Fix |
@@ -202,6 +246,9 @@ func New(o *Options) quote.Service { ... }
 | Hand-written fx module, door module or `cmd/<app>/main.go` in a builder app | Annotate and `go generate ./...`; edit the source, never `gen/` |
 | Hand-written switch module (`sync.Once` + `switch` on an `implementation` key) in a builder app | `@Provide(index=0)` on each implementation, `@Default` on the one wired when the key is unset |
 | `AlreadyExists` for two `@Provide` of the same value | They are implementations: mark one `@Default`; otherwise give each a `name` |
+| Hand-written `lib/boost/factory/<resty, redis, mongo>/module.go` in a builder app | `@Inject(index=N, name=<api>, plugins=[...])` on the client param |
+| One resty client shared by services calling different APIs | One `name` per API: each gets its own `...clients.<name>.host` |
+| `otel` and `datadog` both in a client's `plugins` | One tracing vendor (LAW 35) |
 | Hand-written `config.go` (`config.Add` in `init()` + `NewOptions`) in a builder app | A `@Config` struct with `default`/`desc` tags; the constructor receives `*Options` |
 | Knobs of an in-domain implementation passed through a hand-written fx module | A `@Config` struct in its own package -- it imports no config (LAW 20 holds) |
 | `@Middleware` on a constructor returning `*struct` | Return the interface (LAW 22) |

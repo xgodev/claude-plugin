@@ -97,7 +97,7 @@ func module(impl string) fx.Option {
 }
 ```
 
-A boost factory the app builds with its own plugins or config path gets an app module under `internal/pkg/fx/modules/lib/boost/factory/<factory>/`. Use it when boost ships no module for the factory (pgx) or when the shipped one cannot take the app's plugins:
+A boost factory the app builds with its own plugins or config path gets an app module under `internal/pkg/fx/modules/lib/boost/factory/<factory>/`. Use it when boost ships no module for the factory (pgx) or when the shipped one cannot take the app's plugins. In an inject/builder app a resty, redis or mongo client is not written by hand: `@Inject(index=0, name=quote, plugins=[otel])` on the client parameter generates it (`builder.md`, "Factory clients"); this module is for the factories inject does not build:
 
 ```go
 // internal/pkg/fx/modules/lib/boost/factory/pgx/module.go

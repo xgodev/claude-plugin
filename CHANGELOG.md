@@ -2,6 +2,26 @@
 
 ## [Unreleased]
 
+## [1.24.7]
+
+### Added
+
+- boost `references/builder.md`: factory clients -- `@Inject(index=0,
+  name=quote, plugins=[otel, prometheus])` on a `*resty.Client`,
+  `*redis.Client`, `*redis.ClusterClient` or `*mongo.Conn` parameter makes
+  inject generate that client with its own config
+  (`boost.factory.resty.clients.quote.*`) and those plugins (registry,
+  rules, generated file, validation).
+
+### Changed
+
+- Go layout note and LAW 35: in an inject/builder app a resty/redis/mongo
+  client and its plugins come from `@Inject(..., plugins=[...])`; the
+  hand-written `lib/boost/factory/<factory>/module.go` stays for factories
+  inject does not build (pgx, ...).
+- boost `references/fx/modules.md`: the app factory module points builder
+  apps to the generated clients.
+
 ## [1.24.6]
 
 ### Added
