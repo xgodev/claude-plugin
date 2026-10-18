@@ -2,6 +2,23 @@
 
 ## [Unreleased]
 
+## [1.24.6]
+
+### Added
+
+- boost `references/builder.md`: `@Config` -- inject generates the
+  `config.Add` registration and the `*Options` provider of a settings struct
+  (types, tags, key and env rule, validation).
+
+### Changed
+
+- Go LAW 25 and the layout note: in an inject/builder app a unit's knobs are
+  a `@Config` struct in its own package, never a hand-written `config.go`;
+  an in-domain implementation keeps its knobs there too.
+- boost `references/wrapper/config.md`: points inject/builder apps to
+  `@Config`; a comma-separated env var fills a `[]string` decoded into a
+  struct (only `config.Strings` gets it empty).
+
 ## [1.24.5]
 
 ### Added

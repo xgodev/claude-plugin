@@ -35,6 +35,10 @@ internal/pkg/fx/modules/lib/boost/factory/<factory>/<door>/module.go   a server:
 api/                                                       openapi.yaml, proto/, events/*.json
 ```
 
+In an inject/builder app the unit modules and switches above are generated
+into `gen/`, and each `config.go` of knobs is a `@Config` struct in the
+unit's own package (LAW 25).
+
 ```go
 // domain/service/quote/service.go -- the contract, alone
 type Service interface {
@@ -128,7 +132,12 @@ func module(impl string) fx.Option { // the test's seam
   is derived from the key (`boost/references/wrapper/config.md`). Read accessors in the fx module
   and pass values into constructors -- a service never calls `config.*` in
   its logic. `os.Getenv` in app code is a defect. Default datastore is
-  `memory` (LAW 8).
+  `memory` (LAW 8). In an inject/builder app there is no hand-written
+  `config.go`: the knobs are a `@Config` struct in the unit's own package
+  (`options.go`, fields tagged `default`/`desc`), inject generates the
+  registration and hands `*Options` to `New` (`boost/references/builder.md`).
+  The package never imports config, so an in-domain implementation keeps
+  its knobs in its own `@Config` too.
 - **26** -- No package-level mutable state (maps, slices, counters) serving
   requests. A cache shared across instances goes through
   `boost/wrapper/cache` with a Redis driver; an in-process cache holds only

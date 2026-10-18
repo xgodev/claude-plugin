@@ -1,5 +1,12 @@
 **REQUIRED BACKGROUND:** `references/start.md` -- the registry is empty until `boost.Start()` loads env+files.
 
+## In an inject/builder app: `@Config`, not `config.go`
+
+There the registration below is generated: declare a `@Config` struct with
+`default`/`desc` tags in the owner package and receive `*Options` in its
+constructor (`references/builder.md`). Write `config.Add` by hand only
+outside inject/builder (or for a key no struct field expresses, like a map).
+
 ## Register every tunable up front
 
 ```go
@@ -77,7 +84,7 @@ Consequences, in order of how often they bite:
 
 Framework-layer keys live under `boost.*` (e.g., `boost.factory.echo.port` <- `BOOST_FACTORY_ECHO_PORT`). Application-layer keys can use any namespace.
 
-A `[]string` (or any slice) key has **no** env form: the value arrives as a plain string, and `config.Strings` only unwraps `[]interface{}` / `[]string`, so a comma-separated env var yields an **empty** slice, not the parsed list. Override slices via a config file, or register a single string and split it yourself.
+A `[]string` key read with `config.Strings` has **no** env form: the value arrives as a plain string, and `config.Strings` only unwraps `[]interface{}` / `[]string`, so a comma-separated env var yields an **empty** slice, not the parsed list. Decoded into a struct (`config.NewOptionsWithPath` / `config.UnmarshalWithPath`, which is what a `@Config` struct uses) the same env var IS split by commas -- koanf's unmarshal runs `mapstructure.StringToSliceHookFunc(",")`. So read slices through an options struct, not `config.Strings`.
 
 ## See every config at boot, hide the secrets
 
