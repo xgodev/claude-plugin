@@ -2,6 +2,8 @@
 - `references/start.md` -- `boost.Start()` first.
 - `references/wrapper/config.md` -- config namespacing semantics.
 
+In a builder app (every new app) the client is not built by hand: `@Inject(index=N, name=<name>, plugins=[...])` on the `*resty.Client` parameter generates it with its own config (`references/builder.md`, "Factory clients"). The construction below is for libraries and apps wired by hand.
+
 ## Construction -- one client per upstream
 
 ```go

@@ -3,6 +3,8 @@
 - `references/wrapper/log.md` -- request logger via context.
 - `references/model-errors.md` -- handler errors are typed and routed by `error_handler`.
 
+In a builder app (every new app) the echo server, its routes and `main.go` are generated from `@REST` on the handlers; server plugins are a `@Provide` of `[]boostecho.Plugin` (`references/builder.md`). The `main.go` below is the shape of an app wired by hand.
+
 ## Canonical `main.go`
 
 ```go

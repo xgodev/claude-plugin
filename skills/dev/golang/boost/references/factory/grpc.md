@@ -1,5 +1,7 @@
 **REQUIRED BACKGROUND:** `references/start.md`, `references/wrapper/config.md`.
 
+In a builder app (every new app) the gRPC server is generated from `@GRPC(register=pkg.RegisterXServer)` on the service constructor; server plugins are a `@Provide` of `[]server.Plugin` (`references/builder.md`). The server wiring below is for an app wired by hand; a gRPC client is built with this factory in any app.
+
 ## Canonical examples (ship with boost)
 
 - `factory/contrib/google.golang.org/grpc/v1/client/examples/examplesvc/` -- minimal client wiring

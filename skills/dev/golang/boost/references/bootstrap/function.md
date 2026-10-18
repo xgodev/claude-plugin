@@ -1,5 +1,7 @@
 **REQUIRED BACKGROUND:** `references/start.md`. For middleware -> `references/bootstrap/middleware.md`. For Pub/Sub adapter specifics (incl. ctx-loss workaround) -> `references/bootstrap/adapter-pubsub.md`.
 
+In a builder app (every new app) `@Function(adapter=cloudevents|kafka|nats|pubsub)` on the handler generates the adapter module and `main.go` (`references/builder.md`); the handler signature below still holds.
+
 ## Iron Law -- handler signature is forced by `function.Handler[T]`
 
 The framework declares (`bootstrap/function/handler.go`):

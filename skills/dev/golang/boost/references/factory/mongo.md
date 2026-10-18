@@ -1,5 +1,7 @@
 **REQUIRED BACKGROUND:** `references/start.md`, `references/wrapper/config.md`.
 
+In a builder app (every new app) the client is not built by hand: `@Inject(index=N, name=<name>, plugins=[...])` on the `*mongo.Conn` parameter generates it with its own config (`references/builder.md`, "Factory clients"). The construction below is for libraries and apps wired by hand.
+
 ## Canonical examples (ship with boost)
 
 - `factory/contrib/go.mongodb.org/mongo-driver/v1/examples/ping/main.go`

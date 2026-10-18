@@ -1,5 +1,7 @@
 **REQUIRED BACKGROUND:** `references/start.md`, `references/fx/modules.md` (composition patterns), `references/wrapper/log.md` (the logger fx uses).
 
+In a builder app (every new app) `main.go` is generated and calls `fxfact.NewApp(<app>.Modules()...).Run()` (`references/builder.md`); call the factory by hand only in an app wired by hand.
+
 The factory wraps `go.uber.org/fx`'s `fx.New` with exactly one boost default: it prepends `fx.Logger(NewLogger())` so fx events appear in your structured log stream (level from `boost.factory.fx.log.level`). Nothing else is wired -- lifecycle, `OnStart` / `OnStop` and their contexts behave exactly as in raw fx.
 
 ```go

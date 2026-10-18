@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+## [1.25.2]
+
+### Changed
+
+- boost `start.md`, `factory/echo.md`, `factory/grpc.md`, `factory/resty.md`,
+  `factory/redis.md`, `factory/mongo.md`, `factory/fx.md` and
+  `bootstrap/function.md` open with what a builder app (every new app)
+  generates instead -- `main.go`, `@REST`/`@GRPC`/`@Function` doors,
+  `@Inject(..., plugins=[...])` clients -- and keep the hand wiring for
+  libraries and apps wired before builder.
+
 ## [1.25.1]
 
 ### Added

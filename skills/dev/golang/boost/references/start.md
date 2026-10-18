@@ -1,5 +1,7 @@
 ## Iron Law -- `boost.Start()` is the first line of `main`
 
+In a builder app (every new app) `cmd/<app>/main.go` is generated with `boost.Start()` as its first line (`references/builder.md`); write `main` by hand only outside builder (a library example, an app wired before builder).
+
 ```go
 package main
 
