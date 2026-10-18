@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+## [1.24.5]
+
+### Added
+
+- boost `references/builder.md`: `@Default` -- inject generates the config
+  switch of an implementation set (key, generated file, boot failure,
+  validation); `@Middleware` on a member applies only when it is chosen.
+
+### Changed
+
+- Go LAW 23 and boost `references/fx/modules.md`: in an inject/builder app
+  the implementation switch is generated from `@Default`, never hand-written.
+
 ## [1.24.4]
 
 ### Changed

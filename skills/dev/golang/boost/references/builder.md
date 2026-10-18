@@ -4,15 +4,19 @@
 the wiring from comment annotations: `inject` writes one fx module per
 constructor, `builder` writes the doors (REST, gRPC, event function), a
 `Modules()` per app, the `main` of every app and the `@Middleware`
-decorators. The app writes handlers, plain services and annotations -- no
-hand-written fx module, door or `main.go` for what the annotations cover.
+decorators; `inject` also writes the config switch of an implementation set
+(`@Default`). The app writes handlers, plain services and annotations -- no
+hand-written fx module, switch module, door or `main.go` for what the
+annotations cover.
 
 ## Canonical example (ships with boost)
 
 - `builder/examples/simple/` -- app `api` (REST on `rest` and `admin`, gRPC
-  health, a `stock.Service` with `@Middleware(log, prometheus)`) and app
-  `worker` (cloudevents function); its tests fail when `gen/` or a main is
-  stale.
+  health, a `stock.Service` implemented by `stock/memory` -- `@Default`,
+  `@Middleware(log, prometheus)` -- and `stock/unlimited`, chosen by
+  `builder.examples.simple.stock.implementation`) and app `worker`
+  (cloudevents function); its tests boot the api with each implementation
+  and fail when `gen/` or a main is stale.
 
 ## Generating
 
@@ -28,6 +32,7 @@ hand-written fx module, door or `main.go` for what the annotations cover.
 cmd/<app>/main.go                                      boost.Start() + fxfact.NewApp(<app>.Modules()...).Run()
 gen/module.go                                          inject root module
 gen/<import path>/<func>_module.go                     one per @Provide/@Invoke
+gen/implementation/<type import path>/<type>_implementation.go   <Type>ImplementationModule(): the @Default switch
 gen/builder/<app>/modules.go                           Modules(): doors, decorators, multiserverfx.Module()
 gen/builder/<app>/<server>_module.go                   one REST or gRPC server
 gen/builder/<app>/function_module.go                   the @Function handler and its adapter
@@ -49,6 +54,7 @@ generation instead of being overwritten.
 | `@GRPC` | constructor with one default `@Provide` | `register` (`pkg.RegisterXServer`, required), `server` (`grpc`), `app` |
 | `@Function` | `func(context.Context, cloudevents.Event) (T, error)` | `adapter` (`cloudevents`, `kafka`, `nats`, `pubsub`), `app`; one per app |
 | `@Middleware` | constructor with one `@Provide` | plugin names, positional |
+| `@Default` | constructor with one `@Provide` of a value another constructor also provides | -- |
 
 A method handler needs its receiver provided by a default `@Provide`. A
 server other than `rest`/`grpc` is configured under `<app>.server.<name>`;
@@ -93,8 +99,54 @@ func (s *service) Available(ctx context.Context, item string) (bool, error) {
   Config only turns a plugin off:
   `boost.factory.local.extra.middleware.plugins.<plugin>.<name>.enabled`
   (default `true`).
+- On a member of an implementation set (`@Default` below) the decorator
+  applies only when that member is the chosen one.
 - Not supported: `cache`, `fallback`, different plugins per method. Those
   stay hand-built (`references/extra/middleware.md`).
+
+## `@Default` -- implementation switch by config
+
+```go
+// internal/pkg/domain/service/quote/service.go
+type Service interface {
+	Quote(ctx context.Context, item string) (float64, error)
+}
+
+// internal/pkg/domain/service/quote/local/service.go
+// @Provide(index=0)
+// @Default
+func New() quote.Service { return &service{} }
+
+// internal/pkg/domain/service/quote/resty/service.go
+// @Provide(index=0)
+func New(c *resty.Client) quote.Service { return &service{client: c} }
+```
+
+- Two or more `@Provide` of the same value (type and `name`, no `group`)
+  with exactly one `@Default` form an implementation set. The
+  implementation's name is its package name (`local`, `resty`).
+- Key: the type's package path relative to the Go module, in dots, plus
+  `implementation` (`internal.pkg.domain.service.quote.implementation`, env
+  `INTERNAL_PKG_DOMAIN_SERVICE_QUOTE_IMPLEMENTATION`); a named value adds its
+  name before `implementation`; a type outside the module uses its full
+  import path. Default: the `@Default` package. The generated file registers
+  the key.
+- inject writes `gen/implementation/<type import path>/<type>_implementation.go`:
+  `<Type>ImplementationModule()` includes only the chosen member's module, so
+  the others and their dependencies (HTTP client, database) are never built;
+  `<Type>Implementation()` returns the chosen name. Consumers and
+  `gen.Module()` include the switch. An unknown name fails the boot with
+  `NotValid` naming key, value and valid names -- never a fallback.
+- Generation fails on: two providers of the value without `@Default`
+  (AlreadyExists), two `@Default`, `@Default` without exactly one `@Provide`
+  / on a group / with `@Invoke` / without another implementation, members in
+  packages with the same name, members returning different types, a consumer
+  of the set in a member's package, two sets with the same key.
+- A member is never a `@REST`/`@Function` receiver nor a `@GRPC`
+  constructor: serve the door from a type that receives the chosen
+  interface.
+- `@Default` marks the default *implementation*; a `@Provide` without `name`
+  is the default *provider* -- different things.
 
 ## Red flags
 
@@ -102,6 +154,8 @@ func (s *service) Available(ctx context.Context, item string) (bool, error) {
 |---|---|
 | `wrapper.Exec(ctx, ...)` / `middleware.New*Wrapper` written in a service method | `@Middleware(...)` on the constructor; the method body stays plain |
 | Hand-written fx module, door module or `cmd/<app>/main.go` in a builder app | Annotate and `go generate ./...`; edit the source, never `gen/` |
+| Hand-written switch module (`sync.Once` + `switch` on an `implementation` key) in a builder app | `@Provide(index=0)` on each implementation, `@Default` on the one wired when the key is unset |
+| `AlreadyExists` for two `@Provide` of the same value | They are implementations: mark one `@Default`; otherwise give each a `name` |
 | `@Middleware` on a constructor returning `*struct` | Return the interface (LAW 22) |
 | Vendor SDK imported to trace/measure a service | The plugin name in `@Middleware`; the vendor is config (LAW 21) |
 | `gen/` not regenerated after changing an annotation | `go generate ./...`; keep a test comparing `Render` output with `gen/` |

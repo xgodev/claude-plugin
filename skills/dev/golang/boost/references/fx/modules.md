@@ -71,7 +71,7 @@ func Module() fx.Option {
 - **`fx.Options`, not `fx.Module`** -- the shape boost ships.
 - **A flag goes before the once** (`if !IsEnabled() { return fx.Options() }`, as boost's publisher drivers do), so off wires nothing and never spends the once.
 
-A switch module runs its switch inside the same once (LAW 23). `Module()` only wraps an unexported `module(impl)`, which is the seam the test calls:
+A switch module runs its switch inside the same once (LAW 23). In an inject/builder app it is generated from `@Default` (`references/builder.md`); write it by hand only without inject. `Module()` only wraps an unexported `module(impl)`, which is the seam the test calls:
 
 ```go
 // internal/pkg/fx/modules/domain/repository/order/module.go

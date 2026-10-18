@@ -105,7 +105,9 @@ func module(impl string) fx.Option { // the test's seam
   (server modules), then `multiserver.Module()`. The implementation switch
   exists only when two or more implementations exist; with one, the module
   provides it directly. The switch runs inside the once, through an
-  unexported `module(impl)` that the test calls once per value. No `init()` that builds a client, no package-level
+  unexported `module(impl)` that the test calls once per value. In an
+  inject/builder app the switch is generated: `@Default` on the existing
+  implementation (`boost/references/builder.md`), never written by hand. No `init()` that builds a client, no package-level
   client/singleton, no `New` called inside another unit's logic. Adding the
   second implementation adds the switch in the same change: the config
   key, the existing implementation as its default, and the boot failure on
