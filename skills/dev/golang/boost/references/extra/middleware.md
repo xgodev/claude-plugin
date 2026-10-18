@@ -27,6 +27,7 @@ The middleware order arguments here mirror the order semantics from `references/
 
 ## When to use
 
+- **Not** around a service's methods: `@Middleware(log, hystrix, datadog, prometheus)` on its constructor generates the decorator (`references/builder.md`). Build the chain by hand only for what `@Middleware` does not cover (`cache`, `fallback`, different plugins per method).
 - The Pub/Sub / NATS / Kafka adapter workaround for ctx-loss (see `references/bootstrap/adapter-pubsub.md`).
 - Custom drivers / adapters where you need the same chain semantics outside `fn.Run`.
 
@@ -50,5 +51,6 @@ These are separate `AnyErrorMiddleware`/`AnyMiddleware`/`ErrorMiddleware` implem
 | Red flag | Fix |
 |---|---|
 | Used in place of `fn.Run` without a `// TODO(boost-upstream):` comment explaining why | Either add the comment + tracking issue, or use `fn.Run` |
+| `wrapper.Exec(ctx, ...)` hand-written in a service method | `@Middleware(...)` on the constructor (`references/builder.md`) |
 | Different `T` parameter than the rest of the chain | All on `*cloudevents.Event` |
 | Custom middleware order that breaks the recovery-outermost rule | Mirror `references/bootstrap/middleware.md`'s canonical order |

@@ -2,6 +2,21 @@
 
 ## [Unreleased]
 
+## [1.24.3]
+
+### Added
+
+- boost `references/builder.md`: `inject`/`builder` code generation
+  (`@Provide`, `@Inject`, `@Invoke`, `@REST`, `@GRPC`, `@Function`,
+  `@Middleware`), generated layout and `main.go`, red flags; routed from the
+  boost index.
+
+### Changed
+
+- boost `extra/middleware.md` and Go LAW 35: a service's methods get their
+  middleware chain from `@Middleware(...)` on the constructor, never a
+  hand-written `wrapper.Exec`.
+
 ## [1.24.2]
 
 ### Added

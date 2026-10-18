@@ -177,7 +177,9 @@ func module(impl string) fx.Option { // the test's seam
   component with no boost plugin (Kafka, NATS, Pub/Sub, the publish path's
   trace) is instrumented at the call site with the OTel API: the publisher
   injects the trace context into the event (`traceparent`) and the consumer
-  extracts it.
+  extracts it. A service's own methods get log/hystrix/datadog/prometheus
+  from `@Middleware(...)` on its constructor, never a hand-written
+  `wrapper.Exec` in the method body (`boost/references/builder.md`).
 - **36** -- A flag is `config.Add(root+".enabled", <default>, "...")` in the
   owner's `config.go` with an `IsEnabled()` accessor, and the fx module
   returns an empty `fx.Options()` when it is off -- the shape of boost's own
