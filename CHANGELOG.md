@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [1.24.4]
+
+### Changed
+
+- boost `references/factory/mcp.md`: MCP `version` defaults to the binary's
+  main module version (`0.0.0` when unstamped) instead of a fixed `1.0.0`.
+
 ## [1.24.3]
 
 ### Added

@@ -41,11 +41,11 @@ res, err := cli.Session().CallTool(ctx, &mcp.CallToolParams{Name: "greet", Argum
 ## Keys
 
 Server (`BOOST_FACTORY_MCP_SERVER_*`): `name` (empty = `boost.applicationName`),
-`version` (`1.0.0`), `instructions`, `transport` (`HTTP` | `STDIO`), `port`
+`version` (empty = main module version stamped by `go build`, `0.0.0` when unstamped), `instructions`, `transport` (`HTTP` | `STDIO`), `port`
 (`8090`), `path` (`/mcp`), `stateless`, `jsonResponse`, `sessionTimeout`,
 `keepAlive`.
 
-Client (`BOOST_FACTORY_MCP_CLIENT_*`): `name`, `version`, `transport` (`HTTP` |
+Client (`BOOST_FACTORY_MCP_CLIENT_*`): `name`, `version` (same default), `transport` (`HTTP` |
 `COMMAND`), `endpoint` (`http://localhost:8090/mcp`), `maxRetries` (`5`,
 negative disables), `command`, `args`, `keepAlive`.
 
