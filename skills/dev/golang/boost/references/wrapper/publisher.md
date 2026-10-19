@@ -1,5 +1,7 @@
 **REQUIRED BACKGROUND:** `references/start.md`. For function deadletter integration -> `references/bootstrap/middleware.md`. For adding a new driver to boost -> `references/CONTRIBUTING.md`.
 
+In a builder app (every new app) do not build it by hand: `@Inject` a `*publisher.Publisher` and the generator builds it, the driver chosen by `boost.wrapper.publisher.driver.name`, `drivers=[nats, pubsub]` to generate only those, `name=orders` for a publisher on the `orders` clients (`references/builder.md`).
+
 ## Construct via the driver-agnostic wrapper
 
 ```go

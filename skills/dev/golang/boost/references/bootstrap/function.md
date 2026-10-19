@@ -2,6 +2,8 @@
 
 In a builder app (every new app) `@Function(adapter=cloudevents|cenats|kafka|nats|pubsub)` (or a list, `adapter=[pubsub, nats]`, chosen by `<app>.function.adapter`) on the handler generates the adapter module and `main.go` (`references/builder.md`); the handler signature below still holds.
 
+`fn.Run` runs the command named in the args, else `boost.bootstrap.function.default`, else the only adapter given; nothing to run or an ambiguous choice is `NotValid`. The nats, cloudevents_nats and Pub/Sub (v1, v2) adapters run on the command context: when it is done they take no new message, let the handler finish the one it holds with a context the stop does not cancel, and return, so SIGTERM exits 0. A subject or subscription that cannot be received fails `Run`. The kafka (confluent) adapter still ignores the context.
+
 ## Iron Law -- handler signature is forced by `function.Handler[T]`
 
 The framework declares (`bootstrap/function/handler.go`):
@@ -61,5 +63,6 @@ The whole chain must agree on one `T` (here `*cloudevents.Event`): `function.New
 | Handler with input `*cloudevents.Event` (pointer) | Change to value -- framework signature is forced |
 | `function.New[cloudevents.Event](...)` (T = value) | Change to `*cloudevents.Event` or `[]*cloudevents.Event` -- anything else is a constructor error |
 | One middleware in the chain parameterized differently from the rest | Pick one `T` and use it everywhere |
+| `boost.bootstrap.function.default` set, or a CLI arg passed, for an app with one adapter | Not needed: `Run` runs the only adapter |
 
 **Verification by example:** before claiming a handler signature is correct, grep `bootstrap/function/handler.go` and confirm the actual `Handler[T]` type signature. The framework is the source of truth; this skill can drift.

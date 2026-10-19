@@ -25,7 +25,7 @@ Two distinct namespaces (`.../confluent-kafka-go/v2/config.go`):
 
 Env overrides use `_` as the path separator: `BOOST_FACTORY_CONFLUENT_BROKERS` for the factory keys, `BOOST_BOOTSTRAP_FUNCTION_ADAPTER_CONFLUENT_TOPICS` for the adapter ones.
 
-## Production caveat -- same ctx-loss as Pub/Sub
+## Production caveat -- ctx-loss (Pub/Sub and NATS no longer have it)
 
 `bootstrap/function/adapter/contrib/confluentinc/confluent-kafka-go/v2/helper.go:41` hard-codes:
 
@@ -33,7 +33,7 @@ Env overrides use `_` as the path separator: `BOOST_FACTORY_CONFLUENT_BROKERS` f
 err := subscriber.Subscribe(context.Background())
 ```
 
-Passing a signal-aware ctx does NOT restore graceful shutdown: `subscriber.go:44-67` is a bare `for {}` over `consumer.ReadMessage` that never selects on `ctx.Done()`. The ctx only reaches the handler (`subscriber.go:131`); the receive loop keeps running regardless. Bypassing `fn.Run` and building the chain via `extra/middleware.NewAnyErrorWrapper` (see `references/bootstrap/adapter-pubsub.md`) lets you propagate cancellation INTO the handler, but the subscriber loop itself only stops when the process exits. Add the `// TODO(boost-upstream):` annotation naming the offending file.
+Passing a signal-aware ctx does NOT restore graceful shutdown: `subscriber.go:44-67` is a bare `for {}` over `consumer.ReadMessage` that never selects on `ctx.Done()`. The ctx only reaches the handler (`subscriber.go:131`); the receive loop keeps running regardless. Bypassing `fn.Run` and building the chain via `extra/middleware.NewAnyErrorWrapper` lets you propagate cancellation INTO the handler, but the subscriber loop itself only stops when the process exits. Add the `// TODO(boost-upstream):` annotation naming the offending file.
 
 ## Consumer group semantics
 

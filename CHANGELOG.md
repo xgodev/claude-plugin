@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+## [1.25.6]
+
+### Changed
+
+- boost `factory/fx.md`: `NewApp` installs `fx.WithLogger(NewEventLogger)`;
+  errors that stop the app log at ERROR whatever the fx level.
+- boost `builder.md`: `@Function(client=)`, adapters on the app's client,
+  graceful stop, generated `*publisher.Publisher` (`drivers=`, `name=`).
+- boost `bootstrap/function.md`, `adapter-pubsub.md`, `adapter-nats.md`:
+  `Run` picks the only adapter; Pub/Sub and NATS stop on the run context, so
+  the ctx-loss workaround is gone. `wrapper/publisher.md`: builder path.
+
 ## [1.25.5]
 
 ### Added

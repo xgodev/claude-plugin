@@ -59,7 +59,7 @@ generation instead of being overwritten.
 | `@REST` | `func(echo.Context) error`, func or method | `method`, `path` (required), `server` (`rest`), `app` (`api`); repeatable |
 | `@GRPC` | constructor with one default `@Provide` | `register` (`pkg.RegisterXServer`, required), `server` (`grpc`), `app` |
 | `@MCP` | `func(context.Context, *mcp.CallToolRequest, In) (*mcp.CallToolResult, Out, error)`, func or method | `name` (snake case of the handler), `server` (`mcp`), `app` |
-| `@Function` | `func(context.Context, cloudevents.Event) (T, error)` | `adapter` (`cloudevents`, `cenats`, `kafka`, `nats`, `pubsub`, or a list `[pubsub, nats]` chosen by config), `app`, `middlewares=[a, b]`; one per app |
+| `@Function` | `func(context.Context, cloudevents.Event) (T, error)` | `adapter` (`cloudevents`, `cenats`, `kafka`, `nats`, `pubsub`, or a list `[pubsub, nats]` chosen by config), `app`, `client` (named client of the adapter), `middlewares=[a, b]`; one per app |
 | `@Middleware` | constructor with one `@Provide` | plugin names, positional |
 | `@Default` | constructor with one `@Provide` of a value another constructor also provides | -- |
 | `@Config` | exported struct outside `main`, one per package | -- (field tags `default`, `desc`, `hide`, `config`) |
@@ -76,7 +76,29 @@ name. `function_module.go` wires only the chosen adapter module, so the
 others and their clients are never built; an unknown name fails the boot
 with `NotValid` naming key, value and valid names. A single name generates
 the door as before; the adapters' own keys (`.enabled`, the pubsub
-`version`) stay as they are.
+`version`) stay as they are. The app runs the chosen adapter with no CLI
+argument and no `boost.bootstrap.function.default`; nothing to run, or more
+than one adapter and no choice, fails the boot with `NotValid`.
+
+The `nats`, `cenats` and `pubsub` (v2) adapters read with the app's client,
+not one of their own: the default one (the unnamed `@Provide` of the app, or
+the one inject generates), shared with the publisher and every `@Inject`
+without `name`, so a function that reads from a broker and publishes to it
+boots with one client. `client=orders` takes the named client `orders`
+instead (keys `boost.factory.<factory>.clients.orders.*`), shared with
+`@Inject(name=orders)` and the publisher `orders`. The pubsub v1 adapter
+keeps its own v1 client. The adapters run on the run context: SIGTERM stops
+taking messages, lets the handler finish the one it holds, and the app
+exits 0; a subscription that cannot be received fails the boot.
+
+`*publisher.Publisher` is generated too (`@Inject` on it): the driver is
+`boost.wrapper.publisher.driver.name` (`noop` by default), each driver on the
+default client of its factory. `@Inject(index=N, drivers=[nats, pubsub])`
+generates only those drivers plus `noop` (leave `kafka` out to keep cgo and
+librdkafka out of the app); `@Inject(index=N, name=orders)` builds the
+publisher `orders`, its drivers on the `orders` clients, chosen by
+`boost.wrapper.publisher.clients.orders.driver.name`. A publisher the app
+`@Provide`s wins and nothing is generated for it.
 
 ## `@MCP` -- a handler as an MCP tool
 
@@ -285,6 +307,7 @@ func New(c *resty.Client) quoter.Service { ... }
 | `service/reservestock`, `service/reserve`, `handler/reservestock` | `<entity>/<agent>`: `service/stock/reserver`, `handler/stock/reserver` (`creator`, `finder`, `updater`, `remover`) |
 | Hand-written switch module (`sync.Once` + `switch` on an `implementation` key) in a builder app | `@Provide(index=0)` on each implementation, `@Default` on the one wired when the key is unset |
 | `AlreadyExists` for two `@Provide` of the same value | They are implementations: mark one `@Default`; otherwise give each a `name` |
+| Hand-written publisher driver module, or `ModuleWithoutClient` wiring, in a builder app | `@Inject` the `*publisher.Publisher` (`drivers=`, `name=`) and `@Function(client=)` |
 | Hand-written `lib/boost/factory/<resty, redis, mongo>/module.go` in a builder app | `@Inject(index=N, name=<api>, plugins=[...])` on the client param |
 | One resty client shared by services calling different APIs | One `name` per API: each gets its own `...clients.<name>.host` |
 | `otel` and `datadog` both in a client's `plugins` | One tracing vendor (LAW 35) |
