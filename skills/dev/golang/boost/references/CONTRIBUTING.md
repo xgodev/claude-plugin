@@ -153,7 +153,7 @@ func NewWithOptions(ctx context.Context, c *upstream.Client, opts *Options) publ
 func NewWithConfigPath(ctx context.Context, c *upstream.Client, path string) (publisher.Driver, error)
 ```
 
-This is the trio to aim for in NEW code, so call sites are interchangeable -- but it is not universal today. Among publisher drivers only Pub/Sub (`wrapper/publisher/driver/contrib/cloud.google.com/pubsub/v1`) and Confluent Kafka (`.../confluentinc/confluent-kafka-go/v2`) ship all three; NATS exposes only `New(conn *nats.Conn) publisher.Driver` and Goka only `New(emitter *g.Emitter) publisher.Driver`, both with no `Options` and no `config.go`. Mirror the closest existing contrib: a driver with real tunables gets the full trio + config registration; a thin driver with nothing to configure can stay at a single `New`.
+This is the trio to aim for in NEW code, so call sites are interchangeable -- but it is not universal today. Among publisher drivers only Pub/Sub (`wrapper/publisher/driver/contrib/cloud.google.com/pubsub/v2`, and `v1`) and Confluent Kafka (`.../confluentinc/confluent-kafka-go/v2`) ship all three; NATS exposes only `New(conn *nats.Conn) publisher.Driver` and Goka only `New(emitter *g.Emitter) publisher.Driver`, both with no `Options` and no `config.go`. Mirror the closest existing contrib: a driver with real tunables gets the full trio + config registration; a thin driver with nothing to configure can stay at a single `New`.
 
 ## Config registration
 

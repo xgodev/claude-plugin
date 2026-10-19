@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [1.25.3]
+
+### Changed
+
+- boost Pub/Sub pages (`factory/pubsub.md`, `wrapper/publisher.md`,
+  `bootstrap/adapter-pubsub.md`, `fx/modules.md`, `CONTRIBUTING.md`) point
+  to v2, boost's default Pub/Sub version: the three `version` keys
+  (factory, publisher driver, function adapter) default to `v2`, staying on
+  v1 means setting all three to `v1`, and any other value fails the boot.
+
 ## [1.25.2]
 
 ### Changed

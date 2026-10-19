@@ -25,16 +25,16 @@ A multi-service platform typically follows the latter pattern: shared modules (D
 |---|---|
 | core | `core/context` (provides `context.Background`; most other modules already compose it) |
 | factory (client/server constructors) | `factory/contrib/labstack/echo/v4`, `.../go-resty/resty/v2`, `.../redis/go-redis/v9` (two entry points: `ClusterModule()` and `ClientModule()`, not `Module()`), `.../go.mongodb.org/mongo-driver/v1`, `.../go.mongodb.org/mongo-driver/v2`, `.../google.golang.org/grpc/v1/server`, `.../elastic/go-elasticsearch/v8`, `.../confluentinc/confluent-kafka-go/v2`, `.../lovoo/goka/v1`, `.../nats-io/nats.go/v1`, `.../cloud.google.com/pubsub/v1`, `.../cloud.google.com/bigquery/v1`, `.../coocood/freecache/v1`, `.../panjf2000/ants/v2`, `.../datadog/dd-trace-go/v1`, `.../cloud.google.com/pubsub/v2`, `.../cloud.google.com/firestore/v1`, `.../gocloud.dev/pubsub/v0`, `.../google.golang.org/grpc/v1/client`, `.../modelcontextprotocol/go-sdk/v1/{server,client}`, `.../go.opentelemetry.io/otel/v1`, `.../prometheus/client_golang/v1` (pusher), `.../allegro/bigcache/v3`, `.../aws/aws-sdk-go-v2/v1`, `.../gocql/gocql/v1`, `.../godror/godror/v0`, `.../jackc/pgx/v5`, `.../graphql-go/graphql/v0`, `.../hashicorp/memdb/v1`, `.../jlaffaye/ftp/v0`, `.../k8s.io/client-go/v0`, `.../mittwald/vaultgo/v0`, `.../tidwall/buntdb/v1` |
-| bootstrap function | `bootstrap/function` (`Module[T](m []middleware.AnyErrorMiddleware[T])`); middlewares `bootstrap/function/middleware/{recovery,logger,prometheus,publisher,ignore_errors}`; adapters `bootstrap/function/adapter/contrib/{cloud.google.com/pubsub/v1,cloudevents/sdk-go/v2/core/http,confluentinc/confluent-kafka-go/v2,nats-io/nats.go/v1}` |
+| bootstrap function | `bootstrap/function` (`Module[T](m []middleware.AnyErrorMiddleware[T])`); middlewares `bootstrap/function/middleware/{recovery,logger,prometheus,publisher,ignore_errors}`; adapters `bootstrap/function/adapter/contrib/{cloud.google.com/pubsub/v1,cloud.google.com/pubsub/v2,cloudevents/sdk-go/v2/core/http,confluentinc/confluent-kafka-go/v2,nats-io/nats.go/v1}` |
 | extra | `extra/multiserver` |
 | wrapper publisher | `wrapper/publisher`; drivers `wrapper/publisher/driver/contrib/{cloud.google.com/pubsub/v1,cloud.google.com/pubsub/v2,confluentinc/confluent-kafka-go/v2,lovoo/goka/v1,nats-io/nats.go/v1}` and `wrapper/publisher/driver/extra/noop`; `wrapper/publisher/middleware/prometheus` |
 
-So the Pub/Sub client wiring below is already shipped -- `fx/modules/factory/contrib/cloud.google.com/pubsub/v1` does exactly `fx.Provide(pubsub.NewClient)` plus `contextfx.Module()`:
+So the Pub/Sub client wiring below is already shipped -- `fx/modules/factory/contrib/cloud.google.com/pubsub/v2` does exactly `fx.Provide(pubsub.NewClient)` plus `contextfx.Module()`. The Pub/Sub v1 and v2 modules (factory, driver, adapter) are both composable; each turns on by its `version` key, `v2` by default (`references/factory/pubsub.md`):
 
 The unit that needs the client includes that module; `main` never lists it:
 
 ```go
-import pubsubfx "github.com/xgodev/boost/fx/modules/factory/contrib/cloud.google.com/pubsub/v1"
+import pubsubfx "github.com/xgodev/boost/fx/modules/factory/contrib/cloud.google.com/pubsub/v2"
 
 options = fx.Options(pubsubfx.Module(), fx.Provide(pubsub.New)) // inside the unit's once, below
 ```

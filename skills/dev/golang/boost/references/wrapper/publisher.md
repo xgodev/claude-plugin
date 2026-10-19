@@ -5,7 +5,7 @@
 ```go
 import (
     "github.com/xgodev/boost/wrapper/publisher"
-    drvpubsub "github.com/xgodev/boost/wrapper/publisher/driver/contrib/cloud.google.com/pubsub/v1"
+    drvpubsub "github.com/xgodev/boost/wrapper/publisher/driver/contrib/cloud.google.com/pubsub/v2"
 )
 
 drv, err := drvpubsub.New(ctx, pb)   // pb is *pubsub.Client (see boost-factory-pubsub)
@@ -20,7 +20,7 @@ pub := publisher.New(drv)
 
 | Driver | Path |
 |---|---|
-| Google Cloud Pub/Sub | `wrapper/publisher/driver/contrib/cloud.google.com/pubsub/v1` |
+| Google Cloud Pub/Sub | `wrapper/publisher/driver/contrib/cloud.google.com/pubsub/v2` (`v1` for apps pinned to it -- `references/factory/pubsub.md`) |
 | Confluent Kafka | `wrapper/publisher/driver/contrib/confluentinc/confluent-kafka-go/v2` |
 | NATS | `wrapper/publisher/driver/contrib/nats-io/nats.go/v1` |
 | Lovoo Goka | `wrapper/publisher/driver/contrib/lovoo/goka/v1` |
@@ -58,7 +58,7 @@ Set the destination via `out.SetSubject("topic-name")` before returning from the
 
 | Red flag | Fix |
 |---|---|
-| Calling `pb.Topic("foo").Publish(ctx, ...)` directly inside a handler | Return `*cloudevents.Event` from the handler; let the publisher middleware drive `pub.Publish` |
+| Calling `pb.Publisher("foo").Publish(ctx, ...)` directly inside a handler | Return `*cloudevents.Event` from the handler; let the publisher middleware drive `pub.Publish` |
 | `err == nil` read as "every event published", or failures dug out of `[]PublishOutput` | `Publish` returns the joined per-event error; check it |
 | Waiting for Kafka delivery on the producer's `Events()` channel | `Publish` already waits for each report, bounded by its `ctx` |
 | Building a publisher per request instead of once at startup | Construct `pub` in `main`, pass to handlers via deps |

@@ -8,7 +8,7 @@
 
 ```go
 import (
-    apubsub "github.com/xgodev/boost/bootstrap/function/adapter/contrib/cloud.google.com/pubsub/v1"
+    apubsub "github.com/xgodev/boost/bootstrap/function/adapter/contrib/cloud.google.com/pubsub/v2"
     "github.com/xgodev/boost/bootstrap/function"
 )
 
@@ -20,7 +20,7 @@ Fine for prototypes. **Not safe for production graceful shutdown** -- see next s
 
 ## Production caveat -- known ctx-loss
 
-`bootstrap/function/adapter/contrib/cloud.google.com/pubsub/v1/helper.go:51` hard-codes:
+`bootstrap/function/adapter/contrib/cloud.google.com/pubsub/v2/helper.go:43` hard-codes:
 
 ```go
 if err := subscriber.Subscribe(context.Background()); err != nil { ... }
@@ -36,7 +36,7 @@ Bypass `fn.Run` and drive `NewSubscriber` directly with a signal-aware ctx:
 
 ```go
 import (
-    apubsub "github.com/xgodev/boost/bootstrap/function/adapter/contrib/cloud.google.com/pubsub/v1"
+    apubsub "github.com/xgodev/boost/bootstrap/function/adapter/contrib/cloud.google.com/pubsub/v2"
     "github.com/xgodev/boost/extra/middleware"
     "github.com/xgodev/boost/bootstrap/function"
 )
@@ -47,7 +47,7 @@ defer stop()
 opts, err := apubsub.DefaultOptions()
 if err != nil { log.Fatalf("subscriber options: %v", err) }
 
-// TODO(boost-upstream): bootstrap/function/adapter/contrib/cloud.google.com/pubsub/v1/helper.go:51
+// TODO(boost-upstream): bootstrap/function/adapter/contrib/cloud.google.com/pubsub/v2/helper.go:43
 // hard-codes context.Background(), so fn.Run cannot drain SIGTERM. Bypassing
 // helper here and driving NewSubscriber with a signal-aware ctx + the same
 // recovery -> logger -> publisher chain. Collapse back to fn.Run once the
@@ -83,6 +83,6 @@ The `// TODO(boost-upstream):` block is not optional documentation -- it's the m
 
 | Red flag | Fix |
 |---|---|
-| `pubsub.Client.Subscription(...).Receive(...)` directly | Use `apubsub.NewSubscriber(...).Subscribe(ctx)` |
-| Bypass of `fn.Run` without `// TODO(boost-upstream):` naming `helper.go:51` | Add the comment, OR use canonical `fn.Run` and accept ungraceful shutdown |
+| `pb.Subscriber(...).Receive(...)` directly | Use `apubsub.NewSubscriber(...).Subscribe(ctx)` |
+| Bypass of `fn.Run` without `// TODO(boost-upstream):` naming `helper.go:43` | Add the comment, OR use canonical `fn.Run` and accept ungraceful shutdown |
 | `apubsub.New[T]` returning `T = cloudevents.Event` (value) | `T = *cloudevents.Event` everywhere in the chain |
