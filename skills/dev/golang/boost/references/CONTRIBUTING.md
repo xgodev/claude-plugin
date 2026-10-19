@@ -179,6 +179,28 @@ func ConfigAdd(path string) {
 
 Multi-instance pattern: one binary publishes to multiple SNS topics / Pub/Sub projects / Kafka clusters by calling `<driver>.ConfigAdd("boost.wrapper.publisher.driver.<name>.<instance>")` per instance.
 
+## Two SDK versions side by side -- one version key, in the parent fx package
+
+When an fx module ships for two SDK versions (`fx/modules/.../pubsub/v1`, `.../v2`), both read ONE `version` key. Declare it once, with the default, in the parent package next to `v1/` and `v2/` -- never once per version package (two `config.Add` of the same key, two defaults that can drift):
+
+```go
+// fx/modules/factory/contrib/cloud.google.com/pubsub/config.go
+package pubsub
+
+const (
+    V1 = "v1"
+    V2 = "v2" // the default
+    VersionKey = "boost.factory.gcp.pubsub.version"
+)
+
+func init() { config.Add(VersionKey, V2, "defines the pubsub version: v1 or v2") }
+
+// Version returns V1 or V2; any other value is NotValid, naming key and value.
+func Version(key string) (string, error) { ... }
+```
+
+Each `vN/module.go` starts with `if _, err := Version(VersionKey); err != nil { return fx.Error(err) }`, then returns empty options when the key selects the other version. Both modules stay composable, the config turns on one, and a typo fails the boot instead of silently picking a version. A driver or adapter built on that factory declares its own `version` key the same way (`boost.wrapper.publisher.driver.pubsub.version`); its `IsEnabled()` is `enabled && version == vN`. Test the default through `config.Entries()` (the key appears once, with the default) -- the koanf instance is global, so every other test sets the version it needs.
+
 ## Errors and logging
 
 ```go

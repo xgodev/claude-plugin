@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## [1.25.5]
+
+### Added
+
+- boost `references/CONTRIBUTING.md`: "Two SDK versions side by side" --
+  the `v1/` and `v2/` fx modules read one `version` key declared once in
+  the parent fx package, each module fails the boot on an unknown value
+  and is a no-op when the key selects the other version.
+
 ## [1.25.4]
 
 ### Changed

@@ -173,4 +173,4 @@ images. See [`docs/quality-gate.md`](docs/quality-gate.md).
 
 MIT -- see [LICENSE](LICENSE).
 
-- Version: 1.25.4
+- Version: 1.25.5
