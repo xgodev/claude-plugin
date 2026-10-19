@@ -59,7 +59,7 @@ generation instead of being overwritten.
 | `@REST` | `func(echo.Context) error`, func or method | `method`, `path` (required), `server` (`rest`), `app` (`api`); repeatable |
 | `@GRPC` | constructor with one default `@Provide` | `register` (`pkg.RegisterXServer`, required), `server` (`grpc`), `app` |
 | `@MCP` | `func(context.Context, *mcp.CallToolRequest, In) (*mcp.CallToolResult, Out, error)`, func or method | `name` (snake case of the handler), `server` (`mcp`), `app` |
-| `@Function` | `func(context.Context, cloudevents.Event) (T, error)` | `adapter` (`cloudevents`, `kafka`, `nats`, `pubsub`), `app`; one per app |
+| `@Function` | `func(context.Context, cloudevents.Event) (T, error)` | `adapter` (`cloudevents`, `cenats`, `kafka`, `nats`, `pubsub`, or a list `[pubsub, nats]` chosen by config), `app`, `middlewares=[a, b]`; one per app |
 | `@Middleware` | constructor with one `@Provide` | plugin names, positional |
 | `@Default` | constructor with one `@Provide` of a value another constructor also provides | -- |
 | `@Config` | exported struct outside `main`, one per package | -- (field tags `default`, `desc`, `hide`, `config`) |
@@ -69,6 +69,14 @@ server other than `rest`/`grpc`/`mcp` is configured under
 `<app>.server.<name>`; one server name serves one kind of door. Server plugins
 are a `[]boostecho.Plugin` / `[]server.Plugin` (gRPC or MCP) provided without
 `name` (default server) or with `name=<server>`.
+
+`@Function(adapter=[pubsub, nats])` makes the adapter a config choice:
+`<app>.function.adapter` (env `<APP>_FUNCTION_ADAPTER`), default the first
+name. `function_module.go` wires only the chosen adapter module, so the
+others and their clients are never built; an unknown name fails the boot
+with `NotValid` naming key, value and valid names. A single name generates
+the door as before; the adapters' own keys (`.enabled`, the pubsub
+`version`) stay as they are.
 
 ## `@MCP` -- a handler as an MCP tool
 

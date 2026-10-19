@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [1.25.4]
+
+### Changed
+
+- boost `builder.md` and `bootstrap/function.md`: `@Function(adapter=[a, b])`
+  takes a list chosen by `<app>.function.adapter` (env
+  `<APP>_FUNCTION_ADAPTER`, default the first); only the chosen adapter
+  module is wired and an unknown name fails the boot with `NotValid`
+  (boost v1.4.0). The `@Function` row also lists `cenats` and `middlewares`.
+
 ## [1.25.3]
 
 ### Changed
