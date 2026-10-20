@@ -23,7 +23,9 @@ capability:
 - **`dev-rules`** -- macro, language-agnostic engineering-discipline skill
   (data ownership, zero coupling, RED-first TDD, 100% coverage,
   docs-synced commits, documented contracts, in-repo docs with diagrams,
-  verify-before-done) plus the architecture LAWs (platform first, layers,
+  verify-before-done), the ISO/IEC 25010 quality characteristics checked
+  against their CWE defect entries on every change, plus the architecture
+  LAWs (platform first, layers,
   interfaces, IoC, one responsibility, configuration, statelessness,
   lifecycle, contract first, standard layout, market framework, language
   and store chosen by the problem, many protocols, messaging as a

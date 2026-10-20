@@ -321,3 +321,19 @@ change.
   `SetLimit`, or channel-fed workers) from line one, concurrent by
   default. Shared state is either owned by one goroutine (channels) or
   guarded -- run `-race` in tests always.
+
+## Quality (LAW 40)
+
+- Unsized input is streamed: `io.Reader` + `io.Copy`, `bufio.Scanner`
+  (with `Buffer` for long lines), `csv.Reader.Read` in a loop,
+  `json.Decoder` over the body. `io.ReadAll`, `os.ReadFile` and
+  `csv.ReadAll` only on input with a checked, small upper bound
+  (CWE-770). HTTP bodies are capped with `http.MaxBytesReader`, uploads
+  read with `MultipartReader`; query results iterate `rows.Next`.
+- Every `Close` is deferred right after the error check that opened it
+  (CWE-772, CWE-404).
+- Every outbound call carries a deadline: `context.WithTimeout`,
+  `http.Client{Timeout: ...}`, never `http.DefaultClient` (CWE-1088).
+  Every goroutine has an exit path tied to a context (CWE-401).
+- SQL uses placeholders (CWE-89); `exec.Command` takes separate
+  arguments, never `sh -c` with interpolated input (CWE-78).

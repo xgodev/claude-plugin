@@ -22,10 +22,10 @@ can change priorities, not the laws of correctness.
 This file is the index. Every rule below binds on every change; its line
 here is the rule, and its group file (under `rules/`, next to this file)
 holds the full text, the excuses agents use to dodge it, and the red
-flags. Before writing code, open `rules/flow.md` and `rules/design.md`
-(every change), plus every other group whose rules your change touches --
-unsure means open it. LAW numbers are global; the language leaves cite
-them.
+flags. Before writing code, open `rules/flow.md`, `rules/design.md` and
+`rules/quality.md` (every change), plus every other group whose rules your
+change touches -- unsure means open it. LAW numbers are global; the
+language leaves cite them.
 
 ## Flow -- `rules/flow.md` (every change)
 
@@ -61,6 +61,12 @@ them.
 - LAW 38 -- Every exported unit documents its contract.
 - LAW 39 -- Technical docs live in the repo, diagrams as text, updated
   with the code.
+
+## Quality -- `rules/quality.md` (every change)
+
+- LAW 40 -- Every change meets the nine ISO/IEC 25010 quality
+  characteristics, checked against their CWE defect entries before writing
+  and before delivery -- reused existing code included.
 
 ## Testing -- `rules/testing.md` (writing, changing, or skipping a test)
 

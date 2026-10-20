@@ -177,8 +177,8 @@ repos. Read them before changing anything.
   choice is made before any language leaf loads, so it stays agnostic-side.
 - **`engineering/rules.md` is an index; the rules live in groups.** One
   line per rule there, the full text + rationalizations + red flags in
-  its group file under `engineering/rules/` (flow, design, testing,
-  errors, architecture). A new LAW takes the next global number (the
+  its group file under `engineering/rules/` (flow, design, quality,
+  testing, errors, architecture). A new LAW takes the next global number (the
   language leaves cite by number -- never renumber), lands in one group,
   and gets its index line in the same commit.
 - **Macro rules land in two places, owner-approved.** A cross-language rule

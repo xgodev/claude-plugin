@@ -15,9 +15,11 @@ contract first, the ecosystem's standard layout, the market framework,
 the language and the store chosen by the problem, many protocols over one
 service, messaging as a contract with the broker proposed, observable by
 default, everything behind a feature flag). `skills/dev/engineering/rules.md` is the index (one line
-per rule, which group to open); the full rules live in five groups under
-`skills/dev/engineering/rules/` (flow, design, testing, errors,
-architecture). Those say WHAT; each language leaf
+per rule, which group to open); the full rules live in six groups under
+`skills/dev/engineering/rules/` (flow, design, quality, testing, errors,
+architecture). The quality group (LAW 40) adopts the ISO/IEC 25010
+product quality model as the checklist every change answers, with CWE
+entries as the concrete defects to rule out under each characteristic. Those say WHAT; each language leaf
 (`skills/dev/golang/index.md`, ...) says HOW in that language.
 
 It is the companion to the [Quality Gate](quality-gate.md), whose Docker

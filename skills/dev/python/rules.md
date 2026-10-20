@@ -128,6 +128,22 @@ the Python idioms live here, not there.
   is shared across workers and across tests. Own it in an object passed
   in, not in the module.
 
+## Quality (LAW 40)
+
+- Unsized input is iterated: `for line in f`, `shutil.copyfileobj`,
+  `hashlib.file_digest`, `f.read(CHUNK)` in a loop, `mmap` for random
+  access. `f.read()`, `readlines()`, `Path.read_bytes()/read_text()`,
+  `json.load` of an unbounded file and `list(cursor)` only on input with a
+  checked, small upper bound (CWE-770). Query results are paged or read
+  with `fetchmany`/a server-side cursor.
+- `requests`/`httpx` always pass `timeout=`; large bodies use
+  `stream=True` + `iter_content` (CWE-1088, CWE-400).
+- Every file, socket, lock and connection is held by a `with` block.
+- `subprocess` takes an argument list, never `shell=True` with
+  interpolated input (CWE-78); SQL uses parameters, never f-strings
+  (CWE-89); `yaml.safe_load`, never `pickle`/`yaml.load` on untrusted
+  input (CWE-502).
+
 ## Quality gate (the `python` image)
 
 Sentinel at the repo root -- `pyproject.toml`, `setup.py`, `setup.cfg`

@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+### Added
+
+- `dev` LAW 40, new group `engineering/rules/quality.md` (opened on every
+  change): every change meets the nine ISO/IEC 25010:2023 product quality
+  characteristics, written as targets before coding and checked against
+  each characteristic's CWE entries (the CISQ view CWE-1305 / ISO/IEC 5055
+  plus CWE-400/770 and others) before delivery; reused existing code is
+  checked before reuse. Rationalizations come from a RED baseline where an
+  agent reused a whole-file decode helper and kept ~700 MB of RAM for a
+  stems player. Go, Rust, Python and Java leaves get a `Quality (LAW 40)`
+  section with the language's streaming, timeout, resource-release and
+  injection-safe shapes.
+
 ## [1.26.0]
 
 ### Changed

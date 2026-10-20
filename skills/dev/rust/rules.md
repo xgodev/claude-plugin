@@ -60,6 +60,26 @@ idioms live here, not there.
   quality-gate hygiene scan fails this. If the limit is genuinely wrong,
   raise it in `clippy.toml`, visible in the diff.
 
+## Quality (LAW 40)
+
+- Unsized input is read in chunks: `BufReader` + `read`/`lines`,
+  `std::io::copy`, `memmap2` for random access. `std::fs::read`,
+  `read_to_end`, `read_to_string` and `collect::<Vec<_>>()` over a stream
+  only on input with a checked, small upper bound (CWE-770).
+- Media is decoded packet by packet into a reused buffer (`symphonia`
+  `next_packet` + `decode`), never into one `Vec` per file. A derived copy
+  (resampled, transcoded) is written once to a file and memory-mapped.
+- A real-time callback never touches I/O, locks or the allocator: a
+  reader thread fills a lock-free ring (`rtrb`) ahead of the callback.
+  Preloading the whole file is not the real-time-safe answer.
+- Resources are released by ownership (RAII); a handle is never kept in a
+  `static` without a release path.
+- Every network call has a timeout (`reqwest` `.timeout()`,
+  `tokio::time::timeout`) (CWE-1088).
+- Arithmetic on sizes, indices and samples is `checked_*`/`saturating_*`,
+  conversions are `try_from`, never a silent `as` truncation (CWE-190,
+  CWE-197).
+
 ## Red flags (first-person; stop and do the rule)
 
 - "unsafe impl Send, the compiler is just being strict" -> write the
@@ -71,3 +91,6 @@ idioms live here, not there.
   list that alarms on pass, or fix it.
 - "A short sleep makes the test stable" -> stable on this machine at this
   load; join/await/Notify with a deadline instead.
+- "`decode_file` returns a `Vec<f32>`, I'll reuse it for the new player"
+  -> LAW 40: a reused helper that holds the whole input is the defect,
+  not the pattern; stream it.
