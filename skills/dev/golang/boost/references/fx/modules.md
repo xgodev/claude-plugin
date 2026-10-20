@@ -110,19 +110,17 @@ func Module() fx.Option {
 	once.Do(func() {
 		options = fx.Options(
 			contextfx.Module(),
+			otelfx.Module(), // fx/modules/factory/contrib/go.opentelemetry.io/otel/v1: starts the providers otelsql reports to
 			fx.Provide(func(ctx context.Context) (*sql.DB, error) {
-				// otelsql reads otel.TracerProvider / MeterProvider, which stay nil until
-				// started, and fx builds the DB before any echo plugin starts them. Both
-				// calls are once-guarded and do nothing when that signal is off.
-				otel.StartTracerProvider(ctx) // factory/contrib/go.opentelemetry.io/otel/v1
-				otel.StartMeterProvider(ctx)
-				return pgx.NewDB(ctx, otelsql.NewOTel()) // factory/core/database/sql/plugins/contrib/xsam/otelsql/v0
+				return pgx.NewDB(ctx, otelsql.NewOTel()) // factory/contrib/jackc/pgx/v5; factory/core/database/sql/plugins/contrib/xsam/otelsql/v0
 			}),
 		)
 	})
 	return options
 }
 ```
+
+Nothing in boost starts the OTel providers on its own: no OTel plugin does (otelecho, otelsql, redis, mongo, resty), so a graph without `otelfx.Module()` sends every span and metric to a noop provider and nothing errors. Every module whose component takes an OTel plugin includes it (once-guarded, so including it twice is safe). Order does not matter: the provider globals forward to the provider started later (`factory/otel.md`).
 
 ## Doors and `main`
 
@@ -146,8 +144,9 @@ import (
 	"github.com/xgodev/boost/fx/modules/extra/multiserver"     // ServersGroupKey
 	createorderfx "example.com/orders/internal/pkg/fx/modules/app/orders/rest/handler/createorder"
 	"example.com/orders/internal/app/orders/rest/handler/createorder"
-	// elided: the echo factory, contextfx, and the plugins under the echo factory's
-	// plugins/ (rec = native/recover, errorhandler = extra/error_handler)
+	// elided: the echo factory, contextfx, otelfx (fx/modules/factory/contrib/go.opentelemetry.io/otel/v1),
+	// and the plugins under the echo factory's plugins/ (rec = native/recover,
+	// errorhandler = extra/error_handler)
 )
 
 const root = "internal.pkg.fx.modules.lib.boost.factory.echo.rest"
@@ -160,6 +159,7 @@ func Module() fx.Option {
 	once.Do(func() {
 		options = fx.Options(
 			contextfx.Module(),
+			otelfx.Module(),        // starts the providers otelecho reports to
 			createorderfx.Module(), // the handler, and through it the service and repository
 			fx.Provide(fx.Annotated{Group: multiserver.ServersGroupKey, Target: newServer}),
 		)
@@ -286,7 +286,7 @@ If no module provides `*publisher.Publisher`, `FunctionDeps.Publisher` is nil an
 | The implementation switch outside the once, or `default:` falling back to an implementation | The switch runs inside the once through `module(impl)`; `default:` returns `fx.Error` (LAW 4) |
 | Two echo servers built with `echo.NewServer` | Each door builds its server with `echo.NewServerWithConfigPath` and its own root; both default to the same port |
 | A test calls `Module()` inside a test function, twice, or once per value | The second call is empty (`-count=2` included) and the graph passes falsely; capture options once in a package var or `TestMain`, and test values through `module(v)` with the shared modules captured first |
-| The app's pgx module with `otelsql` and no `otel.StartTracerProvider` / `StartMeterProvider` | The DB is built before any echo plugin starts the providers; start them in the DB constructor (both once-guarded) |
+| A module whose component takes an OTel plugin (otelsql, otelecho, redis, mongo, resty) and does not include `otelfx.Module()`, or calls `otel.StartTracerProvider` / `StartMeterProvider` in a constructor | No plugin starts the providers, so the spans go to a noop provider silently; include boost's `fx/modules/factory/contrib/go.opentelemetry.io/otel/v1` `Module()` in that module |
 | Constructor returning a concrete type when consumers need an interface | Return the interface so swapping implementations doesn't break the graph |
 | `fx.Invoke` doing real business logic | Use `fx.Invoke` only for wiring (route registration, lifecycle hooks); business logic lives in the constructed types |
 | Per-service copy-paste of the same fx wiring | Extract into a shared module package (e.g., `<orgname>/<core>/fxmodules`) |
