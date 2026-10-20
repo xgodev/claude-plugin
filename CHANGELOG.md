@@ -14,6 +14,12 @@
   cloudevents_http adapter runs on the run context (`http.RunContext`), so
   SIGTERM takes no new request, answers the events in hand and exits 0; a bad
   HTTP option fails `Run`; `http.Run` is deprecated (boost #262).
+- boost `factory/otel.md`, `builder.md`, `fx/modules.md`, `bootstrap/otel.md`:
+  builder and inject include `otelfx.Module()` for a server or client with
+  the `otel` plugin and a `@Function` with the `opentelemetry` middleware
+  (boost #256); the module flushes and shuts the providers down on stop
+  (`Shutdown`, final, a failure logged without changing the exit code);
+  `oteltest.Collector` for telemetry tests; config defaults (boost #257).
 
 ## [1.27.0]
 

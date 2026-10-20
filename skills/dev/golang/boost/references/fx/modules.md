@@ -120,7 +120,7 @@ func Module() fx.Option {
 }
 ```
 
-Nothing in boost starts the OTel providers on its own: no OTel plugin does (otelecho, otelsql, redis, mongo, resty), so a graph without `otelfx.Module()` sends every span and metric to a noop provider and nothing errors. Every module whose component takes an OTel plugin includes it (once-guarded, so including it twice is safe). Order does not matter: the provider globals forward to the provider started later (`factory/otel.md`).
+Nothing in boost starts the OTel providers on its own: no OTel plugin does (otelecho, otelsql, redis, mongo, resty), so a graph without `otelfx.Module()` sends every span and metric to a noop provider and nothing errors. Every module whose component takes an OTel plugin includes it (once-guarded, so including it twice is safe); builder and inject do it in the modules they generate. Order does not matter: the provider globals forward to the provider started later. On stop it flushes and shuts the providers down (`factory/otel.md`, "Shutdown").
 
 ## Doors and `main`
 

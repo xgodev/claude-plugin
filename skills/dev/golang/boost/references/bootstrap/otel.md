@@ -7,6 +7,8 @@ otel := om.NewOpenTelemetry[*cloudevents.Event]()
 fn, _ := function.New[*cloudevents.Event](rec, lmi, otel, pmi)
 ```
 
+It reports to the providers `otelfx.Module()` starts and flushes on stop (`references/factory/otel.md`); `@Function(middlewares=[opentelemetry])` in a builder app includes that module, hand-wired code includes it itself.
+
 `NewOpenTelemetry[T]()` implements the same `middleware.AnyErrorMiddleware[T]` interface as the other function middlewares, so it composes with any subset/order of `recovery`/`logger`/`publisher`/`ignore_errors`/`prometheus`.
 
 ## What it instruments

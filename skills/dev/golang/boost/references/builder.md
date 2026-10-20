@@ -332,6 +332,12 @@ package rest
   and provides the `[]Plugin`; the app writes no plugin code.
 - The annotation chooses; config only turns one off
   (`<plugins root>.<name>.enabled`, default `true`).
+- A door whose server lists `otel`, or whose `@Function` runs the
+  `opentelemetry` middleware, also includes `otelfx.Module()`
+  (`fx/modules/factory/contrib/go.opentelemetry.io/otel/v1`): it starts the
+  OTel providers on boot and flushes and stops them on stop, once per app,
+  so spans and metrics reach `boost.factory.otel.endpoint` (default
+  `localhost:4317`) instead of a noop provider (`factory/otel.md`).
 
 | Type | Plugins root | Plugins (default set first) |
 |---|---|---|
@@ -390,7 +396,9 @@ closed by the generated module when the app stops.
   services calling two APIs are two names, never one shared client.
 - The annotation chooses the plugins; config only turns one off
   (`...clients.quote.plugins.otel.enabled`, default `true`). Pick ONE tracing
-  vendor in the list (LAW 35).
+  vendor in the list (LAW 35). A client with `otel` (resty, redis, mongo,
+  sql) also includes `otelfx.Module()`, which starts and stops the OTel
+  providers, as a door with `otel` does.
 - Consumers of one name share the client; each may repeat `plugins` only
   with the same list, or omit it.
 - An app `@Provide` of the same type and name wins and nothing is
