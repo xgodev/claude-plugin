@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.27.0]
+
 ### Added
 
 - `dev` LAW 40, new group `engineering/rules/quality.md` (opened on every
