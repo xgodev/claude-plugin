@@ -97,7 +97,7 @@ func module(impl string) fx.Option {
 }
 ```
 
-A boost factory the app builds with its own plugins or config path gets an app module under `internal/pkg/fx/modules/lib/boost/factory/<factory>/`. Use it when boost ships no module for the factory (pgx) or when the shipped one cannot take the app's plugins. In an inject/builder app a resty, redis or mongo client is not written by hand: `@Inject(index=0, name=quote, plugins=[otel])` on the client parameter generates it (`builder.md`, "Factory clients"); this module is for the factories inject does not build:
+A boost factory the app builds with its own plugins or config path gets an app module under `internal/pkg/fx/modules/lib/boost/factory/<factory>/`. Use it when boost ships no module for the factory (pgx) or when the shipped one cannot take the app's plugins. In an inject/builder app a factory client (resty, redis, mongo, NATS, Pub/Sub, `*sql.DB` through godror or pgx, ...) is not written by hand: `@Inject(index=0, name=quote, plugins=[otel])` on the client parameter generates it (`@Inject(..., drivers=[pgx])` for a `*sql.DB`; `builder.md`, "Factory clients"); this module is for an app without inject, or a factory inject does not build:
 
 ```go
 // internal/pkg/fx/modules/lib/boost/factory/pgx/module.go
@@ -126,7 +126,7 @@ func Module() fx.Option {
 
 ## Doors and `main`
 
-In a builder app (every new app) the doors, `Modules()` and `main.go` below are generated from `@REST`/`@GRPC`/`@Function` (`references/builder.md`); this section is the shape of an app wired by hand.
+In a builder app (every new app) the doors, `Modules()` and `main.go` below are generated from `@REST`/`@GRPC`/`@MCP`/`@Function`/`@Job` (`references/builder.md`); this section is the shape of an app wired by hand.
 
 A door is what takes traffic in. A server (HTTP on echo, gRPC) gets a module under `lib/boost/factory/<factory>/<door>/`. That module:
 

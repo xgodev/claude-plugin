@@ -1,5 +1,7 @@
 **REQUIRED BACKGROUND:** `references/start.md`, `references/wrapper/config.md`. Layout/trio convention -> `references/CONTRIBUTING.md`.
 
+**In a builder app (every new app) this page is NOT the wiring:** the `*sql.DB` is generated from `@Inject(index=0, name=gold, drivers=[godror], plugins=[health, otel])` on the constructor's param, keys under `boost.factory.godror.clients.gold.*` (`references/builder.md`, "`*sql.DB`"). No `oracle.NewDB` and no fx module by hand. The code below is for an app without inject.
+
 ```go
 import oracle "github.com/xgodev/boost/factory/contrib/godror/godror/v0"
 

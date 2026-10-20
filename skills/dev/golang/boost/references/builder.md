@@ -2,11 +2,13 @@
 
 `github.com/xgodev/boost/inject` and `github.com/xgodev/boost/builder` generate
 the wiring from comment annotations: `inject` writes one fx module per
-constructor, `builder` writes the doors (REST, gRPC, MCP tool, event function), a
+constructor, `builder` writes the doors (REST, gRPC, MCP tool, event
+function, a job that runs once), a
 `Modules()` per app, the `main` of every app and the `@Middleware`
 decorators; `inject` also writes the config switch of an implementation set
 (`@Default`), the config registration of a settings struct (`@Config`) and
-the factory clients (`*resty.Client`, redis, mongo) an `@Inject` asks for.
+the factory clients (resty, redis, mongo, NATS, Pub/Sub, `*sql.DB`, ... --
+table below) an `@Inject` asks for.
 The app writes handlers, plain services, settings structs and annotations --
 no hand-written fx module, switch module, `config.go`, factory module, door
 or `main.go` for what the annotations cover.
@@ -17,8 +19,9 @@ or `main.go` for what the annotations cover.
   health, the `check_stock` MCP tool on `mcp`, a `stock.Service` implemented by `stock/memory` -- `@Default`,
   `@Middleware(log, prometheus)` -- and `stock/unlimited`, chosen by
   `builder.examples.simple.stock.implementation`; `stock/memory` reads a
-  `@Config Options{SoldOut []string}`) and app `worker` (cloudevents
-  function); its tests boot the api with each implementation and with
+  `@Config Options{SoldOut []string}`), app `order-worker` (`@Function`
+  records `order.created` events) and app `stock-audit` (`@Job`: checks the
+  stock of the items its `@Config` lists, then exits); its tests boot the api with each implementation and with
   `BUILDER_EXAMPLES_SIMPLE_STOCK_MEMORY_SOLD__OUT=book,pen`, and fail when
   `gen/` or a main is stale.
 
@@ -39,9 +42,11 @@ gen/<import path>/<func>_module.go                     one per @Provide/@Invoke
 gen/<import path>/<struct>_module.go                   one per @Config: config.Add per field + <Struct>Module()
 gen/implementation/<type import path>/<type>_implementation.go   <Type>ImplementationModule(): the @Default switch
 gen/client/<client type import path>/<name>_<type>.go           <Name>ClientModule(): a factory client asked by @Inject
+gen/client/database/sql/<name>_db.go                   the *sql.DB of @Inject(drivers=[godror|pgx])
 gen/builder/<app>/modules.go                           Modules(): doors, decorators, multiserverfx.Module()
 gen/builder/<app>/<server>_module.go                   one REST, gRPC or MCP server
 gen/builder/<app>/function_module.go                   the @Function handler and its adapter
+gen/builder/<app>/job_module.go                        the @Job handler, run once
 gen/builder/middleware/<import path>/<func>_middleware.go   Decorate<Func>(): the @Middleware decorator
 ```
 
@@ -54,12 +59,13 @@ generation instead of being overwritten.
 | Annotation | On | Keys |
 |---|---|---|
 | `@Provide` | constructor | `index` (required), `name` or `group` |
-| `@Inject` | param of a `@Provide`/`@Invoke` func | `index` (required), `name` or `group` (slice param); `plugins=[a, b]` on a factory client param |
+| `@Inject` | param of a `@Provide`/`@Invoke` func | `index` (required), `name` or `group` (slice param); `plugins=[a, b]` on a factory client param; `drivers=[...]` on `*sql.DB` (one of `godror`, `pgx`) or `*publisher.Publisher` |
 | `@Invoke` | func run on start | -- |
 | `@REST` | `func(echo.Context) error`, func or method | `method`, `path` (required), `server` (`rest`), `app` (`api`); repeatable |
 | `@GRPC` | constructor with one default `@Provide` | `register` (`pkg.RegisterXServer`, required), `server` (`grpc`), `app` |
 | `@MCP` | `func(context.Context, *mcp.CallToolRequest, In) (*mcp.CallToolResult, Out, error)`, func or method | `name` (snake case of the handler), `server` (`mcp`), `app` |
 | `@Function` | `func(context.Context, cloudevents.Event) (T, error)` | `adapter` (`cloudevents`, `cenats`, `kafka`, `nats`, `pubsub`, or a list `[pubsub, nats]` chosen by config), `app`, `client` (named client of the adapter), `middlewares=[a, b]`; one per app |
+| `@Job` | `func(context.Context) error`, func or method | `app` (required); one per app, alone in its app |
 | `@Middleware` | constructor with one `@Provide` | plugin names, positional |
 | `@Default` | constructor with one `@Provide` of a value another constructor also provides | -- |
 | `@Config` | exported struct outside `main`, one per package | -- (field tags `default`, `desc`, `hide`, `config`) |
@@ -69,6 +75,20 @@ A method handler needs its receiver provided by a default `@Provide`. A
 server other than `rest`/`grpc`/`mcp` is configured under
 `<app>.server.<name>`; one server name serves one kind of door. Server plugins
 come from `@Server` (below); a server without one gets boost's default set.
+
+App names are kebab case, as the deploy is named (`app=stock-audit`, the
+CronJob/Deployment name), never squashed (`stockaudit`) or camelCase: they
+match `^[a-z][a-z0-9]*(-[a-z0-9]+)*$`, are not `middleware`, and without the
+hyphens are not a Go keyword or `main`. builder maps the name:
+
+| App | `cmd/`, `gen/builder/` dir, binary | Go package | Config element | Env prefix |
+|---|---|---|---|---|
+| `api` | `api` | `api` | `api` | `API_` |
+| `orders-updater` | `orders-updater` | `ordersupdater` | `ordersUpdater` | `ORDERS__UPDATER_` |
+
+`ORDERS__UPDATER_FUNCTION_ADAPTER=nats` sets `ordersUpdater.function.adapter`
+(`__` is the hump of a camelCase word, `wrapper/config.md`). A server name
+is one word (`^[a-z][a-z0-9]*$`), not `function`.
 
 `@Function(adapter=[pubsub, nats])` makes the adapter a config choice:
 `<app>.function.adapter` (env `<APP>_FUNCTION_ADAPTER`), default the first
@@ -99,6 +119,37 @@ librdkafka out of the app); `@Inject(index=N, name=orders)` builds the
 publisher `orders`, its drivers on the `orders` clients, chosen by
 `boost.wrapper.publisher.clients.orders.driver.name`. A publisher the app
 `@Provide`s wins and nothing is generated for it.
+
+## `@Job` -- an app that runs once and exits
+
+```go
+// internal/app/stock-audit/job/handler/stock/auditor/handler.go -- no main.go by hand
+// New provides the handler.
+// @Provide(index=0)
+func New(svc auditor.Service) *Handler { return &Handler{svc: svc} }
+
+// Handle audits the stock once.
+// @Job(app=stock-audit)
+func (h *Handler) Handle(ctx context.Context) error { return h.svc.Audit(ctx) }
+```
+
+- The shape of a Kubernetes CronJob (a batch, sync or audit that runs and
+  exits): `boost.Start()`, the graph, the handler once, then the app stops.
+  Never a hand-written `main.go`, a `fx.Populate` + `app.Start`/`os.Exit`,
+  nor an `@Invoke` doing the work.
+- The handler is a `job.Handler` (`github.com/xgodev/boost/bootstrap/job`):
+  `func(context.Context) error`, a function or a method whose receiver has a
+  `@Provide`; `@Middleware` on the services it receives applies as in any
+  door. builder writes `gen/builder/<app>/job_module.go`, which provides the
+  handler and includes `jobfx.Module()` (`fx/modules/bootstrap/job`), the
+  runner; the generated main is the same as any app's.
+- Exit code: nil exits 0; an error is logged at ERROR (`job failed: <error>`)
+  and exits 1. SIGTERM cancels the handler's context and the app waits for
+  it up to the fx stop timeout (15s default): its error, or still running at
+  the timeout, exits 1; nil exits 0. Return `ctx.Err()` when giving up.
+- `app` is required. One `@Job` per app and nothing beside it: a server
+  door (`@REST`, `@GRPC`, `@MCP`) or a `@Function` in the same app fails the
+  generation; a second job is a second app.
 
 ## `@MCP` -- a handler as an MCP tool
 
@@ -314,11 +365,21 @@ func New(c *resty.Client) quoter.Service { ... }
   builds its client).
 - Clients and plugin names:
 
-| Client type | Plugins |
-|---|---|
-| `*resty.Client` | `log`, `health`, `otel`, `datadog`, `prometheus`, `retry`, `requestid` |
-| `*redis.Client`, `*redis.ClusterClient` | `health`, `otel`, `datadog`, `prometheus` |
-| `*mongo.Conn` (boost mongo factory v1/v2) | `health`, `otel`, `datadog`, `prometheus` |
+| Client type | Factory root | Plugins |
+|---|---|---|
+| `*resty.Client` | `boost.factory.resty` | `log`, `health`, `otel`, `datadog`, `prometheus`, `retry`, `requestid` |
+| `*redis.Client`, `*redis.ClusterClient` (go-redis v9) | its factory's | `health`, `otel`, `datadog`, `prometheus` |
+| `*mongo.Conn` (boost mongo factory v1/v2) | its factory's | `health`, `otel`, `datadog`, `prometheus` |
+| `*nats.Conn` | its factory's | `health`, `log` |
+| `*pubsub.Client` (`cloud.google.com/go/pubsub/v2`) | its factory's | `log`, `datadog`, `prometheus` |
+| `*bigtable.Client` | `boost.factory.bigtable` | `log`, `datadog`, `prometheus` |
+| `*gocql.Session` (gocql or cassandra-gocql-driver v2) | its factory's | `health` |
+| `*sns.Client`, `*sqs.Client`, `*kinesis.Client` (aws-sdk-go-v2) | `boost.factory.aws` | `datadog` |
+| `*kafka.Producer` (confluent, cgo) | `boost.factory.confluent` | none |
+| `*sql.DB` with `drivers=[godror]` or `drivers=[pgx]` | `boost.factory.godror` (cgo) / `boost.factory.pgx` | `health`, `otel`, `datadog` |
+
+Clients that hold connections (all but resty and the AWS clients) are
+closed by the generated module when the app stops.
 
 - One client per `name`, each with its own config: `name=quote` lives under
   `boost.factory.resty.clients.quote.*` (env
@@ -335,8 +396,32 @@ func New(c *resty.Client) quoter.Service { ... }
 - Generation fails on: `plugins` on a non-client param, on an app-provided
   client, with `group` or on `@Provide`; an unknown or repeated plugin;
   different lists for one client; a non-lowerCamel name.
-- `*sql.DB` (pgx, godror) and other factories are not generated: keep the
-  hand-written `lib/boost/factory/<factory>/module.go` (`fx/modules.md`).
+- A factory outside the table is not generated: keep the hand-written
+  `lib/boost/factory/<factory>/module.go` (`fx/modules.md`).
+
+### `*sql.DB` -- `drivers=[godror]` or `drivers=[pgx]`
+
+```go
+// internal/pkg/datastore/gold/oracle/datastore.go -- no godror/pgx module by hand
+// @Provide(index=0)
+// @Inject(index=0, name=gold, drivers=[godror], plugins=[health, otel])
+func New(db *sql.DB) gold.Repository { ... }
+```
+
+- inject writes `gen/client/database/sql/gold_db.go`: the `*sql.DB`
+  `name:"gold"` from `NewDBWithConfigPath` of the named driver's factory,
+  closed when the app stops. Only that driver is imported: godror needs cgo
+  and the Oracle client libraries at run time; pgx is pure Go.
+- Keys under `<factory root>.clients.<name>`: godror
+  `boost.factory.godror.clients.gold.connectString`, `.username`,
+  `.password`, ... (env `BOOST_FACTORY_GODROR_CLIENTS_GOLD_CONNECT__STRING`);
+  pgx the same three under `boost.factory.pgx.clients.<name>`. No `name` is
+  the factory's root. The pool keys stay shared under `boost.factory.sql`.
+- `drivers` names exactly one. Consumers of one `*sql.DB` name the same
+  driver, or one names it and the others omit it; a `*sql.DB` no consumer
+  gives a driver fails the generation.
+- A `*sql.DB` the app `@Provide`s wins; `drivers` on its consumers fails the
+  generation.
 
 ## Red flags
 
@@ -352,7 +437,11 @@ func New(c *resty.Client) quoter.Service { ... }
 | Hand-written publisher driver module, or `ModuleWithoutClient` wiring, in a builder app | `@Inject` the `*publisher.Publisher` (`drivers=`, `name=`) and `@Function(client=)` |
 | `plugins.go` with `@Provide []boostecho.Plugin` of boost plugins, or any server code in `internal/app` | `@Server(type=..., plugins=[...])` in `internal/pkg/server/<transport>/doc.go` |
 | A JSON struct declared inside each REST handler | One model per entity in `internal/pkg/server/rest/model/<entity>.go`, shared by the handlers |
-| Hand-written `lib/boost/factory/<resty, redis, mongo>/module.go` in a builder app | `@Inject(index=N, name=<api>, plugins=[...])` on the client param |
+| Hand-written `lib/boost/factory/<resty, redis, mongo, nats, ...>/module.go` in a builder app | `@Inject(index=N, name=<api>, plugins=[...])` on the client param |
+| Hand-written godror/pgx module, or `oracle.NewDB` / `pgx.NewDB` in a provider, in a builder app | `@Inject(index=N, name=<db>, drivers=[godror], plugins=[...])` on the `*sql.DB` param |
+| A CronJob/batch app with a hand-written `main.go`, `fx.Populate` + `app.Start` + `os.Exit`, or the work in an `@Invoke` | `@Job(app=<app>)` on a `func(context.Context) error` handler |
+| `@Job` next to a `@REST`/`@Function` in one app | A job is an app of its own: `app=<job-name>` |
+| App name squashed or camelCase (`pricesync`, `priceSync`) when the deploy is `price-sync` | `app=price-sync`: builder maps it to the package `pricesync` and env prefix `PRICE__SYNC_` |
 | One resty client shared by services calling different APIs | One `name` per API: each gets its own `...clients.<name>.host` |
 | `otel` and `datadog` both in a client's `plugins` | One tracing vendor (LAW 35) |
 | Hand-written `config.go` (`config.Add` in `init()` + `NewOptions`) in a builder app | A `@Config` struct with `default`/`desc` tags; the constructor receives `*Options` |

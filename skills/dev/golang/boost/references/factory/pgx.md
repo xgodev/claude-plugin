@@ -1,5 +1,7 @@
 **REQUIRED BACKGROUND:** `references/start.md`, `references/wrapper/config.md`. Layout/trio convention -> `references/CONTRIBUTING.md`.
 
+**In a builder app (every new app) this page is NOT the wiring:** the `*sql.DB` is generated from `@Inject(index=0, name=orders, drivers=[pgx], plugins=[health, otel])` on the constructor's param, keys under `boost.factory.pgx.clients.orders.*` (`references/builder.md`, "`*sql.DB`"). No `pgx.NewDB`, no `ConfigAdd` and no fx module by hand. The code below is for an app without inject.
+
 ```go
 import pgx "github.com/xgodev/boost/factory/contrib/jackc/pgx/v5"
 

@@ -14,6 +14,25 @@
   stems player. Go, Rust, Python and Java leaves get a `Quality (LAW 40)`
   section with the language's streaming, timeout, resource-release and
   injection-safe shapes.
+- boost `builder.md`: `@Job(app=)` door -- an app that runs one
+  `func(context.Context) error` once and exits (the CronJob shape),
+  `gen/builder/<app>/job_module.go`, exit codes and SIGTERM, one job per app
+  with no server door or `@Function` beside it.
+- boost `builder.md`: app names are kebab case (`app=stock-audit`), with the
+  mapping to `cmd/` directory, Go package, config element and env prefix
+  (`ORDERS__UPDATER_`).
+- boost `builder.md`: `@Inject(index=N, name=X, drivers=[godror|pgx],
+  plugins=[health, otel, datadog])` builds the `*sql.DB`
+  (`gen/client/database/sql/<name>_db.go`, keys under
+  `boost.factory.<driver>.clients.<name>`); the factory clients table lists
+  every client inject builds.
+
+### Changed
+
+- boost `factory/godror.md`, `factory/pgx.md`, `fx/modules.md`: a builder app
+  gets its `*sql.DB` from `@Inject(drivers=[...])`, never a hand-written
+  module. Go layout (`golang/index.md`): `@Job` handlers under
+  `internal/app/<app>/job/`, app names kebab case.
 
 ## [1.26.0]
 
