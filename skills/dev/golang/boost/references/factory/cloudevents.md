@@ -14,4 +14,5 @@ Use this when your function is invoked via HTTP CloudEvents (Knative push, Cloud
 | Red flag | Fix |
 |---|---|
 | `cloudevents.NewClientHTTP(...)` from upstream SDK directly | `cefact.NewHTTP(ctx, handler)` |
-| Bypassing the function middleware chain when running over HTTP | Use the bootstrap HTTP adapter (`bootstrap/function/adapter/contrib/cloudevents/sdk-go/v2/core/http`, `Run(fn, opts, plugins...)`) -- it wraps the `function.Handler[T]` itself; `function.Wrapper` does NOT produce a `cefact.Handler` |
+| Bypassing the function middleware chain when running over HTTP | Use the bootstrap HTTP adapter (`bootstrap/function/adapter/contrib/cloudevents/sdk-go/v2/core/http`, `RunContext(ctx, fn, opts, plugins...)`) -- it wraps the `function.Handler[T]` itself; `function.Wrapper` does NOT produce a `cefact.Handler` |
+| `http.Run(fn, opts, plugins...)` on that adapter | Deprecated: it serves on a context never cancelled, so SIGTERM waits the fx stop timeout and exits 1. `http.RunContext(ctx, fn, opts, plugins...)` stops when `ctx` is done (stop behavior in `references/bootstrap/function.md`) |

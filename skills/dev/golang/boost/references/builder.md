@@ -109,7 +109,9 @@ instead (keys `boost.factory.<factory>.clients.orders.*`), shared with
 `@Inject(name=orders)` and the publisher `orders`. The pubsub v1 adapter
 keeps its own v1 client. The adapters run on the run context: SIGTERM stops
 taking messages, lets the handler finish the one it holds, and the app
-exits 0; a subscription that cannot be received fails the boot.
+exits 0; a subscription that cannot be received fails the boot. The
+`cloudevents` (HTTP) adapter stops the same way: no new request, the events
+in hand answered, exit 0; a bad HTTP option (e.g. port) fails the boot.
 
 `*publisher.Publisher` is generated too (`@Inject` on it): the driver is
 `boost.wrapper.publisher.driver.name` (`noop` by default), each driver on the

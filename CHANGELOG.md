@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+### Changed
+
+- boost `fx/modules.md`, `factory/otel.md`: the OTel providers are started by
+  boost's `fx/modules/factory/contrib/go.opentelemetry.io/otel/v1` module,
+  which every module with an OTel plugin includes (the pgx and REST door
+  examples now do); no plugin starts them, the echo one included. Drops the
+  stale "start the providers in the DB constructor, they are nil" workaround
+  (boost #60 made the globals delegates).
+- boost `bootstrap/function.md`, `builder.md`, `factory/cloudevents.md`: the
+  cloudevents_http adapter runs on the run context (`http.RunContext`), so
+  SIGTERM takes no new request, answers the events in hand and exits 0; a bad
+  HTTP option fails `Run`; `http.Run` is deprecated (boost #262).
+
 ## [1.27.0]
 
 ### Added
@@ -35,12 +48,6 @@
   gets its `*sql.DB` from `@Inject(drivers=[...])`, never a hand-written
   module. Go layout (`golang/index.md`): `@Job` handlers under
   `internal/app/<app>/job/`, app names kebab case.
-- boost `fx/modules.md`, `factory/otel.md`: the OTel providers are started by
-  boost's `fx/modules/factory/contrib/go.opentelemetry.io/otel/v1` module,
-  which every module with an OTel plugin includes (the pgx and REST door
-  examples now do); no plugin starts them, the echo one included. Drops the
-  stale "start the providers in the DB constructor, they are nil" workaround
-  (boost #60 made the globals delegates).
 
 ## [1.26.0]
 
