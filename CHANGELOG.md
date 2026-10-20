@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [1.27.1]
 
 ### Changed
 
@@ -20,6 +20,8 @@
   (boost #256); the module flushes and shuts the providers down on stop
   (`Shutdown`, final, a failure logged without changing the exit code);
   `oteltest.Collector` for telemetry tests; config defaults (boost #257).
+- `CLAUDE.md`: a change that impacts the plugin ships with its version bump
+  in the same push -- no content parked under `[Unreleased]`.
 
 ## [1.27.0]
 

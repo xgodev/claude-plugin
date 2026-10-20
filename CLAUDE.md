@@ -28,6 +28,11 @@ repos. Read them before changing anything.
   line, and a `CHANGELOG.md` entry. ONE version for the whole bundle: any
   content change anywhere (a skill, a gate, a hook) bumps the single
   plugin version, or auto-update will not pick it up.
+- **Every change that impacts the plugin ships released.** The bump
+  (patch for docs/fixes, minor for new rules/features) goes out in the
+  same push as the content -- never park content under `[Unreleased]`
+  waiting for a release call, and never ask the owner whether to
+  release. Content pushed without a bump never reaches installed users.
 - **English only. Everywhere.** Docs, manifests, skills, code comments, and
   all runtime output. Public OSS -- no Portuguese anywhere.
 - **Zero proprietary / internal references.** No employer/client company
