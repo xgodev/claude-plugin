@@ -63,12 +63,12 @@ generation instead of being overwritten.
 | `@Middleware` | constructor with one `@Provide` | plugin names, positional |
 | `@Default` | constructor with one `@Provide` of a value another constructor also provides | -- |
 | `@Config` | exported struct outside `main`, one per package | -- (field tags `default`, `desc`, `hide`, `config`) |
+| `@Server` | package doc of `internal/pkg/server/<transport>/` (its `doc.go`) | `type` (required: `rest`, `grpc`, `mcp`, `cloudevents`), `name` (the type's server), `app` (`api`), `plugins=[a, b]` |
 
 A method handler needs its receiver provided by a default `@Provide`. A
 server other than `rest`/`grpc`/`mcp` is configured under
 `<app>.server.<name>`; one server name serves one kind of door. Server plugins
-are a `[]boostecho.Plugin` / `[]server.Plugin` (gRPC or MCP) provided without
-`name` (default server) or with `name=<server>`.
+come from `@Server` (below); a server without one gets boost's default set.
 
 `@Function(adapter=[pubsub, nats])` makes the adapter a config choice:
 `<app>.function.adapter` (env `<APP>_FUNCTION_ADAPTER`), default the first
@@ -254,6 +254,48 @@ func New(o *Options) quoter.Service { ... }
   keys equal or one the parent of the other (configs and implementation
   keys alike).
 
+## `@Server` -- the plugins of a server
+
+```go
+// internal/pkg/server/rest/doc.go -- no plugins.go by hand
+// Package rest holds what the REST server of the app is built with.
+// @Server(type=rest, plugins=[recover, requestId, logger, errorHandler, health, prometheus])
+package rest
+```
+
+- Only in a package doc: everything of a server is infrastructure under
+  `internal/pkg/server/<transport>/` -- its `@Server` and the REST model
+  the handlers share (`internal/pkg/server/rest/model/<entity>.go`:
+  `FromEntity(*entity.X) X` and `(X) Entity() *entity.X`). The handlers stay
+  in `internal/app/<app>/<transport>/handler/...`.
+- `type` is the server type; each type has its own table of plugin names,
+  so a new server type is a new row, never a new annotation. `cloudevents`
+  is the http adapter of `@Function`: no `name`, its plugins go to the
+  app's function when it runs that adapter.
+- `name` (default the type's server: `rest`, `grpc`, `mcp`) and `app`
+  (default `api`) pick the server; one `@Server` per server.
+- `plugins` in order, none twice; `plugins=[]` is none; no `plugins` key,
+  or no `@Server` at all, is the default set. The door imports each plugin
+  and provides the `[]Plugin`; the app writes no plugin code.
+- The annotation chooses; config only turns one off
+  (`<plugins root>.<name>.enabled`, default `true`).
+
+| Type | Plugins root | Plugins (default set first) |
+|---|---|---|
+| `rest` | `boost.factory.echo.plugins` | **`recover`, `requestId`, `logger`, `errorHandler`, `health`**, `prometheus`, `otel`, `datadog`, `pprof`, `swagger`, `cors`, `gzip`, `bodyLimit`, `bodydump`, `semaphore`, `status`, `multiServer`, `bytedanceSonic`, `goccyGoJson` |
+| `grpc` | `boost.factory.grpc.server.plugins` | **`log`**, `prometheus`, `datadog`, `compressor` |
+| `mcp` | `boost.factory.mcp.server.plugins` | **`log`**, `otel` |
+| `cloudevents` | `boost.bootstrap.function.adapter.cloudevents.http.plugins` | `otel` (no default) |
+
+- A plugin of your own (a middleware boost does not ship) is still a
+  `@Provide` of `[]boostecho.Plugin` / `[]server.Plugin` (`name=<server>`
+  for a named one); that server then gets no default set, and a `@Server`
+  for it too fails.
+- Generation fails on: `@Server` outside a package doc; no or unknown
+  `type`; an unknown or repeated plugin; `name` on `cloudevents`; a server
+  of another type or one no app declares; two `@Server` for one server; a
+  `@Server` and a `@Provide []Plugin` for the same server.
+
 ## Factory clients -- `@Inject(..., plugins=[...])`
 
 ```go
@@ -308,6 +350,8 @@ func New(c *resty.Client) quoter.Service { ... }
 | Hand-written switch module (`sync.Once` + `switch` on an `implementation` key) in a builder app | `@Provide(index=0)` on each implementation, `@Default` on the one wired when the key is unset |
 | `AlreadyExists` for two `@Provide` of the same value | They are implementations: mark one `@Default`; otherwise give each a `name` |
 | Hand-written publisher driver module, or `ModuleWithoutClient` wiring, in a builder app | `@Inject` the `*publisher.Publisher` (`drivers=`, `name=`) and `@Function(client=)` |
+| `plugins.go` with `@Provide []boostecho.Plugin` of boost plugins, or any server code in `internal/app` | `@Server(type=..., plugins=[...])` in `internal/pkg/server/<transport>/doc.go` |
+| A JSON struct declared inside each REST handler | One model per entity in `internal/pkg/server/rest/model/<entity>.go`, shared by the handlers |
 | Hand-written `lib/boost/factory/<resty, redis, mongo>/module.go` in a builder app | `@Inject(index=N, name=<api>, plugins=[...])` on the client param |
 | One resty client shared by services calling different APIs | One `name` per API: each gets its own `...clients.<name>.host` |
 | `otel` and `datadog` both in a client's `plugins` | One tracing vendor (LAW 35) |

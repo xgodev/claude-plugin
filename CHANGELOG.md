@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+## [1.26.0]
+
+### Changed
+
+- boost `builder.md`: `@Server(type=, name=, app=, plugins=[...])` in the
+  package doc of `internal/pkg/server/<transport>/` picks the plugins of
+  each server type (`rest`, `grpc`, `mcp`, `cloudevents`), one table of
+  plugin names per type; no `@Server` is boost's default set; config only
+  turns one off. No hand-written `plugins.go`.
+- Go layout (`golang/index.md`, LAWs 33 and 35): server code is
+  infrastructure under `internal/pkg/server/<transport>/`, the REST model
+  too (`internal/pkg/server/rest/model/<entity>.go`, shared by the
+  handlers). `factory/echo.md`, `factory/grpc.md` point to `@Server`.
+
 ## [1.25.6]
 
 ### Changed
