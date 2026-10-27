@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.28.0]
+
+### Added
+
+- `dev` Rust leaf (`rust/rules.md`), new section "Crate layout -- fast
+  incremental builds from the first crate" (#39): small crates, one area
+  each, split near ~5k hand-written lines; generated code (`slint_build`,
+  `tonic-build`/`prost-build`, `bindgen`) in its own crate with nothing
+  hand-written in it, one Slint UI crate per independent window, test-only
+  UI harnesses out of the production UI crate, the Slint translation-domain
+  gotcha when `.slint` files move; thin bin crate; build scripts read
+  `CARGO_MANIFEST_DIR` at run time, never `env!`. A "Build machine"
+  subsection (sccache, one shared `target-dir`, the same-hash overwrite
+  gotcha and per-clone `CARGO_TARGET_DIR` for parallel builds, one cargo
+  build per machine, measure a leaf-touch build before and after a split),
+  review flags that block a change, and three red flags. Rationalizations
+  come from a RED baseline where an agent put hand-written adapters next to
+  `include_modules!`, baked a path with `env!` into a build helper, and
+  assumed sccache shares deps across clones.
+
 ## [1.27.1]
 
 ### Changed

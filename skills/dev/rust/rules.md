@@ -80,6 +80,72 @@ idioms live here, not there.
   conversions are `try_from`, never a silent `as` truncation (CWE-190,
   CWE-197).
 
+## Crate layout -- fast incremental builds from the first crate (One Responsibility Per File, LAW 40)
+
+A crate is the unit of incremental compilation and of build parallelism:
+editing one `.rs` file recompiles its whole crate and relinks every crate
+above it. The layout is set on day one; a split done later, under
+pressure, is a refactor of every import.
+
+- **Small crates, one area each** (`<app>-core-<area>`, `<app>-gui-<area>`).
+  Pure logic with no UI or framework dependency lives in its own crates.
+  A crate nearing ~5k hand-written lines is split along an area boundary
+  in the change that grows it.
+- **Generated code gets its own crate, with nothing hand-written in it.**
+  `slint_build`, `tonic-build`/`prost-build`, `bindgen`, any `build.rs`
+  codegen: the crate holds the codegen source (`.slint`, `.proto`,
+  headers), the `build.rs`, and a `lib.rs` that only includes the output
+  (`slint::include_modules!()`, `tonic::include_proto!`). Adapters,
+  mapping and callbacks live in another crate that depends on it. Editing
+  Rust then never recompiles generated code, and editing the codegen
+  source never recompiles the logic.
+  - Slint: one UI crate per independent window, so editing one window's
+    `.slint` does not regenerate the whole app.
+  - Test-only UI harnesses live in their own crate, used as a
+    dev-dependency -- never compiled into the production UI crate.
+  - Slint's translation domain is the `CARGO_PKG_NAME` of the crate that
+    compiles the `.slint` (read when `build.rs` runs). Moving `.slint`
+    files to another crate changes the domain, and the existing catalog
+    (`<lang>/LC_MESSAGES/<old-crate>.po`) is silently no longer found.
+    Set the old domain in the new `build.rs` before calling `slint_build`
+    (`std::env::set_var("CARGO_PKG_NAME", "<old-crate>")`; edition 2024
+    makes it `unsafe`, with a `// SAFETY:` that the build script has no
+    other thread yet), and check one translated string after the move.
+- **Thin binary crate.** The bin only wires the crates together.
+- **Build scripts read paths at run time.** `build.rs` reads
+  `CARGO_MANIFEST_DIR` with `std::env::var`, never `env!`; a
+  build-dependency helper takes its paths from the caller. Under a shared
+  target dir cargo reuses a compiled build script or build-dependency
+  across clones, and `env!` keeps the path of the clone that compiled it.
+
+### Build machine
+
+- `sccache` as `rustc-wrapper` in `~/.cargo/config.toml`, its cache
+  (`SCCACHE_DIR`, `SCCACHE_CACHE_SIZE`) on a disk with room for every
+  clone.
+- sccache does NOT share third-party crates across clones: the target
+  dir's absolute path is part of the key. The sharing comes from one
+  `target-dir` in `~/.cargo/config.toml` for every workspace.
+- Gotcha of the shared target: a workspace crate gets the same metadata
+  hash in every clone of the repo, so two clones building at once
+  overwrite each other's `lib<crate>-<hash>.rlib` -- E0432/E0425 on
+  symbols that exist. A clone that must build in parallel uses its own
+  `CARGO_TARGET_DIR`. To recover, `cargo clean -p <broken-crate> -p
+  <crate-using-it>`; touching the sources is not enough.
+- One cargo build at a time per machine: a wrapper script takes a
+  machine-wide lock around cargo, and an agent hook denies a bare
+  `cargo build`/`test`/`check` so every build goes through it.
+- Measure before and after a split: touch one leaf `.rs`, `time cargo
+  build`, both numbers in the PR. A split without numbers is a guess.
+
+### Review flags (block the change)
+
+- A crate with a codegen `build.rs` that also holds hand-written modules.
+- A crate past ~5k hand-written lines, or a change that pushes one past.
+- Logic in the bin crate.
+- `env!` for a path in `build.rs` or in a build-dependency.
+- A test-only window or harness inside a production UI crate.
+
 ## Red flags (first-person; stop and do the rule)
 
 - "unsafe impl Send, the compiler is just being strict" -> write the
@@ -94,3 +160,11 @@ idioms live here, not there.
 - "`decode_file` returns a `Vec<f32>`, I'll reuse it for the new player"
   -> LAW 40: a reused helper that holds the whole input is the defect,
   not the pattern; stream it.
+- "One crate to start, we split later" -> later is when one edit costs
+  minutes and the split touches every import; split by area now.
+- "The adapter is tiny, it can sit next to `include_modules!`" -> then
+  every adapter edit recompiles the whole generated window; it goes in
+  its own crate.
+- "sccache already caches the deps across clones" -> not across target
+  dirs; one shared `target-dir`, a per-clone one only to build in
+  parallel.
