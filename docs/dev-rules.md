@@ -22,6 +22,19 @@ product quality model as the checklist every change answers, with CWE
 entries as the concrete defects to rule out under each characteristic. Those say WHAT; each language leaf
 (`skills/dev/golang/index.md`, ...) says HOW in that language.
 
+LAW 41 makes git follow the project's declared flow. The `engineering/git.md`
+leaf finds it (`"git_flow"` in `.dev-rules.json`, or the repo's own docs);
+when none is declared it shows the team five ready-made flows to pick from
+before the first branch -- `release-train` (recommended: issue branches
+board the one active `release/vX.Y.Z`, cut from `main`, merged into `main`
+and tagged; no `develop`), Git Flow, GitHub Flow, GitLab Flow and
+Trunk-Based Development, one file each under `engineering/git/` -- and
+records the pick in the repo. It also holds the rules every flow shares:
+SemVer versions as annotated `vX.Y.Z` tags, Conventional Commits, branch
+name `{type}/issue-N`, explicit staging, conflicts resolved by hand (never
+`-X ours`/`-X theirs`), no rewriting of shared history, milestone before
+closing an issue.
+
 It is the companion to the [Quality Gate](quality-gate.md), whose Docker
 images this plugin runs: the gate catches mechanical metric regressions (fmt, lint,
 build, test, complexity, coverage); `dev-rules` governs the judgment the
@@ -123,11 +136,15 @@ the one the call targets -- and never unlocks or re-arms another:
   "main_folder_guard": false,
   "line_cap_guard": true,
   "line_cap_default": 500,
-  "line_caps": { ".go": 600, ".ts": 400 }
+  "line_caps": { ".go": 600, ".ts": 400 },
+  "git_flow": "release-train"
 }
 ```
 
-`"enabled": false` disables all gating for the project. Omit the file to use
+`"git_flow"` declares the project's git flow (`release-train`, `gitflow`,
+`github-flow`, `gitlab-flow`, `trunk-based`); the `dev` skill's
+`engineering/git.md` leaf reads it, no hook does. `"enabled": false`
+disables all gating for the project. Omit the file to use
 built-in detection (production segments: `src lib app cmd internal pkg crates
 domain`, minus test/docs/config).
 

@@ -62,6 +62,13 @@ time-pressure, authority, or sunk-cost exception.
     reason the commit closes the delivery, not a unit. The gates prove
     order and existence, never quality -- a sound plan and a meaningful test
     stay your job (and the reviewer's).
+41. **Git follows the project's declared flow.** Before a change's first
+    branch, merge, tag or issue close, find the project's git flow
+    (`../git.md`, section 1). None declared -> show the team the flow table
+    there, recommended first, and wait for their pick before any branch
+    exists; the pick is recorded in the repo in the first change that uses
+    it. A flow inferred from the history, or a default started now "to
+    adjust later", is a choice the team did not make.
 
 ## Known limitations
 
@@ -93,6 +100,8 @@ one of these, you are about to violate a rule. Stop.
 | "The bug report points right at the [suspect] code -- I'll go straight there and read it, I get it in 30 seconds" | Reading the production code first makes your test assert what the code DOES, not what it SHOULD do. Both baseline agents went "straight to the coupon branch" and derived the expected value from the code they had just read. Lock the intended behavior WITH the user, encode it as a failing test, and open the implementation only after RED. |
 | "I traced it by hand and verified mentally, the fix is obviously correct -- a failing test is ceremony here" | Mental verification is not a RED (LAW 1), and the trace came from the suspect code, not the spec. A baseline agent shipped a fix having only "verified mentally" -- that is confidence, not evidence (LAW 3). |
 | "Brainstorming/a plan is ceremony for something this small" | The smallest changes are where unexamined assumptions waste the most work. The brainstorm can be three sentences and the plan three bullets, but understanding the intended behavior WITH the user must precede code. |
+| "The merge commits in the history show git-flow, so that is the convention" | History is evidence to show the team, not their declaration. A baseline agent read `Merge release/... into main`, named its branch `hotfix/v1.4.1` and shipped without asking which flow the team uses (LAW 41). |
+| "I'll start on my default (GitHub Flow, squash, rebase to update) while I wait for the answer -- if they pick another flow I just change the PR target" | The base branch, the branch name and the merge style all change with the flow; work started on a guess is redone or merged wrong. A baseline agent did exactly this on a new repo. The pick comes first (LAW 41). |
 
 ## Red Flags -- STOP
 
@@ -117,6 +126,9 @@ First-person thoughts that mean you are mid-violation. Each maps to the rule it 
   code, not the intended behavior).
 - "I'll just start coding, the brainstorm/plan is obvious" -> LAW 13 (every
   change starts with brainstorming; bug -> RED, feature -> writing-plans).
+- "The history shows their flow" / "I'll branch from `main` now and adjust
+  if they want something else" -> LAW 41 (find the declared flow; none ->
+  the team picks from `../git.md` before the first branch).
 - "I'll compile/test/commit after this unit to be safe" -> LAW 13 (batch
   it: all tests -> one RED run -> all code -> one GREEN run -> one commit;
   a per-unit cycle on a compiled workspace burns hours and one CI build per

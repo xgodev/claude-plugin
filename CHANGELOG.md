@@ -1,5 +1,30 @@
 # Changelog
 
+## [1.29.0]
+
+### Added
+
+- `dev` skill: LAW 41 (flow group) -- git follows the project's declared flow
+  (#40). New leaf `engineering/git.md`: find the flow (`"git_flow"` in
+  `.dev-rules.json`, or the repo's own docs; history is evidence, not a
+  declaration); none declared -> the team picks from five ready-made flows
+  before the first branch (asking PR vs local merge in the same message), and
+  the pick is recorded in one setup commit on `main`. One file per
+  flow under `engineering/git/`: `release-train` (recommended -- issue branches
+  `{type}/issue-N` board the one active `release/vX.Y.Z`, cut from `main`;
+  the release merges into `main` with a `vX.Y.Z` tag, `-beta.N` tags on the
+  release are pre-releases; a bug opens a PATCH cycle, a feature a MINOR;
+  hotfix from `main`; always merge, never rebase or squash; no `develop`),
+  `gitflow` (Driessen), `github-flow`, `gitlab-flow`, `trunk-based`. Shared
+  rules: SemVer 2.0.0 (no tag yet -> `v0.1.0`), annotated `vX.Y.Z` tags as the one version source,
+  Conventional Commits 1.0.0, explicit staging, conflicts resolved by hand
+  (never `-X ours`/`-X theirs`), no rewriting of shared history, milestone
+  before closing an issue, merged branches deleted. Rationalizations come
+  from a RED baseline where one agent inferred git-flow from merge commits
+  and shipped a `hotfix/v1.4.1` without asking, and another started a new
+  repo on its own default (GitHub Flow, rebase, squash) "to adjust later".
+- `.dev-rules.json` key `"git_flow"` (read by the skill, not by any hook).
+
 ## [1.28.0]
 
 ### Added

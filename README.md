@@ -29,7 +29,11 @@ capability:
   interfaces, IoC, one responsibility, configuration, statelessness,
   lifecycle, contract first, standard layout, market framework, language
   and store chosen by the problem, many protocols, messaging as a
-  contract, observable by default, feature flags), with RED-first
+  contract, observable by default, feature flags), and git that follows
+  the project's declared flow -- when none is declared the team picks one
+  of five ready-made flows (`release-train`, recommended; Git Flow, GitHub
+  Flow, GitLab Flow, trunk-based) with SemVer tags and Conventional
+  Commits, with RED-first
   enforcement hooks. Each
   language leaf says how a LAW is written in that language. See
   [`docs/dev-rules.md`](docs/dev-rules.md).
@@ -175,4 +179,4 @@ images. See [`docs/quality-gate.md`](docs/quality-gate.md).
 
 MIT -- see [LICENSE](LICENSE).
 
-- Version: 1.28.0
+- Version: 1.29.0

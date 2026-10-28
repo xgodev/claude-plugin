@@ -37,6 +37,8 @@ language leaves cite them.
 - LAW 10 -- Fix tooling at the source repo, never the cache.
 - LAW 13 -- Spec-driven flow: understand with the user first; a bug goes to
   RED, a feature to a plan, batched per delivery.
+- LAW 41 -- Git follows the project's declared flow; none declared -> the
+  team picks one from `git.md` before the first branch.
 
 ## Design -- `rules/design.md` (every change)
 
