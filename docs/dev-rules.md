@@ -146,13 +146,16 @@ the one the call targets -- and never unlocks or re-arms another:
   "line_cap_guard": true,
   "line_cap_default": 500,
   "line_caps": { ".go": 600, ".ts": 400 },
-  "git_flow": "release-train"
+  "git_flow": "release-train",
+  "git_flow_guard": true,
+  "git_flow_direct_paths": ["site/**"]
 }
 ```
 
 `"git_flow"` declares the project's git flow (`release-train`, `gitflow`,
 `github-flow`, `gitlab-flow`, `trunk-based`); the `dev` skill's
-`engineering/git.md` leaf reads it, no hook does. `"enabled": false`
+`engineering/git.md` leaf reads it, and so does the git-flow guard below.
+`"enabled": false`
 disables all gating for the project. Omit the file to use
 built-in detection (production segments: `src lib app cmd internal pkg crates
 domain`, minus test/docs/config).
@@ -169,9 +172,9 @@ simply disable the gates:
 | `.dev-rules/.off` | until removed | `touch .dev-rules/.off` / `rm .dev-rules/.off` any time; commits never clear it |
 | `"enabled": false` | the project | in `.dev-rules.json` |
 
-They disable the RED-first guard (read and edit), the main-folder guard, and
-the line-cap guard together, and silence the mode-prompt, issue-comment
-and unrelated-work reminders.
+They disable the RED-first guard (read and edit), the main-folder guard, the
+line-cap guard and the git-flow guard together, and silence the mode-prompt,
+issue-comment and unrelated-work reminders.
 
 ### main-folder guard (opt-in)
 
@@ -196,6 +199,39 @@ worktree registers its branch in the main `.git` and breaks `git checkout`
 there. **Clone naming:** `issue-<n>` when the work has a related issue;
 when there is none, a session/task slug (e.g. `sess-<yyyymmdd>-<short-task>`),
 so every session still gets its own isolated folder.
+
+### git-flow guard (on once a flow is declared)
+
+A `PreToolUse` hook on `Bash` that holds the declared flow at the branches
+it protects. It reads `"git_flow"` from the `.dev-rules.json` COMMITTED at
+`HEAD` of the repo the command targets (so the commit that declares the
+flow passes, and a repo with no declared flow is not gated):
+
+| Flow | No direct commit on | Merges into `main` allowed from |
+|---|---|---|
+| `release-train` | `main` | `release/*`, `hotfix/*` |
+| `gitflow` | `main`, `develop` | `release/*`, `hotfix/*` (`develop` takes any branch) |
+| `github-flow`, `gitlab-flow` | `main` | any branch |
+| `trunk-based`, any other name | -- | not gated |
+
+A merge is `git merge <branch>`, `git pull <remote> <branch>` and
+`gh pr create` (base from `--base`/`-B`, else the remote's default branch;
+head from `--head`/`-H`, else the current branch). The target is the branch
+the command runs on, following `git switch`/`git checkout` earlier in the
+same command, `git -C <dir>` and `cd <dir> &&`. Always allowed: syncing a
+branch with its own remote (`git merge origin/main`, a bare `git pull`),
+`git merge --abort/--continue/--quit`, and the commit that concludes a merge
+(`MERGE_HEAD` present). The deny names the flow and the branch, points at
+the flow's leaf in the `dev` skill, and tells the agent to ASK THE USER
+rather than work around it.
+
+Repo exceptions live in the same file: `"git_flow_direct_paths"` lists globs
+that may be committed straight on a protected branch (a docs site published
+from `main`, say). The commit passes only when every path it carries --
+already staged, `git add`-ed earlier in the same command, or named as a
+pathspec -- matches one; `git add -A`, `git add .` or `git add -u` before it
+make the set unknown, so the commit is denied. Merges are never exempt.
+Disable the guard for a repo with `"git_flow_guard": false`.
 
 ### issue-comment reminder (on by default, never blocks)
 

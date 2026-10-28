@@ -33,9 +33,10 @@ capability:
   the project's declared flow -- when none is declared the team picks one
   of five ready-made flows (`release-train`, recommended; Git Flow, GitHub
   Flow, GitLab Flow, trunk-based) with SemVer tags and Conventional
-  Commits; work outside the current issue proposed as a new issue plus a
-  separate session, created only after the user's yes; with RED-first
-  enforcement hooks. Each
+  Commits, and a hook that denies a direct commit or an out-of-flow merge
+  on the branches the declared flow protects; work outside the current
+  issue proposed as a new issue plus a separate session, created only
+  after the user's yes; with RED-first enforcement hooks. Each
   language leaf says how a LAW is written in that language. See
   [`docs/dev-rules.md`](docs/dev-rules.md).
 - **`skill-rules`** -- skill-authoring discipline: every skill must be
@@ -132,7 +133,7 @@ pay-per-use:
 | `ux-ui` description (design) | ~85 tokens | every session |
 | `skill-rules` description | ~40 tokens | every session |
 | `dev` router SKILL.md + the leaf it routes to | 0 | only when the skill fires |
-| Hooks (PR gate, RED-first, main-folder, line-cap, issue reminder, mode prompt) | 0 | never (run as processes) |
+| Hooks (PR gate, RED-first, main-folder, line-cap, git-flow, issue reminder, mode prompt) | 0 | never (run as processes) |
 | MCP servers | 0 | none bundled |
 
 ## Token hygiene
@@ -163,7 +164,7 @@ skills/                dev/{SKILL.md router, engineering/, golang/boost/, rust/,
 hooks/                 hooks.json (merged registry) + test/; scripts grouped by area:
                        quality-gate/pr-gate.sh, dev-rules/{red-first-guard.sh,
                        main-folder-guard.sh, line-cap-guard.sh,
-                       issue-comment-reminder.sh, mode-prompt.sh,
+                       git-flow-guard.sh, issue-comment-reminder.sh, mode-prompt.sh,
                        unrelated-work-reminder.sh, clear-after-commit.sh,
                        lib/}
 scripts/               verify_references.py (boost skill link checker)
@@ -181,4 +182,4 @@ images. See [`docs/quality-gate.md`](docs/quality-gate.md).
 
 MIT -- see [LICENSE](LICENSE).
 
-- Version: 1.30.0
+- Version: 1.31.0

@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.31.0]
+
+### Added
+
+- `hooks/dev-rules/git-flow-guard.sh` (`PreToolUse`, `Bash`): holds the flow
+  a project declared in `"git_flow"` at the branches it protects (#40). It
+  denies a direct `git commit` on `main` (and on `develop` under `gitflow`),
+  and a merge into `main` from anything but `release/*` or `hotfix/*` under
+  `release-train` and `gitflow` -- via `git merge`, `git pull <remote>
+  <branch>` or `gh pr create` (base and head resolved from the flags, the
+  remote's default branch and the current branch). It follows `git switch`
+  / `git checkout`, `git -C` and `cd` earlier in the same command. The flow
+  is read from the `.dev-rules.json` committed at `HEAD`, so the setup
+  commit passes and a repo with no declared flow is untouched; `github-flow`
+  and `gitlab-flow` only block the direct commit, `trunk-based` is not
+  gated. Repo exceptions: `"git_flow_direct_paths"` (globs that may be
+  committed straight on a protected branch, checked against every staged
+  or added path; `git add -A` makes the set unknown and is denied) and
+  `"git_flow_guard": false`. The dev-rules kill switches disable it. The
+  deny names the flow and the branch and tells the agent to ask the user.
+  Covered by `hooks/test/git_flow_guard_test.sh`.
+
 ## [1.30.0]
 
 ### Added

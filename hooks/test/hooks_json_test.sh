@@ -17,6 +17,7 @@ P="$HERE/../../.claude-plugin/plugin.json"
 chk '! jq -e ".hooks" "$P" >/dev/null 2>&1' "plugin.json declares NO hooks key (double registration breaks the plugin)"
 chk 'pre_wires "main-folder-guard.sh"' "PreToolUse wires main-folder-guard.sh"
 chk 'pre_wires "line-cap-guard.sh"' "PreToolUse wires line-cap-guard.sh"
+chk 'pre_wires "git-flow-guard.sh"' "PreToolUse wires git-flow-guard.sh"
 chk 'pre_wires "pr-gate.sh"' "PreToolUse wires pr-gate.sh"
 chk 'grep -q "CLAUDE_PLUGIN_ROOT" "$J"' "uses CLAUDE_PLUGIN_ROOT path var"
 exit $fail
