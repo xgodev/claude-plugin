@@ -39,6 +39,8 @@ language leaves cite them.
   RED, a feature to a plan, batched per delivery.
 - LAW 41 -- Git follows the project's declared flow; none declared -> the
   team picks one from `git.md` before the first branch.
+- LAW 42 -- Work outside the current issue: propose a new issue plus a
+  separate session in one line; create them only after the user's yes.
 
 ## Design -- `rules/design.md` (every change)
 

@@ -69,6 +69,28 @@ time-pressure, authority, or sunk-cost exception.
     exists; the pick is recorded in the repo in the first change that uses
     it. A flow inferred from the history, or a default started now "to
     adjust later", is a choice the team did not make.
+42. **Work outside the current issue gets its own issue and its own
+    session -- proposed, never started unasked.** Related means the current
+    issue's done criteria need it; "it would also help", "it's two lines"
+    or "I'm already in this file" is not related. When a fix or subject
+    outside the issue turns up (a bug seen in passing, a cleanup, a problem
+    in another area), nothing of it lands on the current issue's branch --
+    not even as its own commit -- and nothing is created yet. Propose it to
+    the user in one line that names both: a new issue plus a separate
+    session for it (if it blocks the current issue, say so in the same
+    line). A user rule against creating issues unasked forbids the
+    creating, not the proposal. Only after their yes, in order:
+    (1) search open AND closed issues for one that already covers it
+    (`gh issue list --state all --search "<terms>"` on GitHub) -- found ->
+    use it, reopened if the problem is back; (2) otherwise create it: what
+    was seen, the evidence, and that it is outside the current issue;
+    (3) start the separate session with a self-contained brief -- issue
+    link, scope, what done looks like, where the evidence is -- titled
+    `TYPE - #N title` (`FEAT`, `FIX`, `DOCS`, `CHORE`, ...); a harness that
+    cannot start sessions -> hand the user the brief and the title. This
+    session goes back to its own issue. No yes -> it stays out of the
+    branch and is named once in the delivery. The plugin injects this LAW
+    at every session start in a git repo.
 
 ## Known limitations
 
@@ -101,6 +123,9 @@ one of these, you are about to violate a rule. Stop.
 | "I traced it by hand and verified mentally, the fix is obviously correct -- a failing test is ceremony here" | Mental verification is not a RED (LAW 1), and the trace came from the suspect code, not the spec. A baseline agent shipped a fix having only "verified mentally" -- that is confidence, not evidence (LAW 3). |
 | "Brainstorming/a plan is ceremony for something this small" | The smallest changes are where unexamined assumptions waste the most work. The brainstorm can be three sentences and the plan three bullets, but understanding the intended behavior WITH the user must precede code. |
 | "The merge commits in the history show git-flow, so that is the convention" | History is evidence to show the team, not their declaration. A baseline agent read `Merge release/... into main`, named its branch `hotfix/v1.4.1` and shipped without asking which flow the team uses (LAW 41). |
+| "It's unrelated, so I'll offer to drop it in a separate commit on this branch -- one concern per commit is respected" | A separate commit on the issue branch still ships with the issue: the branch and the issue then lie about what they contain. A baseline agent offered exactly this for unused dependencies found mid-build-time work. Its own issue, its own session (LAW 42). |
+| "The user said I can only create issues when told to, so I won't bring up an issue at all" | The rule forbids creating, not proposing. A baseline agent read it as "don't even suggest one" and left the finding with no path forward. The one-line proposal is how the user gets to tell you (LAW 42). |
+| "The user only said 'open it', so I'll create the issue and merely offer the session" | The yes answers what was proposed; a disclosure that named no issue and no session got an ambiguous yes. Propose both in one line from the start, and the yes covers both (LAW 42). |
 | "I'll start on my default (GitHub Flow, squash, rebase to update) while I wait for the answer -- if they pick another flow I just change the PR target" | The base branch, the branch name and the merge style all change with the flow; work started on a guess is redone or merged wrong. A baseline agent did exactly this on a new repo. The pick comes first (LAW 41). |
 
 ## Red Flags -- STOP
@@ -129,6 +154,12 @@ First-person thoughts that mean you are mid-violation. Each maps to the rule it 
 - "The history shows their flow" / "I'll branch from `main` now and adjust
   if they want something else" -> LAW 41 (find the declared flow; none ->
   the team picks from `../git.md` before the first branch).
+- "While I'm here I'll fix this too" / "a separate commit on this branch
+  keeps it clean" -> LAW 42 (not on this branch; propose a new issue plus
+  a separate session in one line).
+- "I'll open an issue for it" (no yes yet) / "they forbade issues, so I
+  won't mention one" -> LAW 42 (propose; create only after the yes, after
+  searching open and closed issues).
 - "I'll compile/test/commit after this unit to be safe" -> LAW 13 (batch
   it: all tests -> one RED run -> all code -> one GREEN run -> one commit;
   a per-unit cycle on a compiled workspace burns hours and one CI build per

@@ -35,6 +35,15 @@ name `{type}/issue-N`, explicit staging, conflicts resolved by hand (never
 `-X ours`/`-X theirs`), no rewriting of shared history, milestone before
 closing an issue.
 
+LAW 42 keeps each issue to its own work. A fix or subject the current issue
+does not need stays off its branch (not even as its own commit); the agent
+proposes it in one line as a new issue plus a separate session and creates
+nothing until the user says yes. Then it searches open and closed issues
+for one that already covers it, creates the issue only if none does, and
+starts the session with a self-contained brief (issue link, scope, done
+criteria), titled `TYPE - #N title`. A `SessionStart` hook carries the rule
+into every session in a git repo (see *unrelated-work reminder* below).
+
 It is the companion to the [Quality Gate](quality-gate.md), whose Docker
 images this plugin runs: the gate catches mechanical metric regressions (fmt, lint,
 build, test, complexity, coverage); `dev-rules` governs the judgment the
@@ -161,8 +170,8 @@ simply disable the gates:
 | `"enabled": false` | the project | in `.dev-rules.json` |
 
 They disable the RED-first guard (read and edit), the main-folder guard, and
-the line-cap guard together, and silence the mode-prompt and issue-comment
-reminders.
+the line-cap guard together, and silence the mode-prompt, issue-comment
+and unrelated-work reminders.
 
 ### main-folder guard (opt-in)
 
@@ -195,6 +204,19 @@ any branch containing `issue-N`), a PostToolUse hook injects a reminder to
 comment issue #N with the commit hash(es), files changed, and build/test
 result. Reminder only -- it never denies anything, and it is silent off
 issue branches, outside git repos, and under the kill switches.
+
+### unrelated-work reminder (on by default, never blocks)
+
+A `SessionStart` hook puts LAW 42 into every session that opens inside a
+git repo, on every start source (startup, resume, clear, compact): a fix or
+subject the current issue does not need stays off its branch and is
+proposed to the user in one line as a new issue plus a separate session;
+only after their yes does the agent search open and closed issues for one
+that covers it, create the issue if none does, and start the session with
+a self-contained brief, titled `TYPE - #N title`. The rule is in context
+before the first unrelated finding, not only once the dev skill is read.
+Context only -- it never denies anything, and it is silent outside git
+repos and under the kill switches.
 
 ### line-cap guard (on by default)
 

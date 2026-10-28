@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.30.0]
+
+### Added
+
+- `dev` skill: LAW 42 (flow group) -- work outside the current issue gets its
+  own issue and its own session, proposed and never started unasked (#41).
+  A fix or subject the current issue's done criteria do not need stays off
+  that issue's branch (not even as its own commit); the agent proposes it in
+  one line naming both a new issue and a separate session, and creates
+  nothing until the user's yes. A user rule against creating issues unasked
+  forbids the creating, not the proposal. After the yes: search open AND
+  closed issues (`gh issue list --state all --search`), reuse one that
+  covers it, otherwise create it; then start the session with a
+  self-contained brief (issue link, scope, done criteria, evidence), titled
+  `TYPE - #N title`; a harness without a session tool hands the user the
+  brief and the title. Rationalizations come from a RED baseline where one
+  agent offered the unrelated fix "as a separate commit on this branch" and,
+  told issues need the user's word, did not propose one at all; another,
+  having disclosed the finding without naming an issue and a session, read
+  the user's "open it" as covering the issue only.
+- `hooks/dev-rules/unrelated-work-reminder.sh` (`SessionStart`, every
+  source): injects LAW 42 into every session that opens inside a git repo,
+  so the rule is in context before the first unrelated finding. Context
+  only, never blocks; silent outside git repos and under the dev-rules kill
+  switches. Covered by `hooks/test/unrelated_work_reminder_test.sh`.
+
 ## [1.29.0]
 
 ### Added
