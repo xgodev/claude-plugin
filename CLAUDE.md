@@ -40,6 +40,11 @@ repos. Read them before changing anything.
   docs, keywords, or examples. Before push, sweep for the internal names
   you know apply (the pattern itself must NOT be written in this public
   repo -- naming the names here is itself a leak).
+- **The plugin knows no consumer project.** Work here is about the plugin
+  only: never name the owner's other projects in content, commits, chat,
+  proposals or follow-ups, and never offer to adopt a change in one of them
+  (that happens in that project's own session). A real case becomes a
+  generic example (`site/**`, not "<project>'s site").
 - **ASCII identifiers/commands; `--` not em-dash** in anything new.
 - **Never guess Claude Code plugin specifics.** Verify against
   https://code.claude.com/docs (plugins / plugin-marketplaces /
