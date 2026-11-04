@@ -65,6 +65,10 @@ commit is the one change that lands outside the flow.
 - **Branch name `{type}/issue-N`** when the work has an issue -- `feature`,
   `bug`, `docs`, `chore`, `hotfix`. The number ties branch, issue and
   milestone together; no descriptive suffix.
+- **A commit is pushed right away.** `git fetch`, then `git push`; when the
+  remote moved, `git pull --rebase`, retest, push. A commit left local is
+  invisible to every other clone, to CI and to repos that install this one
+  from its remote. The push-after-commit hook reminds it.
 - **Stage explicit paths.** Never `git add -A` / `git add .` -- they sweep
   in local scratch files, build output and secrets.
 - **Conflicts are resolved by hand, reading both sides.** `-X ours` /

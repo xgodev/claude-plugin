@@ -65,6 +65,15 @@
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/dev-rules/issue-comment-reminder.sh\""
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/dev-rules/push-after-commit-reminder.sh\""
+          }
+        ]
       }
     ],
     "SessionStart": [

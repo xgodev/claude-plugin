@@ -164,7 +164,8 @@ skills/                dev/{SKILL.md router, engineering/, golang/boost/, rust/,
 hooks/                 hooks.json (merged registry) + test/; scripts grouped by area:
                        quality-gate/pr-gate.sh, dev-rules/{red-first-guard.sh,
                        main-folder-guard.sh, line-cap-guard.sh,
-                       git-flow-guard.sh, issue-comment-reminder.sh, mode-prompt.sh,
+                       git-flow-guard.sh, issue-comment-reminder.sh,
+                       push-after-commit-reminder.sh, mode-prompt.sh,
                        unrelated-work-reminder.sh, clear-after-commit.sh,
                        lib/}
 scripts/               verify_references.py (boost skill link checker)
@@ -182,4 +183,4 @@ images. See [`docs/quality-gate.md`](docs/quality-gate.md).
 
 MIT -- see [LICENSE](LICENSE).
 
-- Version: 1.31.0
+- Version: 1.32.0

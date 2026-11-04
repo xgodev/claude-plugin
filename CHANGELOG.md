@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.32.0]
+
+### Added
+
+- `hooks/dev-rules/push-after-commit-reminder.sh` (`PostToolUse`, `Bash`):
+  after a `git commit` the same command does not push, reminds to
+  `git fetch` + `git push` right away. Reminder only; silent under the
+  kill switches. `skills/dev/engineering/git.md` gains the shared rule
+  "a commit is pushed right away".
+
 ## [1.31.0]
 
 ### Added

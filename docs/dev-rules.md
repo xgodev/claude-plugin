@@ -174,7 +174,7 @@ simply disable the gates:
 
 They disable the RED-first guard (read and edit), the main-folder guard, the
 line-cap guard and the git-flow guard together, and silence the mode-prompt,
-issue-comment and unrelated-work reminders.
+issue-comment, push-after-commit and unrelated-work reminders.
 
 ### main-folder guard (opt-in)
 
@@ -240,6 +240,15 @@ any branch containing `issue-N`), a PostToolUse hook injects a reminder to
 comment issue #N with the commit hash(es), files changed, and build/test
 result. Reminder only -- it never denies anything, and it is silent off
 issue branches, outside git repos, and under the kill switches.
+
+### push-after-commit reminder (on by default, never blocks)
+
+After a `git commit` that the same command does not also push, a
+PostToolUse hook injects a reminder to `git fetch` and `git push` right away
+(`git pull --rebase` and retest first when the remote moved). A commit left
+local is invisible to every other clone, to CI and to repos that install this
+one from its remote. Reminder only -- silent when the command pushes too, and
+under the kill switches.
 
 ### unrelated-work reminder (on by default, never blocks)
 
