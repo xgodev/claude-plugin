@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.34.2]
+
+### Fixed
+
+- Quality Gate `hooks/quality-gate/pr-gate.sh`: monorepo and Git Worktree integration.
+  Extracts supported languages from `.qg.yaml` (`projects:`) and subdirectories
+  instead of skipping when root sentinels are absent; gates all active languages,
+  respecting per-language opt-outs in `.qg-hook.json`; resolves and mounts
+  `GIT_COMMON_DIR` into the container so git operations (`git archive <base>`)
+  succeed inside Git Worktrees without failing with exit 2 (`not a git repository`).
+- Quality Gate `skills/dev/engineering/gate.md`: documented `--no-parallel` and
+  `QG_PARALLEL=0` to serialize test runs under port collisions or resource
+  limits, documented `GIT_COMMON_DIR` volume mount for Git Worktrees, and added
+  guidance for monorepo image selection with `.qg.yaml`.
+- Documentation: updated `docs/quality-gate.md`, `docs/hooks.md`, and
+  `CLAUDE.md` to reflect Git Worktree volume mounting and monorepo detection.
+
 ## [1.34.1]
 
 ### Changed

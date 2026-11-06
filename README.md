@@ -15,7 +15,8 @@ capability:
   lives in [`xgodev/quality-gate`](https://github.com/xgodev/quality-gate) and
   ships as per-language Docker images (`ghcr.io/xgodev/quality-gate/<lang>`);
   this plugin runs the pinned image (`docker` required, fails open when
-  absent). Fails only when a change worsens a metric vs a base ref. A repo can
+  absent). Fails only when a change worsens a metric vs a base ref. Supports Git
+  Worktrees and monorepos configured via `.qg.yaml`. A repo can
   turn the PR-gate hook off per language with a `.qg-hook.json`
   (`{"pr_gate": {"rust": false}}`) when a local gate is too slow to run on
   every PR and CI already enforces it -- not a bypass. See
@@ -183,4 +184,4 @@ images. See [`docs/quality-gate.md`](docs/quality-gate.md).
 
 MIT -- see [LICENSE](LICENSE).
 
-- Version: 1.34.1
+- Version: 1.34.2

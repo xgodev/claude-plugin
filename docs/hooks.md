@@ -14,12 +14,15 @@ On any `Bash` tool call, `hooks/quality-gate/pr-gate.sh` runs. It fast-exits
 for everything except `gh pr create` (matched as the leading tokens of a
 command segment, not as a substring). For a gated command it:
 
-1. Picks the per-language image by a root file-sentinel (`Cargo.toml` -> rust,
-   `go.mod` -> go, ...); no sentinel -> allow.
+1. Detects supported languages from `.qg.yaml` (`projects:`) in monorepos,
+   or from root file-sentinels (`Cargo.toml` -> rust, `go.mod` -> go, ...) and
+   immediate subdirectories; no supported language -> allow.
 2. Resolves the base ref: the branch upstream (`@{upstream}`), else the remote
    default branch (`origin/HEAD`), else **absolute mode** (no base).
-3. Runs `docker run -v "$root:/src" -w /src ghcr.io/xgodev/quality-gate/<lang>:latest
-   [--base <ref>]` (logs bind-mounted to a temp host dir).
+3. For each active language (honoring per-language opt-outs), runs
+   `docker run [-v "$GIT_COMMON_DIR:$GIT_COMMON_DIR"] -v "$root:/src" -w /src ghcr.io/xgodev/quality-gate/<lang>:latest [--base <ref>]`
+   (logs bind-mounted to a temp host dir). In Git Worktrees, `GIT_COMMON_DIR` is
+   resolved and mounted so git commands inside `/src` succeed.
 4. Maps the gate exit code to a decision:
    - `0` passed / bypassed, `3` no supported language -> **allow**
    - `1` regressed / threshold, `2` tool error -> **deny** (JSON
