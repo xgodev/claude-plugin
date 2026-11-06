@@ -5,6 +5,10 @@ Rust-concrete forms of the language-agnostic LAWs in
 This leaf exists because rules.md is language-agnostic BY LAW -- the Rust
 idioms live here, not there.
 
+Slint UI (`.slint` files and the Rust that feeds them): also read
+`slint.md` -- accessibility of custom controls, what macOS reports for
+each role, and keeping views in sync with the data they show.
+
 ## unsafe (LAW 16 -- every safety escape carries its written invariant)
 
 - Every `unsafe { ... }` block and `unsafe fn` carries a `// SAFETY:`

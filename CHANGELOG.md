@@ -1,5 +1,32 @@
 # Changelog
 
+## [1.33.0]
+
+### Added
+
+- `dev` skill: `rust/slint.md`, Slint accessibility and view-state rules
+  learned from end-to-end tests that drive a Slint app through the macOS
+  accessibility tree (#45). Every interactive element is a node with a
+  role and a name, set on the element that IS the node (the inner
+  `TextInput`, not its wrapper); label = what it is, `accessible-value` =
+  what it holds; a caption that repeats the field's name leaves the tree.
+  Rows and tabs drawn with `Rectangle` + `TouchArea` declare a role and
+  expose selection (`accessible-item-selected` is dropped without
+  `accessible-item-selectable`); custom toggles need
+  `accessible-checkable` for `accessible-checked` to reach the tree. A
+  macOS role/state table: a Slint select is `AXPopUpButton`, on/off is in
+  `AXValue`, `list-item` is `AXStaticText`. A view is written from its
+  entity when it opens, and a change re-publishes the entity to every
+  view that shows it. Routed from the `dev` door and `rust/rules.md`.
+- `ux-ui` skill: `references/a11y.md` gains "Custom-Drawn and Desktop
+  Toolkits", the toolkit-agnostic form of the same rules.
+
+### Changed
+
+- `dev` skill (`engineering/rules/quality.md`, `rust/rules.md`): the UI
+  thread only draws; any processing runs on its own named thread, one per
+  processing. Pushed earlier without a version; released here.
+
 ## [1.32.0]
 
 ### Added

@@ -5,8 +5,8 @@ The **all-in-one Claude Code plugin** by `xgodev`, and home of the
 capability:
 
 - **`dev` skill (door)** -- one skill routing to: engineering discipline
-  (`dev-rules`), the quality-gate flow, boost docs, and Rust and Python
-  discipline. Leaves:
+  (`dev-rules`), the quality-gate flow, boost docs, and Rust (with Slint
+  UI accessibility and view refresh) and Python discipline. Leaves:
   grouped-index documentation for
   [`xgodev/boost`](https://github.com/xgodev/boost), the modular Go service
   framework. See [`docs/golang-boost.md`](docs/golang-boost.md).
@@ -183,4 +183,4 @@ images. See [`docs/quality-gate.md`](docs/quality-gate.md).
 
 MIT -- see [LICENSE](LICENSE).
 
-- Version: 1.32.0
+- Version: 1.33.0

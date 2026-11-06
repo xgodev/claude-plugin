@@ -31,7 +31,7 @@ Stacks: `react`, `nextjs`, `vue`, `svelte`, `astro`, `swiftui`, `react-native`, 
 | Context | Reference |
 |---|---|
 | Usability heuristics (NNG) | `references/heuristics.md` |
-| Accessibility / WCAG / inclusive | `references/a11y.md` |
+| Accessibility / WCAG / inclusive / custom-drawn desktop toolkits | `references/a11y.md` |
 | Design systems / tokens / architecture | `references/design-systems.md` |
 | Visual system (type / color / spacing / hierarchy) | `references/visual.md` |
 | Components + code (React / SwiftUI / CSS) | `references/components.md` |

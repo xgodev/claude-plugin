@@ -1,6 +1,6 @@
 ---
 name: dev
-description: "Use when writing, editing, or refactoring code in any language (engineering discipline -- before writing, not after); any work with github.com/xgodev/boost or Go services built on it; Rust work (unsafe, clippy discipline, test shapes); Python work (pyproject/uv toolchain, typing, pytest shapes); Java work (Maven/Gradle layout, Spring Boot); UI/UX design done while coding a feature; git branching, merging, releasing and version tags (which branch to cut from or merge into, which git flow a project uses); checking code quality before opening a PR -- \"run quality gate\", \"run QG\", \"check quality\", \"validate before PR\", \"qa before push\"."
+description: "Use when writing, editing, or refactoring code in any language (engineering discipline -- before writing, not after); any work with github.com/xgodev/boost or Go services built on it; Rust work (unsafe, clippy discipline, test shapes); Slint UI work (.slint accessibility, view refresh); Python work (pyproject/uv toolchain, typing, pytest shapes); Java work (Maven/Gradle layout, Spring Boot); UI/UX design done while coding a feature; git branching, merging, releasing and version tags (which branch to cut from or merge into, which git flow a project uses); checking code quality before opening a PR -- \"run quality gate\", \"run QG\", \"check quality\", \"validate before PR\", \"qa before push\"."
 license: MIT
 metadata:
   author: jpfaria
@@ -16,6 +16,7 @@ Paths are relative to this directory (`skills/dev/`).
 | Git -- which branch to cut from or merge into, branch names, merge vs rebase vs squash, releases, betas, hotfixes, version tags, milestones, closing an issue; choosing a git flow for a project | `engineering/git.md` (routes on to `engineering/git/<flow>.md`) |
 | Go code -- language discipline (architecture layout, errors, tests, //nolint, concurrency) AND github.com/xgodev/boost work | `golang/index.md` (the Go leaf; routes on to `golang/boost/` for the framework) |
 | Rust code -- unsafe/SAFETY:, Send/Sync impls, clippy suppression, Rust test shapes, crate layout for fast incremental builds (codegen crates, sccache, shared target) | `rust/rules.md` |
+| Slint UI -- `.slint` files, accessibility of custom controls (role, label, checked, selected), what macOS reports per role, e2e tests through the accessibility tree, views that must refresh after a change | `rust/slint.md` (with `rust/rules.md`) |
 | Python code -- pyproject/uv toolchain, typing, noqa/type: ignore suppression, pytest shapes | `python/rules.md` |
 | Java code -- Maven/Gradle layout, Spring Boot | `java/rules.md` |
 | UI/UX design -- palettes, styles, typography, charts, per-framework patterns, heuristics, a11y, design systems | `../ux-ui/index.md` (the ux-ui skill owns the design catalog + references) |
