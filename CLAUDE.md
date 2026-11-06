@@ -136,12 +136,12 @@ repos. Read them before changing anything.
   scripts, the contract, the per-language rulesets, and the `add-quality-gate`
   workflow all belong to the gate repo now.
 - **What this plugin owns:** the `gate.md` skill (picks the per-language
-  image by root sentinel, runs `docker run -v "$PWD:/src" -w /src
-  ghcr.io/xgodev/quality-gate/<lang>:latest --format json`, interprets the JSON,
-  enforces the anti-bypass LAWs) and the `hooks/quality-gate/pr-gate.sh`
-  PreToolUse hook (same docker run before `gh pr create`). Neither embeds any
-  gate logic -- detection, measurement, tamper-resistance, and rulesets are
-  all inside the image.
+  image by root sentinel or `.qg.yaml` in monorepos, runs `docker run` with
+  worktree volume support, interprets the JSON, enforces the anti-bypass LAWs)
+  and the `hooks/quality-gate/pr-gate.sh` PreToolUse hook (same docker run
+  before `gh pr create` with multi-language and worktree support). Neither
+  embeds any gate logic -- detection, measurement, tamper-resistance, and
+  rulesets are all inside the image.
 - **`docker` is a runtime prerequisite.** Both the skill and the hook fail
   OPEN when docker or the image is unavailable (a missing runtime must never
   brick the user's git); they never fall back to running tools directly.

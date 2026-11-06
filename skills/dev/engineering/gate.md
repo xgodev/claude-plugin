@@ -111,6 +111,26 @@ wins):
 If NO sentinel matches: treat as **exit 3** (no supported language) -- see
 the exit-code map. Do NOT improvise a gate.
 
+#### Monorepos with `.qg.yaml`
+
+In monorepos where sub-projects live in subdirectories (e.g. `backend/pom.xml`,
+`mobile/package.json`), there may be no sentinel at the repo root. If `.qg.yaml`
+exists at the root, inspect its `projects:` block:
+
+```yaml
+projects:
+  - path: backend
+    language: java    # or lang: java
+  - path: mobile
+    language: nodejs
+```
+
+1. Extract each project entry: if `language:` (or `lang:`) is declared, use it.
+   Otherwise, inspect sentinels inside that subproject directory (`<root>/<path>`).
+2. If no `.qg.yaml` exists, check sentinels at the root and immediate subdirectories.
+3. For each detected language, run its corresponding container image and aggregate
+   the verdicts (exit precedence: `2 > 1 > 3 > 0` -- worst verdict wins).
+
 ```bash
 QG_TAG="${QG_TAG:-latest}"                   # moving tag -- always refreshed (see step 3)
 QG_IMAGE="ghcr.io/xgodev/quality-gate/<lang>:${QG_TAG}"
@@ -118,7 +138,7 @@ QG_IMAGE="ghcr.io/xgodev/quality-gate/<lang>:${QG_TAG}"
 
 **Developer override:** `QG_IMAGE` (run a specific image/tag, e.g. a locally
 built `qg-rust:test` while working on the gate) and `QG_TAG` (pin a fixed
-published version, e.g. `v1.2.0`, for reproducible verdicts) both take
+published version, e.g. `v1.4.0` or `v1`, for reproducible verdicts) both take
 precedence.
 
 ### 2. Detect `--base`
@@ -146,6 +166,39 @@ directly). Always `--format json`. The project is mounted **read-write** at
 a SEPARATE host dir bind-mounted at `/logs` -- never inside `/src`, so the run
 does not dirty the user's repo -- and this skill reads `pr-*.log` from there:
 
+#### Git Worktrees support (`GIT_COMMON_DIR`)
+
+In a Git Worktree, `$PWD/.git` is a file pointing to `<root-repo>/.git/worktrees/<name>`.
+Because the root repository's `.git` folder is not mounted inside `$PWD`, git commands
+inside the container (such as `git archive <base>`) fail with `fatal: not a git repository`
+(Exit Code 2).
+
+Resolve `GIT_COMMON_DIR` and bind-mount it when it sits outside `$PWD`:
+
+```bash
+GIT_COMMON_DIR="$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null || git rev-parse --git-common-dir 2>/dev/null)"
+WORKTREE_MOUNT=""
+if [ -n "$GIT_COMMON_DIR" ] && [ -d "$GIT_COMMON_DIR" ]; then
+  case "$GIT_COMMON_DIR" in
+    "$PWD"|"$PWD"/*) ;;
+    *) WORKTREE_MOUNT="-v $GIT_COMMON_DIR:$GIT_COMMON_DIR" ;;
+  esac
+fi
+```
+
+#### Parallel execution control (`--no-parallel` / `QG_PARALLEL=0`)
+
+When tests collide on TCP ports or run in CPU/memory constrained environments, serialize
+execution by passing `--no-parallel` to the dispatcher or setting `QG_PARALLEL=0`:
+
+```bash
+# Via CLI flag to the container command:
+--no-parallel
+
+# Or via container environment variable:
+-e QG_PARALLEL=0
+```
+
 `--pull` (default `always` via `QG_PULL`) refreshes the moving `latest` tag
 every run, so a cached copy never gates against a stale gate (a pull failure
 surfaces as exit 2 -- see the notes). Gate developers testing a locally built
@@ -158,6 +211,7 @@ QG_TAG="${QG_TAG:-latest}"
 QG_IMAGE="${QG_IMAGE:-ghcr.io/xgodev/quality-gate/<lang>:${QG_TAG}}"
 
 docker run --rm --pull="${QG_PULL:-always}" ${QG_PLATFORM:+--platform $QG_PLATFORM} \
+  ${WORKTREE_MOUNT} \
   -v "$PWD:/src" -w /src \
   -v "$LOG_DIR:/logs" \
   "$QG_IMAGE" \
@@ -171,7 +225,11 @@ GATE_EXIT=$?
 In **absolute mode** (no base ref available), omit `--base`:
 
 ```bash
-docker run --rm --pull="${QG_PULL:-always}" ${QG_PLATFORM:+--platform $QG_PLATFORM} -v "$PWD:/src" -w /src -v "$LOG_DIR:/logs" "$QG_IMAGE" \
+docker run --rm --pull="${QG_PULL:-always}" ${QG_PLATFORM:+--platform $QG_PLATFORM} \
+  ${WORKTREE_MOUNT} \
+  -v "$PWD:/src" -w /src \
+  -v "$LOG_DIR:/logs" \
+  "$QG_IMAGE" \
   --format json --log-dir /logs \
   > "$LOG_DIR/result.json" 2> "$LOG_DIR/stderr.log"
 GATE_EXIT=$?
