@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.34.0]
+
+### Added
+
+- `dev` skill, `rust/slint.md`: more causes confirmed by end-to-end
+  tests that drive a Slint app through the macOS accessibility tree
+  (#45). New rule 6, tests through the accessibility tree: a control
+  scrolled out of a `ScrollView` / `ListView` may be absent or ignore
+  clicks, so scroll to it before the lookup (never assume the section
+  opens at the top); clear a field with arrows + backspace, since a
+  synthetic cmd+A can type the letter, and check `AXValue` before
+  typing; in "click ignored while off", click the control under test
+  before anything turns the state on; plain text is found by `AXValue`.
+  New rule 7: a `PopupWindow` holding a slider uses
+  `close-policy: close-on-click-outside`, because the default closes it
+  when the drag ends. Rule 1: the role goes on one element only (a role
+  on a field's wrapper too makes two fields with one name). Rule 3: one
+  checked state per control. The macOS table gains `slider` ->
+  `AXSlider`.
+- `ux-ui` skill, `references/a11y.md`: the toolkit-agnostic form of the
+  same rules.
+
 ## [1.33.0]
 
 ### Added
