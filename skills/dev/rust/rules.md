@@ -54,6 +54,14 @@ each role, and keeping views in sync with the data they show.
   `JoinHandle::join`/`.await`, a `Condvar`, a channel, `Notify`, or a
   bounded readiness poll with a deadline.
 
+## fmt (only the files you changed)
+
+- Before a commit, format and check only the `.rs` files you touched:
+  `rustfmt --edition <crate edition> <files>` (`--check` to verify).
+  Never `cargo fmt --all` on a big workspace: it walks every crate, takes
+  long, and can rewrite files outside your change. **Why:** the owner
+  waited on a whole-workspace fmt for a two-file fix.
+
 ## clippy suppression (the threshold belongs to the repo config)
 
 - Suppression is per-item (`#[allow(...)]` on the fn/impl) and carries a

@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.34.1]
+
+### Changed
+
+- `dev` skill, `rust/rules.md`: fmt only the `.rs` files you changed
+  (`rustfmt --edition <e> <files>`), never `cargo fmt --all`.
+
 ## [1.34.0]
 
 ### Added
