@@ -52,9 +52,10 @@ CWE entries that are its concrete failures.
    - *Responsiveness* -- The UI thread (main thread, event loop, render
      timer, callbacks) only draws. Every processing -- analysis, DSP,
      parsing, file or network I/O, rendering a model from data, judging
-     -- runs on its own thread from the day it is written, one thread per
-     independent stream of work (two inputs are two threads, never two
-     items in series on one), and the UI only installs the last result
+     -- runs on its own thread from the day it is written: one thread
+     per processing, never two processings in series on one thread (a
+     tuner and a spectrum are two threads; the same analysis of two
+     inputs is two threads), and the UI only installs the last result
      the worker published. "On the UI for now" is a defect, not a step.
      CWE-1050, CWE-400.
    - *Resource utilization* -- Memory, CPU, handles, connections and
