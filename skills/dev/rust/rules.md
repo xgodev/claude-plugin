@@ -72,6 +72,11 @@ idioms live here, not there.
 - A real-time callback never touches I/O, locks or the allocator: a
   reader thread fills a lock-free ring (`rtrb`) ahead of the callback.
   Preloading the whole file is not the real-time-safe answer.
+- A UI timer or callback (Slint, egui, iced, GTK) never processes: the
+  work runs on a named `std::thread` per stream that publishes its last
+  result (`Arc<Mutex<Option<R>>>` or a channel) and takes commands by
+  `mpsc`; the timer only `take()`s and writes the model. One worker per
+  input/stream, never one loop over all of them.
 - Resources are released by ownership (RAII); a handle is never kept in a
   `static` without a release path.
 - Every network call has a timeout (`reqwest` `.timeout()`,

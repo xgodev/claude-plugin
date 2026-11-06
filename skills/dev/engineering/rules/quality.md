@@ -49,6 +49,14 @@ CWE entries that are its concrete failures.
      lock, or an allocation; no work that grows faster than the input
      where linear will do. CWE-407, CWE-1067, CWE-1050, CWE-1046,
      CWE-1088.
+   - *Responsiveness* -- The UI thread (main thread, event loop, render
+     timer, callbacks) only draws. Every processing -- analysis, DSP,
+     parsing, file or network I/O, rendering a model from data, judging
+     -- runs on its own thread from the day it is written, one thread per
+     independent stream of work (two inputs are two threads, never two
+     items in series on one), and the UI only installs the last result
+     the worker published. "On the UI for now" is a defect, not a step.
+     CWE-1050, CWE-400.
    - *Resource utilization* -- Memory, CPU, handles, connections and
      threads grow with the unit of work, never with the size of the
      input. Input whose size the code does not control -- a file, media,
