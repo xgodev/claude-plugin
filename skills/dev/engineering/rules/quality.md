@@ -50,9 +50,9 @@ CWE entries that are its concrete failures.
      where linear will do. CWE-407, CWE-1067, CWE-1050, CWE-1046,
      CWE-1088.
    - *Responsiveness* -- The UI thread (main thread, event loop, render
-     timer, callbacks) only draws. Every processing -- analysis, DSP,
-     parsing, file or network I/O, rendering a model from data, judging
-     -- runs on its own thread from the day it is written: one thread
+     timer, callbacks) only draws. Any processing of any kind -- analysis,
+     DSP, parsing, file or network I/O, building a model from data,
+     judging, sorting, searching, anything that is not drawing -- runs on its own thread from the day it is written: one thread
      per processing, never two processings in series on one thread (a
      tuner and a spectrum are two threads; the same analysis of two
      inputs is two threads), and the UI only installs the last result

@@ -72,7 +72,8 @@ idioms live here, not there.
 - A real-time callback never touches I/O, locks or the allocator: a
   reader thread fills a lock-free ring (`rtrb`) ahead of the callback.
   Preloading the whole file is not the real-time-safe answer.
-- A UI timer or callback (Slint, egui, iced, GTK) never processes: the
+- A UI timer or callback (Slint, egui, iced, GTK) never processes anything
+  (any work that is not drawing): the
   work runs on a named `std::thread` per processing that publishes its
   last result (`Arc<Mutex<Option<R>>>` or a channel) and takes commands
   by `mpsc`; the timer only `take()`s and writes the model. One worker
