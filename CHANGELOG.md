@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.35.0]
+
+### Added
+
+- Google Antigravity dual-target integration: 100% compatibility with Google
+  Antigravity (both `agy` CLI and Antigravity IDE), while maintaining 100%
+  compatibility with Claude Code in the same repository.
+- Native Antigravity manifest `.antigravity-plugin/plugin.json` and high-contrast
+  vector logo in `assets/logo.svg`.
+- Root lifecycle hook registration `hooks.json` delegating to
+  `hooks/antigravity-adapter.sh`.
+- Adapter `hooks/antigravity-adapter.sh`: translates Antigravity protojson payloads
+  into canonical tool executions, bridges all 9 `dev-rules` and `quality-gate`
+  hooks without logic duplication, and adapts decision/injection contracts.
+- Automated installer `scripts/install-antigravity.sh`: supports global linking
+  to `~/.gemini/config/plugins/claude-plugin` or project-local linking to
+  `<project>/.agents/plugins/claude-plugin`.
+- Architecture documentation in `docs/antigravity.md`.
+- Comprehensive test coverage in `hooks/test/antigravity_adapter_test.sh` and
+  enhanced `hooks/test/hooks_json_test.sh`.
+
 ## [1.34.2]
 
 ### Fixed

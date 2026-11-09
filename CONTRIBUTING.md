@@ -35,9 +35,13 @@ the gate: `skills/dev/engineering/gate.md` and `hooks/quality-gate/pr-gate.sh`
 ```
 claude-plugin/
 |-- .claude-plugin/     plugin.json + marketplace.json
+|-- .antigravity-plugin/ plugin.json (Antigravity manifest)
+|-- assets/             logo.svg (plugin icon)
+|-- hooks.json          root lifecycle hooks (Antigravity adapter bridge)
 |-- skills/             shipped skills (dev/, ux-ui/, skill-rules/)
-|-- hooks/              hooks.json + quality-gate/ + dev-rules/ + test/
-|-- docs/               plugin docs (quality-gate.md, hooks.md, dev-rules.md, ...)
+|-- hooks/              hooks.json (canonical) + antigravity-adapter.sh + quality-gate/ + dev-rules/ + test/
+|-- scripts/            verify_* + install-antigravity.sh
+|-- docs/               plugin docs (quality-gate.md, hooks.md, dev-rules.md, antigravity.md, ...)
 |-- README.md  CHANGELOG.md  CLAUDE.md
 ```
 
@@ -46,4 +50,5 @@ claude-plugin/
 ```bash
 hooks/test/*.sh              # hook behavior (run all before committing a hook change)
 hooks/test/hooks_json_test.sh
+hooks/test/antigravity_adapter_test.sh
 ```

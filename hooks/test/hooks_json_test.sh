@@ -21,4 +21,29 @@ chk 'pre_wires "line-cap-guard.sh"' "PreToolUse wires line-cap-guard.sh"
 chk 'pre_wires "git-flow-guard.sh"' "PreToolUse wires git-flow-guard.sh"
 chk 'pre_wires "pr-gate.sh"' "PreToolUse wires pr-gate.sh"
 chk 'grep -q "CLAUDE_PLUGIN_ROOT" "$J"' "uses CLAUDE_PLUGIN_ROOT path var"
+
+# Antigravity dual-target contracts
+ROOT="$HERE/../.."
+AGY_HOOKS="$ROOT/hooks.json"
+AGY_MANIFEST="$ROOT/.antigravity-plugin/plugin.json"
+ADAPTER="$ROOT/hooks/antigravity-adapter.sh"
+
+chk '[ -f "$AGY_HOOKS" ]' "root hooks.json exists"
+chk 'jq -e . "$AGY_HOOKS" >/dev/null 2>&1' "root hooks.json is valid JSON"
+chk 'jq -e ".[].PreToolUse // empty" "$AGY_HOOKS" >/dev/null 2>&1' "root hooks.json declares PreToolUse"
+chk 'jq -e ".[].PostToolUse // empty" "$AGY_HOOKS" >/dev/null 2>&1' "root hooks.json declares PostToolUse"
+chk 'jq -e ".[].SessionStart // empty" "$AGY_HOOKS" >/dev/null 2>&1' "root hooks.json declares SessionStart"
+chk 'jq -e ".[].PreInvocation // empty" "$AGY_HOOKS" >/dev/null 2>&1' "root hooks.json declares PreInvocation"
+chk 'jq -e ".[].PostInvocation // empty" "$AGY_HOOKS" >/dev/null 2>&1' "root hooks.json declares PostInvocation"
+chk 'grep -q "antigravity-adapter.sh" "$AGY_HOOKS"' "root hooks.json routes through antigravity-adapter.sh"
+
+chk '[ -f "$AGY_MANIFEST" ]' ".antigravity-plugin/plugin.json exists"
+chk 'jq -e . "$AGY_MANIFEST" >/dev/null 2>&1' ".antigravity-plugin/plugin.json is valid JSON"
+chk '[ "$(jq -r .version "$P")" = "$(jq -r .version "$AGY_MANIFEST" 2>/dev/null)" ]' "plugin.json versions match between Claude and Antigravity manifests"
+chk '[ "$(jq -r .name "$P")" = "$(jq -r .name "$AGY_MANIFEST" 2>/dev/null)" ]' "plugin.json names match between Claude and Antigravity manifests"
+chk '! jq -e ".dependencies" "$AGY_MANIFEST" >/dev/null 2>&1' ".antigravity-plugin/plugin.json declares NO dependencies (Antigravity ignores/warns)"
+chk 'LOGO="$(jq -r .logo "$AGY_MANIFEST" 2>/dev/null)" && [ -n "$LOGO" ] && [ -f "$ROOT/$LOGO" ]' ".antigravity-plugin/plugin.json logo exists"
+
+chk '[ -f "$ADAPTER" ] && [ -x "$ADAPTER" ]' "hooks/antigravity-adapter.sh exists and is executable"
+
 exit $fail

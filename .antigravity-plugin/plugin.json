@@ -1,0 +1,16 @@
+{
+  "name": "claude-plugin",
+  "displayName": "claude-plugin (xgodev)",
+  "version": "1.35.0",
+  "description": "All-in-one engineering discipline, quality gate, Go/boost docs, Rust, Python, Java, and UI/UX design plugin by xgodev with dual-target Claude Code and Antigravity support.",
+  "logo": "assets/logo.svg",
+  "author": {
+    "name": "xgodev"
+  },
+  "repository": "https://github.com/xgodev/claude-plugin.git",
+  "suggestedPrompts": [
+    "Run quality gate checks before creating a PR",
+    "Explore UI/UX design components, charts, and guidelines",
+    "Consult dev-rules engineering discipline and boost docs"
+  ]
+}

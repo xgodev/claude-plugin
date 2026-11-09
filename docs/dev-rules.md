@@ -55,7 +55,9 @@ writing -- not a passive reference skimmed after the fact.
 ## Install
 
 `dev-rules` ships as part of the all-in-one `claude-plugin` -- see the
-[repo README](../README.md) for install and update instructions.
+[repo README](../README.md) for install and update instructions in Claude Code,
+and [`docs/antigravity.md`](antigravity.md) for Google Antigravity. Both harnesses
+share the exact same state machine and sentinels (`.dev-rules/`).
 
 ## Enforcement hooks (shipped with the plugin)
 
