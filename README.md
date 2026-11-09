@@ -61,6 +61,8 @@ natural phrases (e.g. "run quality gate" / "run QG") without the prefix.
 
 ## Install
 
+### Claude Code
+
 ```text
 /plugin marketplace add git@github.com:xgodev/claude-plugin.git
 /plugin install claude-plugin@xgodev
@@ -69,6 +71,22 @@ natural phrases (e.g. "run quality gate" / "run QG") without the prefix.
 The `superpowers` dependency auto-installs with `claude-plugin`, no
 extra step: it resolves from `claude-plugins-official` (preconfigured in
 Claude Code; an existing install satisfies it).
+
+### Google Antigravity
+
+Link this clone globally into Antigravity (`~/.gemini/config/plugins/claude-plugin`):
+
+```bash
+./scripts/install-antigravity.sh
+```
+
+Or link into a specific project (`<dir>/.agents/plugins/claude-plugin`):
+
+```bash
+./scripts/install-antigravity.sh --project /path/to/project
+```
+
+See [`docs/antigravity.md`](docs/antigravity.md) for full integration details.
 
 ## Update
 
@@ -159,21 +177,25 @@ tool exists to prevent. See [`docs/token-hygiene.md`](docs/token-hygiene.md).
 
 ```
 .claude-plugin/        plugin.json (the single plugin) + marketplace.json (xgodev)
+.antigravity-plugin/   plugin.json (Antigravity plugin manifest)
+assets/                logo.svg (vector plugin icon)
+hooks.json             root lifecycle hooks (Antigravity adapter bridge)
 skills/                dev/{SKILL.md router, engineering/, golang/boost/, rust/,
                        python/}
                        ux-ui/ (design: catalog + references)  skill-rules/ (shipped)
-hooks/                 hooks.json (merged registry) + test/; scripts grouped by area:
-                       quality-gate/pr-gate.sh, dev-rules/{red-first-guard.sh,
-                       main-folder-guard.sh, line-cap-guard.sh,
-                       git-flow-guard.sh, issue-comment-reminder.sh,
-                       push-after-commit-reminder.sh, mode-prompt.sh,
-                       unrelated-work-reminder.sh, clear-after-commit.sh,
-                       lib/}
+hooks/                 hooks.json (merged registry) + antigravity-adapter.sh + test/;
+                       scripts grouped by area: quality-gate/pr-gate.sh,
+                       dev-rules/{red-first-guard.sh, main-folder-guard.sh,
+                       line-cap-guard.sh, git-flow-guard.sh,
+                       issue-comment-reminder.sh, push-after-commit-reminder.sh,
+                       mode-prompt.sh, unrelated-work-reminder.sh,
+                       clear-after-commit.sh, lib/}
 scripts/               verify_references.py (boost skill link checker)
                        verify_config_roots.py (boost config namespaces vs source)
+                       install-antigravity.sh (Antigravity installer)
 tools/token-hygiene/   hygiene (driver) + checks/ + install-daily:
                        audits the installation for context and token waste
-docs/                  per-area docs (quality-gate, hooks, dev-rules, ...)
+docs/                  per-area docs (quality-gate, hooks, dev-rules, antigravity, ...)
 ```
 
 The quality gate is not bundled here -- it lives in
@@ -184,4 +206,4 @@ images. See [`docs/quality-gate.md`](docs/quality-gate.md).
 
 MIT -- see [LICENSE](LICENSE).
 
-- Version: 1.34.2
+- Version: 1.35.0

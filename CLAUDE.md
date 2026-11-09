@@ -163,6 +163,24 @@ repos. Read them before changing anything.
   here. That repo is maintained by a different agent -- from this repo we only
   file issues there, never edit its code.
 
+### Google Antigravity adapter (`hooks.json`, `hooks/antigravity-adapter.sh`, `scripts/install-antigravity.sh`)
+
+- **The adapter is a translator, not a second registry.** `hooks/antigravity-adapter.sh`
+  reads `hooks/hooks.json` at runtime, maps Antigravity tool names (`run_command`,
+  `read_file`, `edit_file`, `write_file`, `grep_search`, `find_by_name`) to Claude
+  tool names (`Bash`, `Read`, `Edit`, `Write`, `Grep`, `Glob`), and executes the
+  same commands. A new hook is added ONLY to `hooks/hooks.json`; hardcoding hook
+  rules in `hooks.json` or `antigravity-adapter.sh` is a defect.
+- **Root `hooks.json` and `.antigravity-plugin/plugin.json`** enable native
+  Antigravity discovery. `hooks.json` routes events through `antigravity-adapter.sh`.
+- **Test it with `hooks/test/antigravity_adapter_test.sh` and `hooks/test/hooks_json_test.sh`**
+  after touching the adapter, root hooks, or the installer. Both are included in
+  `hooks/test/*.sh`.
+- **Install is `scripts/install-antigravity.sh`**: global by default, or
+  `--project <dir>` to link into `<dir>/.agents/plugins/claude-plugin`.
+- Keep `docs/antigravity.md`, the README Antigravity section, and the installer
+  in lockstep when behavior changes.
+
 ### dev-rules (`skills/dev/engineering/rules.md` + `rules/`, `hooks/dev-rules/`)
 
 - The hooks make RED-first deterministic: production edits blocked until a

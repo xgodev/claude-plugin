@@ -76,6 +76,11 @@ the whole plugin fail to load (`manifest.hooks` is only for *additional*,
 non-standard hook files). The script locates the gate through
 `${CLAUDE_PLUGIN_ROOT}` and the project through `${CLAUDE_PROJECT_DIR}`.
 
+For Google Antigravity, the root `hooks.json` bridges Antigravity runtime events
+via `hooks/antigravity-adapter.sh`, which loads the same canonical
+`hooks/hooks.json` rules and honors the same opt-outs and bypasses. See
+[`docs/antigravity.md`](antigravity.md).
+
 ## Known limitations
 
 This hook is **advisory enforcement**, not a hard security boundary: it is
