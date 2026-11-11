@@ -163,6 +163,51 @@ pressure, is a refactor of every import.
 - Logic in the bin crate.
 - `env!` for a path in `build.rs` or in a build-dependency.
 - A test-only window or harness inside a production UI crate.
+- Any break of "Crate coupling" below.
+
+## Crate coupling -- every crate depends only on what it uses
+
+Small crates buy nothing if they are wired into one ball: a crate that
+pulls a whole facade recompiles, and drags into every binary, everything
+behind it. Coupling is decided by the dependency list and the imports,
+so both are written by hand and checked by a machine.
+
+- **No glob imports of another crate.** No `use other_crate::*`, no
+  `pub use other_crate::*`. Import the names you use
+  (`use other_crate::{A, b};`). Set it in the workspace manifest so it
+  cannot compile:
+  `[workspace.lints.clippy] wildcard_imports = "deny"`, and every member
+  `[lints] workspace = true`. A `prelude` the crate itself owns is the
+  only exception, and it re-exports only its own items.
+- **No facade crates.** A crate that only re-exports other crates hides
+  what its users really depend on; each user depends on the crate that
+  defines the item.
+- **Every declared dependency is used.** A `[dependencies]` entry with
+  no use in `src/` or `build.rs` is deleted in the change that stopped
+  using it. A check in CI fails on an unused dependency.
+- **A binary never depends on another binary's crates.** When two apps
+  in one workspace share code, it moves to a neutral crate named after
+  what it does, never after an app, and both depend on it. Building one
+  app compiles only that app's crates and the shared ones.
+- **Shared code never reaches an app's window or shell type.** A shared
+  crate that needs a window takes it as a trait or a generic, defined in
+  the shared crate.
+- **Enforced by a test, not by a rule.** A workspace test reads
+  `cargo metadata` and fails when a binary's dependency closure holds a
+  crate owned by another binary, or a crate declares a dependency it
+  never uses. A written rule alone gets broken; the failing build is
+  what holds it.
+
+### Red flags (first-person)
+
+- "`use other_crate::*` is shorter" -> it couples the crate to
+  everything the other one exposes; name the imports.
+- "The app B already has this widget, I'll depend on its crate" -> move
+  the widget to a neutral crate first, then both depend on it.
+- "I'll re-export it from here so callers need one import" -> that is a
+  facade; callers depend on the defining crate.
+- "The dependency is unused now, it costs nothing to leave it" -> it
+  rebuilds and links into every binary above it; delete it now.
 
 ## Red flags (first-person; stop and do the rule)
 

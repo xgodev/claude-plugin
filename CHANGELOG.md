@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.36.0]
+
+### Added
+
+- `dev` Rust rules: "Crate coupling" -- no glob imports of another crate
+  (`clippy::wildcard_imports = "deny"` in the workspace), no facade
+  crates, every declared dependency used, no binary depending on another
+  binary's crates (shared code moves to a neutral crate), shared code
+  never reaching an app's window type, all enforced by a `cargo metadata`
+  test instead of a written rule.
+
 ## [1.35.0]
 
 ### Added

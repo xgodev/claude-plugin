@@ -1,7 +1,7 @@
 {
   "name": "claude-plugin",
   "displayName": "claude-plugin (xgodev)",
-  "version": "1.35.0",
+  "version": "1.36.0",
   "description": "All-in-one engineering discipline, quality gate, Go/boost docs, Rust, Python, Java, and UI/UX design plugin by xgodev with dual-target Claude Code and Antigravity support.",
   "logo": "assets/logo.svg",
   "author": {

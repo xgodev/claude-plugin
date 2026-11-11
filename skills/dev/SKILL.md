@@ -15,7 +15,7 @@ Paths are relative to this directory (`skills/dev/`).
 | Quality gate before a PR ("run QG", "check quality", "validate before PR") | `engineering/gate.md` |
 | Git -- which branch to cut from or merge into, branch names, merge vs rebase vs squash, releases, betas, hotfixes, version tags, milestones, closing an issue; choosing a git flow for a project | `engineering/git.md` (routes on to `engineering/git/<flow>.md`) |
 | Go code -- language discipline (architecture layout, errors, tests, //nolint, concurrency) AND github.com/xgodev/boost work | `golang/index.md` (the Go leaf; routes on to `golang/boost/` for the framework) |
-| Rust code -- unsafe/SAFETY:, Send/Sync impls, clippy suppression, Rust test shapes, crate layout for fast incremental builds (codegen crates, sccache, shared target) | `rust/rules.md` |
+| Rust code -- unsafe/SAFETY:, Send/Sync impls, clippy suppression, Rust test shapes, crate layout for fast incremental builds (codegen crates, sccache, shared target), crate coupling (no glob imports or facades, no unused deps, no app depending on another app) | `rust/rules.md` |
 | Slint UI -- `.slint` files, accessibility of custom controls (role, label, checked, selected), what macOS reports per role, e2e tests through the accessibility tree (scrolling, clearing fields, click order), popups holding a slider, views that must refresh after a change | `rust/slint.md` (with `rust/rules.md`) |
 | Python code -- pyproject/uv toolchain, typing, noqa/type: ignore suppression, pytest shapes | `python/rules.md` |
 | Java code -- Maven/Gradle layout, Spring Boot | `java/rules.md` |
